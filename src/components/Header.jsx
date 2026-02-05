@@ -29,23 +29,33 @@ const Header = () => {
           position: sticky;
           top: 0;
           z-index: 1000;
-          height: 56px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0 16px;
           border-bottom: 1px solid #f1f3f5;
-          background: rgba(255, 255, 255, 0.8);
+          background: rgba(255, 255, 255, 0.9);
           backdrop-filter: blur(10px);
+        }
+
+        .brand {
+          font-size: 20px;
+          font-weight: 800;
+          color: #f48525;
+          letter-spacing: -0.5px;
         }
 
         .location {
           display: flex;
           align-items: center;
-          gap: 4px;
-          font-size: 18px;
-          font-weight: 700;
-          color: #212529;
+          gap: 2px;
+          font-size: 14px;
+          font-weight: 600;
+          color: #495057;
+          background: #f8f9fa;
+          padding: 6px 12px;
+          border-radius: 20px;
           cursor: pointer;
         }
 

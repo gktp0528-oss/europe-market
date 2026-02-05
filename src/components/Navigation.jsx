@@ -1,60 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Home, MessageCircle, Bell, User, Flag } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import './Navigation.css';
 
-const Navigation = ({ active }) => {
-    return (
-        <nav className="navigation glass">
-            <Link to="/" className={`nav-item ${active === 'home' ? 'active' : ''}`}>
-                <div className="icon">🏠</div>
-                <span>홈</span>
-            </Link>
-            <Link to="/chat" className={`nav-item ${active === 'chat' ? 'active' : ''}`}>
-                <div className="icon">💬</div>
-                <span>채팅</span>
-            </Link>
-            <Link to="/profile" className={`nav-item ${active === 'profile' ? 'active' : ''}`}>
-                <div className="icon">👤</div>
-                <span>나의 유로</span>
-            </Link>
+const Navigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-            <style jsx>{`
-        .navigation {
-          position: fixed;
-          bottom: 0;
-          width: 100%;
-          max-width: 480px;
-          height: 72px;
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          border-top: 1px solid #f1f3f5;
-          padding-bottom: env(safe-area-inset-bottom);
-        }
+  const navItems = [
+    { id: 'home', icon: Home, label: '홈', path: '/' },
+    { id: 'chat', icon: MessageCircle, label: '채팅', path: '/chat' },
+    { id: 'alarm', icon: Bell, label: '알람', path: '/alarm' },
+    { id: 'mypage', icon: User, label: '마이', path: '/mypage' },
+    { id: 'country', icon: Flag, label: '국가', path: '/country' },
+  ];
 
-        .nav-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          color: #adb5bd;
-          transition: all 0.2s;
-        }
-
-        .nav-item.active {
-          color: #212529;
-        }
-
-        .nav-item .icon {
-          font-size: 22px;
-        }
-
-        .nav-item span {
-          font-size: 12px;
-          font-weight: 600;
-        }
-      `}</style>
-        </nav>
-    );
+  return (
+    <nav className="bottom-nav">
+      {navItems.map((item) => {
+        const isActive = location.pathname === item.path;
+        return (
+          <button
+            key={item.id}
+            className={`nav-item ${isActive ? 'active' : ''}`}
+            onClick={() => navigate(item.path)}
+          >
+            <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+            <span className="nav-label">{item.label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
 };
 
 export default Navigation;

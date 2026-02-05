@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Navigation from './components/Navigation';
 import './App.css';
 
 function App() {
@@ -9,8 +10,15 @@ function App() {
       <div className="mobile-container">
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* Add more routes as we go */}
+          {/* Placeholder routes for now */}
+          <Route path="/chat" element={<div className="flex-center full-screen">채팅 화면 준비중 💬</div>} />
+          <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
+          <Route path="/mypage" element={<div className="flex-center full-screen">마이페이지 준비중 👤</div>} />
+          <Route path="/country" element={<div className="flex-center full-screen">국가 선택 화면 준비중 🇫🇷</div>} />
         </Routes>
+
+        {/* Global Navigation Bar */}
+        <Navigation />
       </div>
     </Router>
   );

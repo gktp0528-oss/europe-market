@@ -1,23 +1,75 @@
-.mobile-container {
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
+
+:root {
+  /* Pastel Palette */
+  --color-primary-pink: #FFB7B2;
+  --color-mint-green: #B5EAD7;
+  --color-lemon-yellow: #FFF5BA;
+  --color-lavender: #C7CEEA;
+
+  /* Foundation */
+  --bg-color: #FEFDF5;
+  --text-main: #4A4A4A;
+  --text-sub: #9B9B9B;
+  --white: #FFFFFF;
+
+  /* UI Tokens */
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile Layout Container */
+#root {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  background-color: var(--white);
+  background-color: var(--bg-color);
   position: relative;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-container {
+  padding-bottom: 90px;
+  /* Space for bottom nav */
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+p {
+  margin: 0;
+  color: var(--text-sub);
+}
+
+/* Utilities */
+.flex-center {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.page-content {
-  flex: 1;
-  padding-bottom: 80px;
-  /* Space for navigation */
-}
-
-/* Glassmorphism utility */
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+.full-screen {
+  width: 100%;
+  height: 100vh;
 }

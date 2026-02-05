@@ -1,25 +1,34 @@
-# 🎨 EuroLife 디자인 가이드
+# Europe Used Market - Design System
 
-유럽 한인들을 위한 중고거래 및 커뮤니티 플랫폼 '유로라이프(EuroLife)'의 디자인 시스템입니다.
+## 🎨 Vibe & Concept
+- **Keywords**: Cute, Cozy, Pastel, Friendly, Round
+- **Core Value**: Like a warm, inviting weekend flea market in Europe.
 
-## 🌈 컬러 팔레트
-- **Primary**: `#F48525` (따뜻한 오렌지/당근색) - 친근함과 활기를 상징
-- **Background**: `#FFFFFF` (순백색) - 깨끗하고 미니멀한 유럽 감성
-- **Text Primary**: `#212529` (다크 그레이) - 높은 가독성
-- **Text Secondary**: `#868E96` (라이트 그레이) - 부가 정보 및 메타데이터
+## 🌈 Color Palette
+### Primary Colors (Pastel)
+- **Primary Pink**: `#FFB7B2` (Warm affection)
+- **Mint Green**: `#B5EAD7` (Fresh start)
+- **Lemon Yellow**: `#FFF5BA` (Bright joy)
+- **Lavender Purple**: `#E2F0CB` (Calm relax - replaced with a soft green/purple mix or `#C7CEEA`) -> Let's use `#C7CEEA` for Lavender.
 
-##  Typography
-- **Font**: `Plus Jakarta Sans` (세련된 산세리프) - 현대적이고 깔끔한 느낌
-- **Heading**: 지역 설정 및 주요 카테고리에 사용
-- **Body**: 물품 설명 및 리스트 정보에 사용
+### Foundation
+- **Background**: `#FEFDF5` (Warm Cream - not stark white)
+- **Text Main**: `#4A4A4A` (Soft Dark Gray)
+- **Text Sub**: `#9B9B9B` (Warm Gray)
+- **White**: `#FFFFFF` (Card backgrounds)
 
-## 📱 UI 구성 요소
-- **Roundness**: `ROUND_TWELVE` (12px의 둥근 모서리) - 부드럽고 친근한 이미지
-- **Quick Menu**: 중고매물, 알바/구인, 과외/레슨, 모임/커뮤니티 (직관적인 아이콘 사용)
-- **Main Feed**: 썸네일(이미지) + 제목 + 가격 + 지역 및 시간의 카드 레이아웃
-- **Navigation**: 홈, 채팅, 마이페이지 (심플한 하단 바)
+## 🔠 Typography
+- **Heading**: Round and friendly font (e.g., 'Nunito', 'Quicksand', or SYSTEM rounded)
+- **Body**: Readable sans-serif
 
-## ✨ 디자인 원칙 (Brand Voice)
-1. **친근함**: '당근마켓'처럼 누구나 쉽게 접근할 수 있는 UI
-2. **신뢰감**: 유럽 거주 한인들을 위한 전문적이고 안전한 정보 제공
-3. **미니멀리즘**: 불필요한 장식을 배제하고 정보 전달에 집중
+## 📦 UI Elements
+- **Radius**: Large border-radius (`20px` ~ `30px`) for a soft, bubbly feel.
+- **Shadow**: Soft, diffused shadows (`0 10px 25px rgba(0,0,0,0.05)`).
+- **Navigation**: Floating bottom bar with glassmorphism or solid white pill shape.
+
+## 🧭 Navigation Structure
+1. **Housing (Home)**: Main dashboard.
+2. **Chat (Chat)**: User communication.
+3. **Alert (Alarm)**: Notifications.
+4. **Profile (My Page)**: User settings.
+5. **Country (Flag)**: Locale selection.
