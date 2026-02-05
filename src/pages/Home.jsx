@@ -32,8 +32,8 @@ const Home = () => {
       {/* 2. Intro Section */}
       <section className="intro-section">
         <div className="intro-text">
-          <h2>{selectedCountry.name} 한인끼리<br />편하게 사고 팔아요 🤝</h2>
-          <p>낯선 타지에서도 한국인끼리라<br />더 믿을 수 있는 중고거래!</p>
+          <h2>{selectedCountry.name} 한인 커뮤니티 🇪🇺</h2>
+          <p>거래부터 알바, 과외, 모임까지<br />유럽 한인들의 생활 플랫폼</p>
         </div>
         <div className="intro-decoration">
           <span style={{ fontSize: '40px' }}>{selectedCountry.flag}</span>
