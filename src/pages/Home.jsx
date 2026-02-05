@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
-import { Shirt, Armchair, Smartphone, Package, User, MapPin, Clock } from 'lucide-react';
+import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -31,24 +31,24 @@ const Home = () => {
         <h3 className="section-title">카테고리</h3>
         <div className="category-grid">
           <CategoryCard
-            title="의류"
-            icon={Shirt}
+            title="중고거래"
+            icon={ShoppingBag}
             delay="0s"
             onClick={() => navigate('/category/clothes')}
           />
           <CategoryCard
-            title="가구"
-            icon={Armchair}
+            title="알바"
+            icon={Briefcase}
             delay="0.1s"
           />
           <CategoryCard
-            title="디지털"
-            icon={Smartphone}
+            title="과외/레슨"
+            icon={GraduationCap}
             delay="0.2s"
           />
           <CategoryCard
-            title="기타"
-            icon={Package}
+            title="모임"
+            icon={Users}
             delay="0.3s"
           />
         </div>
