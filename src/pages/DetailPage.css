@@ -6,8 +6,8 @@
 .detail-page {
     min-height: 100vh;
     background: #fff;
-    padding-bottom: 150px;
-    /* Extra space for bottom bar + navigation */
+    padding-bottom: 80px;
+    /* Space for bottom action bar */
 }
 
 .detail-header {
@@ -139,17 +139,19 @@
 
 .style-1 .bottom-bar {
     position: fixed;
-    bottom: 70px;
-    /* Above navigation bar */
-    left: 0;
-    right: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
     background: white;
     border-top: 1px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .style-1 .like-btn {
@@ -338,14 +340,16 @@
 
 .style-2 .floating-chat-btn {
     position: fixed;
-    bottom: 24px;
-    left: 20px;
-    right: 20px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     padding: 16px;
     background: linear-gradient(135deg, #2196F3, #1976D2);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 0;
     font-size: 16px;
     font-weight: 600;
     display: flex;
@@ -353,7 +357,8 @@
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(33, 150, 243, 0.4);
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 /* =====================================================
@@ -566,14 +571,17 @@
 .style-3 .premium-bottom-bar {
     position: fixed;
     bottom: 0;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     gap: 10px;
     padding: 12px 20px;
     background: white;
     border-top: 1px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .style-3 .like-btn {
@@ -741,16 +749,18 @@
 
 .style-job .job-bar {
     position: fixed;
-    bottom: 70px;
-    /* Above navigation bar */
-    left: 0;
-    right: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     gap: 12px;
     padding: 12px 20px;
     background: white;
     border-top: 1px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .style-job .like-btn {
@@ -900,17 +910,19 @@
 
 .style-tutoring .tutoring-bar {
     position: fixed;
-    bottom: 70px;
-    /* Above navigation bar */
-    left: 0;
-    right: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
     background: white;
     border-top: 1px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .style-tutoring .like-btn {
@@ -1090,16 +1102,18 @@
 
 .style-meetup .meetup-bar {
     position: fixed;
-    bottom: 70px;
-    /* Above navigation bar */
-    left: 0;
-    right: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
     display: flex;
     gap: 12px;
     padding: 12px 20px;
     background: white;
     border-top: 1px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .style-meetup .like-btn {
