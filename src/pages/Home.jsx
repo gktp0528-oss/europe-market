@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
-import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } from 'lucide-react';
+import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock, Pencil } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 
 const DUMMY_ITEMS = [
@@ -16,6 +16,7 @@ const DUMMY_ITEMS = [
 const Home = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountry();
+  const [fabExpanded, setFabExpanded] = useState(false);
 
   const filteredItems = DUMMY_ITEMS.filter(item => item.country === selectedCountry.code);
 
@@ -54,16 +55,19 @@ const Home = () => {
             title="알바"
             icon={Briefcase}
             delay="0.1s"
+            onClick={() => navigate('/category/jobs')}
           />
           <CategoryCard
             title="과외/레슨"
             icon={GraduationCap}
             delay="0.2s"
+            onClick={() => navigate('/category/tutoring')}
           />
           <CategoryCard
             title="모임"
             icon={Users}
             delay="0.3s"
+            onClick={() => navigate('/category/meetups')}
           />
         </div>
       </section>
@@ -93,6 +97,40 @@ const Home = () => {
           </div>
         )}
       </section>
+
+      {/* Floating Action Button - Speed Dial */}
+      <div className="fab-container">
+        {/* Sub-buttons (appear when expanded) */}
+        <div className={`fab-options ${fabExpanded ? 'expanded' : ''}`}>
+          <button className="fab-option" onClick={() => { navigate('/category/clothes'); setFabExpanded(false); }}>
+            <ShoppingBag size={18} />
+            <span>중고거래</span>
+          </button>
+          <button className="fab-option" onClick={() => { navigate('/category/jobs'); setFabExpanded(false); }}>
+            <Briefcase size={18} />
+            <span>알바</span>
+          </button>
+          <button className="fab-option" onClick={() => { navigate('/category/tutoring'); setFabExpanded(false); }}>
+            <GraduationCap size={18} />
+            <span>과외/레슨</span>
+          </button>
+          <button className="fab-option" onClick={() => { navigate('/category/meetups'); setFabExpanded(false); }}>
+            <Users size={18} />
+            <span>모임</span>
+          </button>
+        </div>
+
+        {/* Main FAB button */}
+        <button
+          className={`fab-write ${fabExpanded ? 'active' : ''}`}
+          onClick={() => setFabExpanded(!fabExpanded)}
+        >
+          <Pencil size={24} className={fabExpanded ? 'rotate' : ''} />
+        </button>
+      </div>
+
+      {/* Overlay when FAB is expanded */}
+      {fabExpanded && <div className="fab-overlay" onClick={() => setFabExpanded(false)} />}
     </div>
   );
 };
@@ -106,7 +144,7 @@ const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
       onClick={onClick}
     >
       <div className="card-icon-wrapper">
-        <Icon size={32} strokeWidth={2} color="var(--color-primary-pink)" />
+        <Icon size={24} strokeWidth={2} color="var(--color-primary-pink)" />
       </div>
       <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none' }}>{title}</span>
     </button>

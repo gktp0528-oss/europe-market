@@ -1,0 +1,1131 @@
+/* =====================================================
+   DETAIL PAGE STYLES - 3 Different Designs
+   ===================================================== */
+
+/* Common Styles */
+.detail-page {
+    min-height: 100vh;
+    background: #fff;
+    padding-bottom: 150px;
+    /* Extra space for bottom bar + navigation */
+}
+
+.detail-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    z-index: 100;
+}
+
+.back-btn,
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.divider {
+    height: 1px;
+    background: #eee;
+    margin: 16px 0;
+}
+
+/* =====================================================
+   STYLE 1: Classic Card Style (당근마켓 스타일)
+   ===================================================== */
+.style-1 .detail-image {
+    width: 100%;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-1 .image-placeholder {
+    color: rgba(0, 0, 0, 0.3);
+    font-size: 16px;
+}
+
+.style-1 .detail-content {
+    padding: 20px;
+}
+
+.style-1 .seller-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.style-1 .seller-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-1 .seller-info h4 {
+    font-size: 15px;
+    margin: 0 0 4px;
+}
+
+.style-1 .seller-info span {
+    font-size: 13px;
+    color: #888;
+}
+
+.style-1 .product-section {
+    padding: 20px 0;
+}
+
+.style-1 .product-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.style-1 .product-price {
+    font-size: 22px;
+    font-weight: 800;
+    color: #333;
+    margin: 0 0 12px;
+}
+
+.style-1 .product-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    color: #888;
+}
+
+.style-1 .product-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.style-1 .description-section {
+    padding: 20px 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.style-1 .description-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-line;
+    color: #333;
+}
+
+.style-1 .bottom-bar {
+    position: fixed;
+    bottom: 70px;
+    /* Above navigation bar */
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 100;
+}
+
+.style-1 .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-1 .price-display {
+    flex: 1;
+    font-size: 18px;
+}
+
+.style-1 .chat-btn {
+    padding: 14px 24px;
+    background: #FF6B6B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+/* =====================================================
+   STYLE 2: Fullscreen Gallery Style (에어비앤비 스타일)
+   ===================================================== */
+.style-2 .fullscreen-gallery {
+    position: relative;
+    height: 60vh;
+}
+
+.style-2 .gallery-image {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.style-2 .overlay-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.style-2 .glass {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+}
+
+.style-2 .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-2 .gallery-nav.prev {
+    left: 12px;
+}
+
+.style-2 .gallery-nav.next {
+    right: 12px;
+}
+
+.style-2 .image-counter {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.style-2 .content-sheet {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    margin-top: -24px;
+    position: relative;
+    z-index: 10;
+    padding: 12px 20px 100px;
+}
+
+.style-2 .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+}
+
+.style-2 .product-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.style-2 .product-price {
+    font-size: 20px;
+    font-weight: 800;
+    color: #2196F3;
+    margin: 0 0 12px;
+}
+
+.style-2 .product-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #888;
+}
+
+.style-2 .product-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.style-2 .seller-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.style-2 .seller-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-2 .seller-info {
+    flex: 1;
+}
+
+.style-2 .seller-info h4 {
+    font-size: 14px;
+    margin: 0 0 2px;
+}
+
+.style-2 .seller-info span {
+    font-size: 12px;
+    color: #888;
+}
+
+.style-2 .follow-btn {
+    padding: 8px 16px;
+    border: 1px solid #2196F3;
+    background: white;
+    color: #2196F3;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.style-2 .description-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-line;
+    color: #333;
+}
+
+.style-2 .floating-chat-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 20px;
+    right: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(33, 150, 243, 0.4);
+}
+
+/* =====================================================
+   STYLE 3: Premium Card Style (번개장터 스타일)
+   ===================================================== */
+.style-3 .detail-header.premium {
+    background: transparent;
+}
+
+.style-3 .hero-image {
+    position: relative;
+    height: 300px;
+}
+
+.style-3 .hero-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.3));
+}
+
+.style-3 .hero-badge {
+    position: absolute;
+    top: 70px;
+    left: 16px;
+    padding: 6px 12px;
+    background: rgba(255, 215, 0, 0.9);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.style-3 .premium-content-card {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    margin-top: -24px;
+    position: relative;
+    z-index: 10;
+    padding: 24px 20px 20px;
+}
+
+.style-3 .price-section {
+    margin-bottom: 12px;
+}
+
+.style-3 .price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.style-3 .discount-badge {
+    padding: 4px 8px;
+    background: #FF5252;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.style-3 .current-price {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.style-3 .original-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+}
+
+.style-3 .product-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px;
+}
+
+.style-3 .tag-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.style-3 .product-tag {
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #666;
+}
+
+.style-3 .meta-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.style-3 .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #888;
+}
+
+.style-3 .meta-item.condition {
+    padding: 4px 10px;
+    background: #E3F2FD;
+    color: #1976D2;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.style-3 .premium-seller-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: #FAFAFA;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+
+.style-3 .seller-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.style-3 .seller-avatar.verified {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-3 .verified-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-3 .seller-info h4 {
+    font-size: 14px;
+    margin: 0 0 4px;
+}
+
+.style-3 .seller-stats {
+    display: flex;
+    gap: 6px;
+    font-size: 12px;
+    color: #888;
+}
+
+.style-3 .profile-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.style-3 .features-row {
+    display: flex;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 20px;
+}
+
+.style-3 .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
+}
+
+.style-3 .description-section.premium h3 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: #333;
+}
+
+.style-3 .description-section.premium p {
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #555;
+}
+
+.style-3 .premium-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 10px;
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 100;
+}
+
+.style-3 .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-3 .premium-chat-btn {
+    flex: 1;
+    padding: 14px;
+    background: white;
+    border: 1px solid #333;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.style-3 .buy-btn {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #FF6B6B, #FF5252);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* =====================================================
+   JOB DETAIL PAGE (알바)
+   ===================================================== */
+.style-job .job-hero {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-job .detail-content {
+    padding: 20px;
+}
+
+.style-job .job-title-section {
+    margin-bottom: 20px;
+}
+
+.style-job .job-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.style-job .job-pay {
+    font-size: 22px;
+    font-weight: 800;
+    color: #4CAF50;
+    margin: 0;
+}
+
+.style-job .job-info-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.style-job .info-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: #F5F5F5;
+    border-radius: 12px;
+}
+
+.style-job .info-card div {
+    display: flex;
+    flex-direction: column;
+}
+
+.style-job .info-card .label {
+    font-size: 12px;
+    color: #888;
+}
+
+.style-job .info-card .value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.style-job .requirements-section {
+    padding: 16px;
+    background: #E8F5E9;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.style-job .requirements-section h3 {
+    font-size: 14px;
+    margin: 0 0 8px;
+    color: #2E7D32;
+}
+
+.style-job .requirements-section p {
+    font-size: 14px;
+    margin: 0;
+    color: #333;
+}
+
+.style-job .employer-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.style-job .employer-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-job .employer-info h4 {
+    font-size: 15px;
+    margin: 0 0 4px;
+}
+
+.style-job .employer-info span {
+    font-size: 13px;
+    color: #888;
+}
+
+.style-job .description-section h3 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: #333;
+}
+
+.style-job .description-section p {
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #555;
+}
+
+.style-job .job-bar {
+    position: fixed;
+    bottom: 70px;
+    /* Above navigation bar */
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 100;
+}
+
+.style-job .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-job .apply-btn {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #4CAF50, #388E3C);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+/* =====================================================
+   TUTORING DETAIL PAGE (과외/레슨)
+   ===================================================== */
+.style-tutoring .tutoring-hero {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-tutoring .detail-content {
+    padding: 20px;
+}
+
+.style-tutoring .tutoring-title-section {
+    margin-bottom: 16px;
+}
+
+.style-tutoring .subject-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #7C4DFF;
+    color: white;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.style-tutoring .tutoring-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.style-tutoring .tutoring-pay {
+    font-size: 22px;
+    font-weight: 800;
+    color: #7C4DFF;
+    margin: 0;
+}
+
+.style-tutoring .tutoring-info-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.style-tutoring .info-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: #F3E5F5;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #7C4DFF;
+}
+
+.style-tutoring .tutor-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #FAFAFA;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.style-tutoring .tutor-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #EDE7F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-tutoring .tutor-info {
+    flex: 1;
+}
+
+.style-tutoring .tutor-info h4 {
+    font-size: 15px;
+    margin: 0 0 4px;
+}
+
+.style-tutoring .tutor-info span {
+    font-size: 13px;
+    color: #888;
+}
+
+.style-tutoring .profile-link {
+    padding: 8px 16px;
+    border: 1px solid #7C4DFF;
+    background: white;
+    color: #7C4DFF;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.style-tutoring .description-section.tutoring h3 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: #333;
+}
+
+.style-tutoring .description-section.tutoring p {
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #555;
+}
+
+.style-tutoring .tutoring-bar {
+    position: fixed;
+    bottom: 70px;
+    /* Above navigation bar */
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 100;
+}
+
+.style-tutoring .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-tutoring .price-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.style-tutoring .price-info .label {
+    font-size: 12px;
+    color: #888;
+}
+
+.style-tutoring .price-info strong {
+    font-size: 16px;
+}
+
+.style-tutoring .inquiry-btn {
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #7C4DFF, #651FFF);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+/* =====================================================
+   MEETUP DETAIL PAGE (모임)
+   ===================================================== */
+.style-meetup .meetup-hero {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-meetup .detail-content {
+    padding: 20px;
+}
+
+.style-meetup .meetup-title-section {
+    margin-bottom: 20px;
+}
+
+.style-meetup .meetup-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+}
+
+.style-meetup .meetup-date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #FF6B6B;
+    font-weight: 600;
+}
+
+.style-meetup .meetup-info-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.style-meetup .meetup-info-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #FFF3E0;
+    border-radius: 12px;
+    flex: 1;
+    min-width: calc(50% - 6px);
+}
+
+.style-meetup .meetup-info-card div {
+    display: flex;
+    flex-direction: column;
+}
+
+.style-meetup .meetup-info-card .label {
+    font-size: 11px;
+    color: #888;
+}
+
+.style-meetup .meetup-info-card .value {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.style-meetup .fee-badge {
+    padding: 8px 16px;
+    background: #FF6B6B;
+    color: white;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.style-meetup .participant-bar {
+    width: 100%;
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.style-meetup .participant-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF6B6B, #FF8A80);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.style-meetup .host-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.style-meetup .host-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FFEBEE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.style-meetup .host-info h4 {
+    font-size: 15px;
+    margin: 0 0 4px;
+}
+
+.style-meetup .host-info span {
+    font-size: 13px;
+    color: #888;
+}
+
+.style-meetup .description-section.meetup h3 {
+    font-size: 15px;
+    margin: 0 0 12px;
+    color: #333;
+}
+
+.style-meetup .description-section.meetup p {
+    font-size: 14px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #555;
+}
+
+.style-meetup .meetup-bar {
+    position: fixed;
+    bottom: 70px;
+    /* Above navigation bar */
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    z-index: 100;
+}
+
+.style-meetup .like-btn {
+    width: 48px;
+    height: 48px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.style-meetup .join-btn {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #FF6B6B, #E53935);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
