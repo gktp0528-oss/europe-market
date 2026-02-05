@@ -2,9 +2,23 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } from 'lucide-react';
+import { useCountry } from '../contexts/CountryContext';
+
+const DUMMY_ITEMS = [
+  { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR' },
+  { id: 2, title: '아이폰 13 미니', price: '350유로', location: '베를린 미테', time: '5분 전', color: '#F0F8FF', country: 'DE' },
+  { id: 3, title: '빈티지 원피스', price: '25파운드', location: '런던 소호', time: '12분 전', color: '#FFFAF0', country: 'GB' },
+  { id: 4, title: '네스프레소 머신', price: '50유로', location: '뮌헨', time: '30분 전', color: '#F5F5F5', country: 'DE' },
+  { id: 5, title: '전기밥솥 팝니다', price: '40유로', location: '암스테르담', time: '1시간 전', color: '#E8F5E9', country: 'NL' },
+  { id: 6, title: '자전거 급처', price: '80유로', location: '프랑크푸르트', time: '2시간 전', color: '#FFF3E0', country: 'DE' },
+];
 
 const Home = () => {
   const navigate = useNavigate();
+  const { selectedCountry } = useCountry();
+
+  const filteredItems = DUMMY_ITEMS.filter(item => item.country === selectedCountry.code);
+
   return (
     <div className="home-container">
       {/* 1. Header */}
@@ -18,11 +32,11 @@ const Home = () => {
       {/* 2. Intro Section */}
       <section className="intro-section">
         <div className="intro-text">
-          <h2>EU살이 한인끼리<br />편하게 사고 팔아요 🤝</h2>
+          <h2>{selectedCountry.name} 한인끼리<br />편하게 사고 팔아요 🤝</h2>
           <p>낯선 타지에서도 한국인끼리라<br />더 믿을 수 있는 중고거래!</p>
         </div>
         <div className="intro-decoration">
-          {/* Simple decoration circle */}
+          <span style={{ fontSize: '40px' }}>{selectedCountry.flag}</span>
         </div>
       </section>
 
@@ -56,37 +70,28 @@ const Home = () => {
 
       {/* 4. Real-time Posts Section */}
       <section className="realtime-section">
-        <h3 className="section-title">최근에 올라온 글</h3>
-        <div className="horizontal-scroll">
-          <ItemCard
-            title="이케아 조명 팔아요"
-            price="15유로"
-            location="파리 15구"
-            time="1분 전"
-            color="#FFF0F0"
-          />
-          <ItemCard
-            title="아이폰 13 미니"
-            price="350유로"
-            location="베를린"
-            time="5분 전"
-            color="#F0F8FF"
-          />
-          <ItemCard
-            title="빈티지 원피스"
-            price="25유로"
-            location="런던 소호"
-            time="12분 전"
-            color="#FFFAF0"
-          />
-          <ItemCard
-            title="커피머신 급처"
-            price="50유로"
-            location="뮌헨"
-            time="30분 전"
-            color="#F5F5F5"
-          />
+        <div className="section-header">
+          <h3 className="section-title">{selectedCountry.name}의 최신 글</h3>
         </div>
+
+        {filteredItems.length > 0 ? (
+          <div className="horizontal-scroll">
+            {filteredItems.map(item => (
+              <ItemCard
+                key={item.id}
+                title={item.title}
+                price={item.price}
+                location={item.location}
+                time={item.time}
+                color={item.color}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>아직 등록된 게시물이 없어요 🥲</p>
+          </div>
+        )}
       </section>
     </div>
   );
