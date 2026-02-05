@@ -129,6 +129,8 @@
 
 /* Real-time Section */
 .realtime-section {
+    margin-top: 40px;
+    /* Added spacing */
     margin-bottom: 20px;
 }
 

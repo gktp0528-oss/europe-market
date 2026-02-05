@@ -57,7 +57,7 @@ const Home = () => {
 
       {/* 4. Real-time Posts Section */}
       <section className="realtime-section">
-        <h3 className="section-title">실시간 올라온 매물 🔥</h3>
+        <h3 className="section-title">최근에 올라온 글</h3>
         <div className="horizontal-scroll">
           <ItemCard
             title="이케아 조명 팔아요"
