@@ -7,7 +7,7 @@ const Home = () => {
     <div className="home-container">
       {/* 1. Header */}
       <header className="home-header">
-        <h1 className="logo-text">유럽 벼룩시장</h1>
+        <h1 className="logo-text">이유살이</h1>
         <button className="profile-btn">
           <User size={20} />
         </button>
@@ -16,8 +16,8 @@ const Home = () => {
       {/* 2. Intro Section */}
       <section className="intro-section">
         <div className="intro-text">
-          <h2>유럽에서의 보물찾기<br />시작해볼까요? 💎</h2>
-          <p>나만의 특별한 빈티지 아이템을<br />가장 가까운 곳에서 찾아보세요!</p>
+          <h2>EU살이 한인끼리<br />편하게 사고 팔아요 🤝</h2>
+          <p>낯선 타지에서도 한국인끼리라<br />더 믿을 수 있는 중고거래!</p>
         </div>
         <div className="intro-decoration">
           {/* Simple decoration circle */}
