@@ -31,25 +31,21 @@ const Home = () => {
           <CategoryCard
             title="의류"
             icon={Shirt}
-            color="var(--color-primary-pink)"
             delay="0s"
           />
           <CategoryCard
             title="가구"
             icon={Armchair}
-            color="var(--color-mint-green)"
             delay="0.1s"
           />
           <CategoryCard
             title="디지털"
             icon={Smartphone}
-            color="var(--color-lemon-yellow)"
             delay="0.2s"
           />
           <CategoryCard
             title="기타"
             icon={Package}
-            color="var(--color-lavender)"
             delay="0.3s"
           />
         </div>
@@ -94,16 +90,16 @@ const Home = () => {
 };
 
 // Reusable Category Card Component
-const CategoryCard = ({ title, icon: Icon, color, delay }) => {
+const CategoryCard = ({ title, icon: Icon, delay }) => {
   return (
     <button
       className="category-card"
-      style={{ backgroundColor: color, animationDelay: delay }}
+      style={{ backgroundColor: 'var(--category-bg)', animationDelay: delay }}
     >
       <div className="card-icon-wrapper">
-        <Icon size={32} strokeWidth={2} color="#fff" />
+        <Icon size={32} strokeWidth={2} color="var(--color-primary-pink)" />
       </div>
-      <span className="card-title">{title}</span>
+      <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none' }}>{title}</span>
     </button>
   );
 };

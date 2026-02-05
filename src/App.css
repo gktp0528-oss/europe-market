@@ -8,10 +8,11 @@
   --color-lavender: #C7CEEA;
 
   /* Foundation */
-  --bg-color: #FEFDF5;
+  --bg-color: #FFFFFF;
   --text-main: #4A4A4A;
   --text-sub: #9B9B9B;
   --white: #FFFFFF;
+  --category-bg: #F7F7F7;
 
   /* UI Tokens */
   --radius-lg: 24px;
