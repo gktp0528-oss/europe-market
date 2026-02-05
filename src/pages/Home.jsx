@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { Shirt, Armchair, Smartphone, Package, User, MapPin, Clock } from 'lucide-react';
 
 const Home = () => {
+  const navigate = useNavigate();
   return (
     <div className="home-container">
       {/* 1. Header */}
@@ -32,6 +34,7 @@ const Home = () => {
             title="의류"
             icon={Shirt}
             delay="0s"
+            onClick={() => navigate('/category/clothes')}
           />
           <CategoryCard
             title="가구"
@@ -90,11 +93,12 @@ const Home = () => {
 };
 
 // Reusable Category Card Component
-const CategoryCard = ({ title, icon: Icon, delay }) => {
+const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
   return (
     <button
       className="category-card"
       style={{ backgroundColor: 'var(--category-bg)', animationDelay: delay }}
+      onClick={onClick}
     >
       <div className="card-icon-wrapper">
         <Icon size={32} strokeWidth={2} color="var(--color-primary-pink)" />

@@ -6,12 +6,15 @@ import './App.css';
 
 import CategoryClothes from './pages/CategoryClothes';
 
+import CategoryClothes from './pages/CategoryClothes';
+
 function App() {
   return (
     <Router>
       <div className="mobile-container">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/category/clothes" element={<CategoryClothes />} />
           <Route path="/category/clothes" element={<CategoryClothes />} />
           {/* Placeholder routes for now */}
           <Route path="/chat" element={<div className="flex-center full-screen">채팅 화면 준비중 💬</div>} />
