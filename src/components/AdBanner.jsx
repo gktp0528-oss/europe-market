@@ -22,7 +22,7 @@ const AdBanner = () => {
     };
 
     useEffect(() => {
-        const interval = setInterval(nextSlide, 1500); // 1.5s automatic slide
+        const interval = setInterval(nextSlide, 4000); // 1.5s -> 4s automatic slide
         return () => clearInterval(interval);
     }, [nextSlide, currentIndex]); // currentIndex를 의존성에 추가하여 변경 시 인터벌 재설정
 

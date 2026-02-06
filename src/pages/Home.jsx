@@ -7,22 +7,30 @@ import FloatingActionButton from '../components/FloatingActionButton';
 import Header from '../components/Header';
 import AdBanner from '../components/AdBanner';
 
-const DUMMY_ITEMS = [
-  { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR' },
-  { id: 2, title: '아이폰 13 미니', price: '350유로', location: '베를린 미테', time: '5분 전', color: '#F0F8FF', country: 'DE' },
-  { id: 3, title: '빈티지 원피스', price: '25파운드', location: '런던 소호', time: '12분 전', color: '#FFFAF0', country: 'GB' },
-  { id: 4, title: '네스프레소 머신', price: '50유로', location: '뮌헨', time: '30분 전', color: '#F5F5F5', country: 'DE' },
-  { id: 5, title: '전기밥솥 팝니다', price: '40유로', location: '암스테르담', time: '1시간 전', color: '#E8F5E9', country: 'NL' },
-  { id: 6, title: '자전거 급처', price: '80유로', location: '프랑크푸르트', time: '2시간 전', color: '#FFF3E0', country: 'DE' },
+const POPULAR_ITEMS = [
+  { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR', views: 156 },
+  { id: 2, title: '아이폰 13 미니', price: '350유로', location: '베를린 미테', time: '5분 전', color: '#F0F8FF', country: 'DE', views: 243 },
+  { id: 3, title: '빈티지 원피스', price: '25파운드', location: '런던 소호', time: '12분 전', color: '#FFFAF0', country: 'GB', views: 89 },
+  { id: 4, title: '네스프레소 머신', price: '50유로', location: '뮌헨', time: '30분 전', color: '#F5F5F5', country: 'DE', views: 167 },
+  { id: 5, title: '전기밥솥 팝니다', price: '40유로', location: '암스테르담', time: '1시간 전', color: '#E8F5E9', country: 'NL', views: 92 },
+  { id: 6, title: '자전거 급처', price: '80유로', location: '프랑크푸르트', time: '2시간 전', color: '#FFF3E0', country: 'DE', views: 110 },
+  { id: 7, title: '캐시미어 코트', price: '300유로', location: '밀라노', time: '3시간 전', color: '#ECEFF1', country: 'IT', views: 78 },
+  { id: 8, title: '한국어 가이드 구함', price: '협의', location: '비엔나', time: '4시간 전', color: '#F1F8E9', country: 'AT', views: 56 },
+  { id: 9, title: '부다페스트 한인민박', price: '45유로', location: '부다페스트', time: '5시간 전', color: '#E1F5FE', country: 'HU', views: 134 },
+  { id: 10, title: '프라하 스냅 촬영', price: '80유로', location: '프라하', time: '6시간 전', color: '#FFF3E0', country: 'CZ', views: 210 },
+  { id: 11, title: '한식당 주방 보조', price: '시급 12유로', location: '베를린', time: '7시간 전', color: '#F3E5F5', country: 'DE', views: 145 },
+  { id: 12, title: '루이비통 카드지갑', price: '200유로', location: '파리', time: '8시간 전', color: '#FAFAFA', country: 'FR', views: 320 },
 ];
 
 const Home = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountry();
 
-  const filteredItems = DUMMY_ITEMS.filter(item =>
-    selectedCountry.code === 'ALL' || item.country === selectedCountry.code
-  );
+  // Filter by country if not ALL, then sort by views top 10
+  const filteredPopular = POPULAR_ITEMS
+    .filter(item => selectedCountry.code === 'ALL' || item.country === selectedCountry.code)
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 10);
 
   return (
     <div className="home-container" style={{ paddingTop: '20px' }}>
@@ -59,28 +67,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. Real-time Posts Section */}
+      {/* 4. Popular Posts Section */}
       <section className="realtime-section">
         <div className="section-header">
-          <h3 className="section-title">{selectedCountry.name}의 최신 글</h3>
+          <h3 className="section-title">오늘의 인기글 TOP 10 🔥</h3>
         </div>
 
-        {filteredItems.length > 0 ? (
+        {filteredPopular.length > 0 ? (
           <div className="horizontal-scroll">
-            {filteredItems.map(item => (
-              <ItemCard
-                key={item.id}
-                title={item.title}
-                price={item.price}
-                location={item.location}
-                time={item.time}
-                color={item.color}
-              />
+            {filteredPopular.map((item, index) => (
+              <div key={item.id} className="popular-card-wrapper">
+                <div className="rank-badge">{index + 1}</div>
+                <ItemCard
+                  title={item.title}
+                  price={item.price}
+                  location={item.location}
+                  time={item.time}
+                  color={item.color}
+                />
+              </div>
             ))}
           </div>
         ) : (
           <div className="empty-state">
-            <p>아직 등록된 게시물이 없어요 🥲</p>
+            <p>아직 인기글이 없어요 🥲</p>
           </div>
         )}
       </section>
