@@ -7,7 +7,6 @@
     min-height: 100vh;
     background: #fff;
     padding-bottom: 80px;
-    /* Space for bottom action bar */
 }
 
 .detail-header {
@@ -29,7 +28,8 @@
 .chat-btn:active,
 .apply-btn:active,
 .inquiry-btn:active,
-.join-btn:active {
+.join-btn:active,
+.unified-profile-btn:active {
     transform: scale(0.95);
     transition: transform 0.1s ease;
 }
@@ -69,8 +69,100 @@
     margin: 16px 0;
 }
 
+/* Unified Seller Card & Rating Badge */
+.unified-seller-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+}
+
+.unified-seller-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.unified-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #F3E5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4A4A4A;
+}
+
+.unified-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.unified-info h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+}
+
+.unified-profile-btn {
+    padding: 8px 16px;
+    background: #E8EAF6;
+    color: #3F51B5;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.unified-profile-btn:hover {
+    background: #C5CAE9;
+}
+
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: #FFF9C4;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    width: fit-content;
+}
+
+.rating-badge svg {
+    fill: #FFC107;
+    color: #FFC107;
+}
+
+.detail-meta-row {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #888;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.detail-meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 /* =====================================================
-   STYLE 1: Classic Card Style (당근마켓 스타일)
+   STYLE 1: Classic Card Style
    ===================================================== */
 .style-1 .detail-image {
     width: 100%;
@@ -87,34 +179,6 @@
 
 .style-1 .detail-content {
     padding: 20px;
-}
-
-.style-1 .seller-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.style-1 .seller-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.style-1 .seller-info h4 {
-    font-size: 15px;
-    margin: 0 0 4px;
-}
-
-.style-1 .seller-info span {
-    font-size: 13px;
-    color: #888;
 }
 
 .style-1 .product-section {
@@ -210,445 +274,7 @@
 }
 
 /* =====================================================
-   STYLE 2: Fullscreen Gallery Style (에어비앤비 스타일)
-   ===================================================== */
-.style-2 .fullscreen-gallery {
-    position: relative;
-    height: 60vh;
-}
-
-.style-2 .gallery-image {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.style-2 .overlay-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.style-2 .glass {
-    background: rgba(255, 255, 255, 0.8) !important;
-    backdrop-filter: blur(10px);
-}
-
-.style-2 .gallery-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.style-2 .gallery-nav.prev {
-    left: 12px;
-}
-
-.style-2 .gallery-nav.next {
-    right: 12px;
-}
-
-.style-2 .image-counter {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    padding: 6px 12px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border-radius: 20px;
-    font-size: 12px;
-}
-
-.style-2 .content-sheet {
-    background: white;
-    border-radius: 24px 24px 0 0;
-    margin-top: -24px;
-    position: relative;
-    z-index: 10;
-    padding: 12px 20px 100px;
-}
-
-.style-2 .sheet-handle {
-    width: 40px;
-    height: 4px;
-    background: #ddd;
-    border-radius: 2px;
-    margin: 0 auto 20px;
-}
-
-.style-2 .product-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin: 0 0 8px;
-}
-
-.style-2 .product-price {
-    font-size: 20px;
-    font-weight: 800;
-    color: #2196F3;
-    margin: 0 0 12px;
-}
-
-.style-2 .product-meta {
-    display: flex;
-    gap: 16px;
-    font-size: 13px;
-    color: #888;
-}
-
-.style-2 .product-meta span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.style-2 .seller-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.style-2 .seller-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.style-2 .seller-info {
-    flex: 1;
-}
-
-.style-2 .seller-info h4 {
-    font-size: 14px;
-    margin: 0 0 2px;
-}
-
-.style-2 .seller-info span {
-    font-size: 12px;
-    color: #888;
-}
-
-.style-2 .follow-btn {
-    padding: 8px 16px;
-    border: 1px solid #2196F3;
-    background: white;
-    color: #2196F3;
-    border-radius: 20px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.style-2 .description-section p {
-    font-size: 15px;
-    line-height: 1.7;
-    white-space: pre-line;
-    color: #333;
-}
-
-.style-2 .floating-chat-btn {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    padding: 16px;
-    background: linear-gradient(135deg, #2196F3, #1976D2);
-    color: white;
-    border: none;
-    border-radius: 0;
-    font-size: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
-}
-
-/* =====================================================
-   STYLE 3: Premium Card Style (번개장터 스타일)
-   ===================================================== */
-.style-3 .detail-header.premium {
-    background: transparent;
-}
-
-.style-3 .hero-image {
-    position: relative;
-    height: 300px;
-}
-
-.style-3 .hero-gradient {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.3));
-}
-
-.style-3 .hero-badge {
-    position: absolute;
-    top: 70px;
-    left: 16px;
-    padding: 6px 12px;
-    background: rgba(255, 215, 0, 0.9);
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.style-3 .premium-content-card {
-    background: white;
-    border-radius: 24px 24px 0 0;
-    margin-top: -24px;
-    position: relative;
-    z-index: 10;
-    padding: 24px 20px 20px;
-}
-
-.style-3 .price-section {
-    margin-bottom: 12px;
-}
-
-.style-3 .price-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.style-3 .discount-badge {
-    padding: 4px 8px;
-    background: #FF5252;
-    color: white;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.style-3 .current-price {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.style-3 .original-price {
-    font-size: 14px;
-    color: #999;
-    text-decoration: line-through;
-}
-
-.style-3 .product-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 12px;
-}
-
-.style-3 .tag-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
-
-.style-3 .product-tag {
-    padding: 6px 12px;
-    background: #f5f5f5;
-    border-radius: 16px;
-    font-size: 12px;
-    color: #666;
-}
-
-.style-3 .meta-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.style-3 .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    color: #888;
-}
-
-.style-3 .meta-item.condition {
-    padding: 4px 10px;
-    background: #E3F2FD;
-    color: #1976D2;
-    border-radius: 12px;
-    font-weight: 500;
-}
-
-.style-3 .premium-seller-card {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    background: #FAFAFA;
-    border-radius: 12px;
-    margin-bottom: 16px;
-}
-
-.style-3 .seller-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-}
-
-.style-3 .seller-avatar.verified {
-    position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #eee;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.style-3 .verified-badge {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.style-3 .seller-info h4 {
-    font-size: 14px;
-    margin: 0 0 4px;
-}
-
-.style-3 .seller-stats {
-    display: flex;
-    gap: 6px;
-    font-size: 12px;
-    color: #888;
-}
-
-.style-3 .profile-btn {
-    padding: 8px 16px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.style-3 .features-row {
-    display: flex;
-    gap: 24px;
-    padding: 16px 0;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 20px;
-}
-
-.style-3 .feature-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #666;
-}
-
-.style-3 .description-section.premium h3 {
-    font-size: 15px;
-    margin: 0 0 12px;
-    color: #333;
-}
-
-.style-3 .description-section.premium p {
-    font-size: 14px;
-    line-height: 1.8;
-    white-space: pre-line;
-    color: #555;
-}
-
-.style-3 .premium-bottom-bar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    gap: 10px;
-    padding: 12px 20px;
-    background: white;
-    border-top: 1px solid #eee;
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03);
-}
-
-.style-3 .like-btn {
-    width: 48px;
-    height: 48px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.style-3 .premium-chat-btn {
-    flex: 1;
-    padding: 14px;
-    background: white;
-    border: 1px solid #333;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    cursor: pointer;
-}
-
-.style-3 .buy-btn {
-    flex: 1;
-    padding: 14px;
-    background: linear-gradient(135deg, #FF6B6B, #FF5252);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-/* =====================================================
-   JOB DETAIL PAGE (알바)
+   JOB DETAIL PAGE
    ===================================================== */
 .style-job .job-hero {
     height: 200px;
@@ -681,7 +307,6 @@
 .style-job .job-info-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    /* 2열 배치로 변경 */
     gap: 12px;
     margin-bottom: 24px;
 }
@@ -692,7 +317,7 @@
     gap: 12px;
     padding: 14px;
     background: #F5F5F5;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .style-job .info-card div {
@@ -728,37 +353,6 @@
     font-size: 14px;
     margin: 0;
     color: #333;
-}
-
-.style-job .employer-card {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 20px;
-    background: #FAFAFA;
-    border-radius: 20px;
-    border: 1px solid #f0f0f0;
-    margin-bottom: 24px;
-}
-
-.style-job .employer-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.style-job .employer-info h4 {
-    font-size: 15px;
-    margin: 0 0 4px;
-}
-
-.style-job .employer-info span {
-    font-size: 13px;
-    color: #888;
 }
 
 .style-job .description-section h3 {
@@ -820,7 +414,7 @@
 }
 
 /* =====================================================
-   TUTORING DETAIL PAGE (과외/레슨)
+   TUTORING DETAIL PAGE
    ===================================================== */
 .style-tutoring .tutoring-hero {
     height: 200px;
@@ -834,17 +428,17 @@
 }
 
 .style-tutoring .tutoring-title-section {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
 .style-tutoring .subject-badge {
     display: inline-block;
-    padding: 6px 12px;
-    background: #7C4DFF;
-    color: white;
-    border-radius: 16px;
+    padding: 4px 10px;
+    background: #E8EAF6;
+    color: #3F51B5;
     font-size: 12px;
     font-weight: 600;
+    border-radius: 12px;
     margin-bottom: 8px;
 }
 
@@ -855,9 +449,9 @@
 }
 
 .style-tutoring .tutoring-pay {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
-    color: #7C4DFF;
+    color: #3F51B5;
     margin: 0;
 }
 
@@ -898,14 +492,10 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #EDE7F6;
+    background: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.style-tutoring .tutor-info {
-    flex: 1;
 }
 
 .style-tutoring .tutor-info h4 {
@@ -929,13 +519,13 @@
     cursor: pointer;
 }
 
-.style-tutoring .description-section.tutoring h3 {
+.style-tutoring .description-section h3 {
     font-size: 15px;
     margin: 0 0 12px;
     color: #333;
 }
 
-.style-tutoring .description-section.tutoring p {
+.style-tutoring .description-section p {
     font-size: 14px;
     line-height: 1.8;
     white-space: pre-line;
@@ -950,7 +540,6 @@
     width: 100%;
     max-width: 480px;
     display: flex;
-    align-items: center;
     gap: 12px;
     padding: 12px 20px;
     background: white;
@@ -972,7 +561,6 @@
 }
 
 .style-tutoring .price-info {
-    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -1004,7 +592,7 @@
 }
 
 /* =====================================================
-   MEETUP DETAIL PAGE (모임)
+   MEETUP DETAIL PAGE
    ===================================================== */
 .style-meetup .meetup-hero {
     height: 200px;
@@ -1031,84 +619,78 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 15px;
-    color: #FF6B6B;
-    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
 }
 
 .style-meetup .meetup-info-cards {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .style-meetup .meetup-info-card {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: #FFF3E0;
-    border-radius: 12px;
-    flex: 1;
-    min-width: calc(50% - 6px);
-}
-
-.style-meetup .meetup-info-card div {
-    display: flex;
-    flex-direction: column;
+    gap: 16px;
+    padding: 16px 20px;
+    background: #F3F8FD;
+    border-radius: 16px;
+    border: 1px solid rgba(33, 150, 243, 0.1);
 }
 
 .style-meetup .meetup-info-card .label {
-    font-size: 11px;
+    font-size: 12px;
     color: #888;
+    display: block;
+    margin-bottom: 2px;
 }
 
 .style-meetup .meetup-info-card .value {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
+    color: #333;
 }
 
 .style-meetup .fee-badge {
-    padding: 8px 16px;
-    background: #FF6B6B;
-    color: white;
-    border-radius: 20px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
+    color: #0288D1;
 }
 
 .style-meetup .participant-bar {
-    width: 100%;
-    height: 8px;
+    height: 6px;
     background: #eee;
-    border-radius: 4px;
+    border-radius: 3px;
     margin-bottom: 20px;
     overflow: hidden;
 }
 
 .style-meetup .participant-fill {
     height: 100%;
-    background: linear-gradient(90deg, #FF6B6B, #FF8A80);
-    border-radius: 4px;
-    transition: width 0.3s ease;
+    background: #29B6F6;
+    border-radius: 3px;
 }
 
 .style-meetup .host-card {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px 0;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 20px;
+    gap: 16px;
+    padding: 20px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    margin: 24px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
 }
 
 .style-meetup .host-avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: #FFEBEE;
+    background: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1124,13 +706,13 @@
     color: #888;
 }
 
-.style-meetup .description-section.meetup h3 {
+.style-meetup .description-section h3 {
     font-size: 15px;
     margin: 0 0 12px;
     color: #333;
 }
 
-.style-meetup .description-section.meetup p {
+.style-meetup .description-section p {
     font-size: 14px;
     line-height: 1.8;
     white-space: pre-line;
@@ -1167,262 +749,8 @@
 
 .style-meetup .join-btn {
     flex: 1;
-    padding: 14px;
-    background: linear-gradient(135deg, #FF6B6B, #E53935);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-}
-
-/* =====================================================
-   STYLE 4: Modern Immersive Style
-   ===================================================== */
-.style-modern {
-    background: #f8f9fa;
-    position: relative;
-    padding-bottom: 90px;
-}
-
-.modern-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-    z-index: 100;
-}
-
-.modern-header .icon-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.modern-header .icon-btn:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.modern-hero {
-    height: 45vh;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    padding: 20px;
-}
-
-.modern-hero .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6));
-}
-
-.modern-hero .hero-content {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-}
-
-.location-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 20px;
-    color: white;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.modern-content-card {
-    background: white;
-    border-radius: 30px 30px 0 0;
-    margin-top: -30px;
-    position: relative;
-    z-index: 10;
-    padding: 30px 24px 40px;
-    min-height: 60vh;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.card-handle {
-    width: 40px;
-    height: 4px;
-    background: #e0e0e0;
-    border-radius: 2px;
-    margin: 0 auto 24px;
-}
-
-.title-section {
-    margin-bottom: 20px;
-}
-
-.modern-title {
-    font-size: 26px;
-    font-weight: 800;
-    color: #1a1a1a;
-    line-height: 1.3;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-}
-
-.modern-meta {
-    display: flex;
-    gap: 16px;
-    color: #888;
-    font-size: 14px;
-}
-
-.modern-meta span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.price-section {
-    margin-bottom: 24px;
-}
-
-.modern-price {
-    font-size: 28px;
-    font-weight: 900;
-    color: #FF6B6B;
-    letter-spacing: -0.5px;
-}
-
-.divider {
-    height: 1px;
-    background: #f1f3f5;
-    margin: 24px 0;
-}
-
-.modern-seller {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.seller-profile {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.modern-seller .seller-avatar {
-    width: 54px;
-    height: 54px;
-    border-radius: 20px;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    border: 1px solid #eee;
-}
-
-.modern-seller .seller-details h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0 0 4px;
-    color: #333;
-}
-
-.modern-seller .seller-stats {
-    font-size: 13px;
-    color: #888;
-    display: flex;
-    gap: 8px;
-}
-
-.follow-btn {
-    padding: 8px 18px;
-    background: #f1f3f5;
-    color: #333;
-    border: none;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.modern-description h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 16px;
-    color: #333;
-}
-
-.modern-description p {
-    font-size: 16px;
-    line-height: 1.7;
-    color: #555;
-    white-space: pre-line;
-}
-
-.modern-bottom-bar {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    padding: 12px;
-    border-radius: 20px;
-    display: flex;
-    gap: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.modern-like-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    border: 1px solid #eee;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ff6b6b;
-    cursor: pointer;
-    transition: transform 0.1s;
-}
-
-.modern-like-btn:active {
-    transform: scale(0.95);
-}
-
-.modern-chat-btn {
-    flex: 1;
-    background: #1a1a1a;
+    padding: 16px;
+    background: linear-gradient(135deg, #00BCD4, #0097A7);
     color: white;
     border: none;
     border-radius: 16px;
@@ -1433,97 +761,5 @@
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.detail-meta-row {
-    display: flex;
-    gap: 16px;
-    font-size: 13px;
-    color: #888;
-    margin-top: 8px;
-    margin-bottom: 20px;
-}
-
-.detail-meta-row span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.rating-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    background: #FFF9C4;
-    /* 연한 노란색 배경 */
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    /* 숫자 굵게 */
-    color: #333;
-}
-
-.rating-badge svg {
-    fill: #FFC107;
-    /* 내부 채우기 */
-    color: #FFC107;
-    /* 테두리 색상 */
-}.unified-seller-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    background: white;
-    border: 1px solid #eee;
-    border-radius: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-}
-
-.unified-seller-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.unified-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #F3E5F5; /* 연보라색 배경 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #4A4A4A;
-}
-
-.unified-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.unified-info h4 {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0;
-    color: #333;
-}
-
-.unified-profile-btn {
-    padding: 8px 16px;
-    background: #E8EAF6; /* 연한 보라색 버튼 */
-    color: #3F51B5; /* 진한 보라색 글자 */
-    font-size: 13px;
-    font-weight: 700;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.unified-profile-btn:hover {
-    background: #C5CAE9;
+    box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
 }
