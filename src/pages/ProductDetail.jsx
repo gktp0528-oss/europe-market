@@ -108,7 +108,7 @@ const ProductDetail = () => {
                 {/* Product Info */}
                 <div className="product-section">
                     <h1 className="product-title">{item.title}</h1>
-                    <div className="product-meta" style={{ marginBottom: '16px' }}>
+                    <div className="product-meta">
                         <span><Clock size={14} /> {item.time}</span>
                         <span><Eye size={14} /> {item.views}</span>
                         <span><Heart size={14} /> {item.likes}</span>
