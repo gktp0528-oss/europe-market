@@ -423,10 +423,10 @@
 }
 
 .style-job .description-section p {
-    font-size: 14px;
-    line-height: 1.8;
+    font-size: 15px;
+    line-height: 1.7;
     white-space: pre-line;
-    color: #555;
+    color: #333;
 }
 
 .style-job .job-bar {
@@ -588,10 +588,10 @@
 }
 
 .style-tutoring .description-section p {
-    font-size: 14px;
-    line-height: 1.8;
+    font-size: 15px;
+    line-height: 1.7;
     white-space: pre-line;
-    color: #555;
+    color: #333;
 }
 
 .style-tutoring .tutoring-bar {
@@ -775,10 +775,10 @@
 }
 
 .style-meetup .description-section p {
-    font-size: 14px;
-    line-height: 1.8;
+    font-size: 15px;
+    line-height: 1.7;
     white-space: pre-line;
-    color: #555;
+    color: #333;
 }
 
 .style-meetup .meetup-bar {
