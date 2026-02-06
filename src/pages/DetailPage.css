@@ -166,8 +166,8 @@
    ===================================================== */
 .style-1 .slider-container {
     width: 100%;
-    height: 200px;
-    /* Unified Height */
+    height: 380px;
+    /* Expanded Height for Products */
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -199,7 +199,7 @@
 .style-1 .image-wrapper {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 380px;
 }
 
 .style-1 .slider-dots {
