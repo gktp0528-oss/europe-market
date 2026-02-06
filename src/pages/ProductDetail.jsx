@@ -8,6 +8,7 @@ const ProductDetail = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [currentImage, setCurrentImage] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const images = [
         '/images/nike1.png',
@@ -51,7 +52,7 @@ const ProductDetail = () => {
             <div className="image-wrapper">
                 <div className="slider-container" onScroll={handleScroll}>
                     {images.map((src, index) => (
-                        <div key={index} className="slider-item">
+                        <div key={index} className="slider-item" onClick={() => setIsModalOpen(true)}>
                             <img src={src} alt={`Product ${index + 1}`} />
                         </div>
                     ))}
@@ -65,6 +66,18 @@ const ProductDetail = () => {
                     ))}
                 </div>
             </div>
+
+            {/* Image Zoom Modal */}
+            {isModalOpen && (
+                <div className="image-modal-overlay" onClick={() => setIsModalOpen(false)}>
+                    <div className="image-modal-content" onClick={e => e.stopPropagation()}>
+                        <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
+                            &times;
+                        </button>
+                        <img src={images[currentImage]} alt="Zoomed Product" />
+                    </div>
+                </div>
+            )}
 
             {/* Content */}
             <div className="detail-content">
