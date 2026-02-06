@@ -304,14 +304,16 @@
     margin: 0;
 }
 
-.style-job .job-info-cards {
+.style-job .job-info-cards,
+.style-1 .job-info-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 24px;
 }
 
-.style-job .info-card {
+.style-job .info-card,
+.style-1 .info-card {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -320,17 +322,20 @@
     border-radius: 16px;
 }
 
-.style-job .info-card div {
+.style-job .info-card div,
+.style-1 .info-card div {
     display: flex;
     flex-direction: column;
 }
 
-.style-job .info-card .label {
+.style-job .info-card .label,
+.style-1 .info-card .label {
     font-size: 12px;
     color: #888;
 }
 
-.style-job .info-card .value {
+.style-job .info-card .value,
+.style-1 .info-card .value {
     font-size: 14px;
     font-weight: 600;
 }
