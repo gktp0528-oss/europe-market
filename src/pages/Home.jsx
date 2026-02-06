@@ -6,40 +6,85 @@ import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Header from '../components/Header';
 import AdBanner from '../components/AdBanner';
+
 import { supabase } from '../lib/supabase';
+import { updateTop10Snapshot } from '../lib/aggregation';
 
 const Home = () => {
   const navigate = useNavigate();
-  const { selectedCountry } = useCountry();
-  const [popularItems, setPopularItems] = useState([]);
+
+  const { selectedCountry } = useCountry(); // Context 변수명 일치 (selectedCountry)
+  const [viewMode, setViewMode] = useState('grid');
+  const [popularItems, setPopularItems] = useState([]); // 인기글 상태 추가
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchPopularPosts();
-  }, []);
+  // 날짜 포맷 (YYYY-MM-DD)
+  const getFormatDate = (date) => date.toISOString().split('T')[0];
 
-  const fetchPopularPosts = async () => {
+  // TOP 10 데이터 가져오기 (Swap Logic 포함)
+  const fetchTop10 = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // 집계된 인기글 캐시 테이블에서 데이터 가져오기
-      const { data, error } = await supabase
-        .from('popular_posts_cache')
-        .select('*')
-        .order('rank', { ascending: true });
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
 
-      if (error) throw error;
-      setPopularItems(data || []);
+      const todayStr = getFormatDate(today);
+      const yesterdayStr = getFormatDate(yesterday);
+      const targetCountry = selectedCountry?.code || 'ALL'; // 국가 필터
+
+      // 1. 오늘 날짜 데이터 조회
+      let { data: todayData, error: todayError } = await supabase
+        .from('popular_snapshots')
+        .select('top_items')
+        .eq('snapshot_date', todayStr)
+        .eq('country_code', targetCountry)
+        .single();
+
+      if (todayData && todayData.top_items && todayData.top_items.length > 0) {
+        setPopularItems(todayData.top_items);
+        console.log(`[Home] Loaded TODAY's TOP 10 for ${targetCountry}`);
+      } else {
+        // 2. 오늘 데이터 없으면 어제 데이터 조회 (Swap)
+        console.log(`[Home] No data for today (${todayStr}), checking yesterday...`);
+        let { data: yesterdayData } = await supabase
+          .from('popular_snapshots')
+          .select('top_items')
+          .eq('snapshot_date', yesterdayStr)
+          .eq('country_code', targetCountry)
+          .single();
+
+        if (yesterdayData && yesterdayData.top_items) {
+          setPopularItems(yesterdayData.top_items);
+          console.log(`[Home] Swapped to YESTERDAY's TOP 10 for ${targetCountry}`);
+        } else {
+          setPopularItems([]); // 데이터 없음
+        }
+      }
     } catch (error) {
-      console.error('인기글 로딩 실패:', error.message);
+      console.error('[Home] Error fetching TOP 10:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 국가 필터 적용 (캐시된 데이터 내에서 선택된 국가가 있다면 필터링)
-  const filteredPopular = popularItems
-    .filter(item => selectedCountry.code === 'ALL' || item.country === selectedCountry.code)
-    .slice(0, 10);
+  // 국가 변경 시 다시 로드
+  useEffect(() => {
+    fetchTop10();
+  }, [selectedCountry]);
+
+  // [테스트용] 강제 집계 실행 함수
+  const handleForceAggregation = async () => {
+    if (confirm('현재 데이터를 기반으로 TOP 10 스냅샷을 강제로 생성하시겠습니까? (테스트용)')) {
+      const result = await updateTop10Snapshot();
+      if (result.success) {
+        alert('집계 완료! 데이터를 새로고침합니다.');
+        fetchTop10();
+      } else {
+        alert('집계 실패: 콘솔 확인 필요');
+      }
+    }
+  };
 
   return (
     <div className="home-container" style={{ paddingTop: '20px' }}>
@@ -82,9 +127,9 @@ const Home = () => {
           <h3 className="section-title">오늘의 인기글 TOP 10 🔥</h3>
         </div>
 
-        {filteredPopular.length > 0 ? (
+        {popularItems.length > 0 ? (
           <div className="popular-list">
-            {filteredPopular.map((item, index) => (
+            {popularItems.map((item, index) => (
               <PopularItemCard
                 key={item.id}
                 rank={index + 1}
@@ -106,6 +151,24 @@ const Home = () => {
         )}
       </section>
 
+      <button
+        onClick={handleForceAggregation}
+        style={{
+          position: 'fixed',
+          bottom: '90px',
+          right: '20px',
+          zIndex: 9999,
+          padding: '8px 12px',
+          background: 'rgba(0,0,0,0.6)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '20px',
+          fontSize: '10px',
+          cursor: 'pointer'
+        }}
+      >
+        ⚡ 집계 Trigger
+      </button>
       <FloatingActionButton />
     </div>
   );
