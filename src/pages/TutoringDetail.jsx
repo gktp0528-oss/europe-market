@@ -48,19 +48,28 @@ const TutoringDetail = () => {
                     <p className="tutoring-pay">{tutoring.pay}</p>
                 </div>
 
-                {/* Quick Info */}
-                <div className="tutoring-info-row">
-                    <div className="info-chip">
-                        <BookOpen size={14} />
-                        <span>{tutoring.level}</span>
+                {/* Quick Info Cards */}
+                <div className="job-info-cards">
+                    <div className="info-card">
+                        <BookOpen size={18} />
+                        <div>
+                            <span className="label">수업 레벨</span>
+                            <span className="value">{tutoring.level}</span>
+                        </div>
                     </div>
-                    <div className="info-chip">
-                        <MapPin size={14} />
-                        <span>{tutoring.location}</span>
+                    <div className="info-card">
+                        <MapPin size={18} />
+                        <div>
+                            <span className="label">수업 장소</span>
+                            <span className="value">{tutoring.location}</span>
+                        </div>
                     </div>
-                    <div className="info-chip">
-                        <Award size={14} />
-                        <span>{tutoring.method}</span>
+                    <div className="info-card">
+                        <Award size={18} />
+                        <div>
+                            <span className="label">수업 방식</span>
+                            <span className="value">{tutoring.method}</span>
+                        </div>
                     </div>
                 </div>
 
