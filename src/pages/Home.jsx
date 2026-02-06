@@ -5,6 +5,7 @@ import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } fro
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Header from '../components/Header';
+import AdBanner from '../components/AdBanner';
 
 const DUMMY_ITEMS = [
   { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR' },
@@ -25,6 +26,7 @@ const Home = () => {
 
   return (
     <div className="home-container" style={{ paddingTop: '20px' }}>
+      <AdBanner />
 
       {/* 2. Category Grid */}
       <section className="category-section">
