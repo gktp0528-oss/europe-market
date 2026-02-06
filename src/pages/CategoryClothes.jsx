@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Heart, Eye } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Header from '../components/Header';
@@ -12,20 +12,19 @@ const CategoryClothes = () => {
 
     // Mock Data for Clothing
     const items = [
-        { id: 1, title: '폴로 랄프로렌 셔츠', price: '30유로', location: '파리 15구', time: '10분 전', color: '#F5F5DC', country: 'FR' },
-        { id: 2, title: '빈티지 꽃무늬 원피스', price: '25유로', location: '마레지구', time: '30분 전', color: '#FFE4E1', country: 'FR' },
-        { id: 3, title: '나이키 후드티', price: '20유로', location: '베를린 미테', time: '1시간 전', color: '#E6E6FA', country: 'DE' },
-        { id: 4, title: 'COS 니트 가디건', price: '45파운드', location: '런던 소호', time: '2시간 전', color: '#F0FFFF', country: 'GB' },
-        { id: 5, title: '자라 트렌치 코트', price: '40유로', location: '프랑크푸르트', time: '3시간 전', color: '#FFFACD', country: 'DE' },
-        { id: 6, title: '아페쎄 데님 스커트', price: '50유로', location: '파리 11구', time: '5시간 전', color: '#E0FFFF', country: 'FR' },
-        { id: 7, title: '아디다스 져지', price: '25유로', location: '뮌헨', time: '6시간 전', color: '#FAF0E6', country: 'DE' },
-        { id: 8, title: '바버 왁스 자켓', price: '120파운드', location: '런던 킹스크로스', time: '1일 전', color: '#F0FFF0', country: 'GB' },
-        { id: 9, title: '몽클레어 패딩', price: '500유로', location: '밀라노', time: '2일 전', color: '#F5F5F5', country: 'IT' },
-        { id: 10, title: '구찌 가방', price: '800유로', location: '로마', time: '3일 전', color: '#FFF0F5', country: 'IT' },
-        // 헝가리 샘플
-        { id: 11, title: '캐시미어 코트 (새상품)', price: '120,000포린트', location: '부다페스트 5구', time: '15분 전', color: '#E8D5B7', country: 'HU' },
-        { id: 12, title: '빈티지 헝가리 자수 블라우스', price: '35,000포린트', location: '부다페스트 7구', time: '1시간 전', color: '#FFDAB9', country: 'HU' },
-        { id: 13, title: '닥터마틴 부츠 250mm', price: '55,000포린트', location: '부다페스트 11구', time: '3시간 전', color: '#2F1810', country: 'HU' },
+        { id: 1, title: '폴로 랄프로렌 셔츠', price: '30유로', location: '파리 15구', time: '10분 전', color: '#F5F5DC', country: 'FR', views: 85, likes: 12 },
+        { id: 2, title: '빈티지 꽃무늬 원피스', price: '25유로', location: '마레지구', time: '30분 전', color: '#FFE4E1', country: 'FR', views: 120, likes: 18 },
+        { id: 3, title: '나이키 후드티', price: '20유로', location: '베를린 미테', time: '1시간 전', color: '#E6E6FA', country: 'DE', views: 240, likes: 35 },
+        { id: 4, title: 'COS 니트 가디건', price: '45파운드', location: '런던 소호', time: '2시간 전', color: '#F0FFFF', country: 'GB', views: 65, likes: 7 },
+        { id: 5, title: '자라 트렌치 코트', price: '40유로', location: '프랑크푸르트', time: '3시간 전', color: '#FFFACD', country: 'DE', views: 98, likes: 14 },
+        { id: 6, title: '아페쎄 데님 스커트', price: '50유로', location: '파리 11구', time: '5시간 전', color: '#E0FFFF', country: 'FR', views: 112, likes: 21 },
+        { id: 7, title: '아디다스 져지', price: '25유로', location: '뮌헨', time: '6시간 전', color: '#FAF0E6', country: 'DE', views: 76, likes: 8 },
+        { id: 8, title: '바버 왁스 자켓', price: '120파운드', location: '런던 킹스크로스', time: '1일 전', color: '#F0FFF0', country: 'GB', views: 154, likes: 29 },
+        { id: 9, title: '몽클레어 패딩', price: '500유로', location: '밀라노', time: '2일 전', color: '#F5F5F5', country: 'IT', views: 320, likes: 42 },
+        { id: 10, title: '구찌 가방', price: '800유로', location: '로마', time: '3일 전', color: '#FFF0F5', country: 'IT', views: 450, likes: 68 },
+        { id: 11, title: '캐시미어 코트 (새상품)', price: '120,000포린트', location: '부다페스트 5구', time: '15분 전', color: '#E8D5B7', country: 'HU', views: 42, likes: 5 },
+        { id: 12, title: '빈티지 헝가리 자수 블라우스', price: '35,000포린트', location: '부다페스트 7구', time: '1시간 전', color: '#FFDAB9', country: 'HU', views: 58, likes: 11 },
+        { id: 13, title: '닥터마틴 부츠 250mm', price: '55,000포린트', location: '부다페스트 11구', time: '3시간 전', color: '#2F1810', country: 'HU', views: 94, likes: 16 },
     ];
 
     const filteredItems = items.filter(item =>
@@ -47,10 +46,20 @@ const CategoryClothes = () => {
                             <div className="product-image" style={{ backgroundColor: item.color }}></div>
                             <div className="product-info">
                                 <h3 className="product-title">{item.title}</h3>
-                                <p className="product-price">{item.price}</p>
                                 <div className="product-meta">
                                     <span><MapPin size={12} /> {item.location}</span>
                                     <span><Clock size={12} /> {item.time}</span>
+                                </div>
+                                <div className="product-bottom">
+                                    <p className="product-price">{item.price}</p>
+                                    <div className="product-interactions">
+                                        <span className="interaction-item">
+                                            <Eye size={12} /> {item.views}
+                                        </span>
+                                        <span className="interaction-item heart">
+                                            <Heart size={12} /> {item.likes}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
