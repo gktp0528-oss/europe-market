@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
-import WriteUsedItem from './pages/WriteUsedItem';
 import Navigation from './components/Navigation';
 import './App.css';
 
@@ -24,8 +23,7 @@ const AppContent = () => {
     location.pathname.startsWith('/detail/') ||
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
-    location.pathname.startsWith('/meetup/') ||
-    location.pathname.startsWith('/write/');
+    location.pathname.startsWith('/meetup/');
 
   return (
     <div className="mobile-container">
@@ -36,7 +34,6 @@ const AppContent = () => {
         <Route path="/category/tutoring" element={<CategoryTutoring />} />
         <Route path="/category/meetups" element={<CategoryMeetups />} />
         {/* Detail Pages */}
-        <Route path="/write/used" element={<WriteUsedItem />} />
         <Route path="/detail/:id" element={<ProductDetail />} />
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/tutoring/:id" element={<TutoringDetail />} />

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
-import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock, Pencil } from 'lucide-react';
+import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 const DUMMY_ITEMS = [
   { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR' },
@@ -16,7 +17,6 @@ const DUMMY_ITEMS = [
 const Home = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountry();
-  const [fabExpanded, setFabExpanded] = useState(false);
 
   const filteredItems = DUMMY_ITEMS.filter(item => item.country === selectedCountry.code);
 
@@ -98,39 +98,7 @@ const Home = () => {
         )}
       </section>
 
-      {/* Floating Action Button - Speed Dial */}
-      <div className="fab-container">
-        {/* Sub-buttons (appear when expanded) */}
-        <div className={`fab-options ${fabExpanded ? 'expanded' : ''}`}>
-          <button className="fab-option" onClick={() => { navigate('/write/used'); setFabExpanded(false); }}>
-            <ShoppingBag size={18} />
-            <span>중고거래/글쓰기</span>
-          </button>
-          <button className="fab-option" onClick={() => { navigate('/category/jobs'); setFabExpanded(false); }}>
-            <Briefcase size={18} />
-            <span>알바</span>
-          </button>
-          <button className="fab-option" onClick={() => { navigate('/category/tutoring'); setFabExpanded(false); }}>
-            <GraduationCap size={18} />
-            <span>과외/레슨</span>
-          </button>
-          <button className="fab-option" onClick={() => { navigate('/category/meetups'); setFabExpanded(false); }}>
-            <Users size={18} />
-            <span>모임</span>
-          </button>
-        </div>
-
-        {/* Main FAB button */}
-        <button
-          className={`fab-write ${fabExpanded ? 'active' : ''}`}
-          onClick={() => setFabExpanded(!fabExpanded)}
-        >
-          <Pencil size={24} className={fabExpanded ? 'rotate' : ''} />
-        </button>
-      </div>
-
-      {/* Overlay when FAB is expanded */}
-      {fabExpanded && <div className="fab-overlay" onClick={() => setFabExpanded(false)} />}
+      <FloatingActionButton />
     </div>
   );
 };
