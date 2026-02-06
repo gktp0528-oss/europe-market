@@ -40,23 +40,7 @@ const ProductDetail = () => {
 
             {/* Content */}
             <div className="detail-content">
-                {/* Seller Info */}
-                {/* Unified Seller Card */}
-                <div className="unified-seller-card">
-                    <div className="unified-seller-left">
-                        <div className="unified-avatar">
-                            <User size={28} />
-                        </div>
-                        <div className="unified-info">
-                            <h4>{item.seller.name}</h4>
-                            <div className="rating-badge">
-                                <Star size={14} />
-                                <span>{item.seller.rating}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button className="unified-profile-btn">프로필</button>
-                </div>
+
 
                 {/* Product Info */}
                 <div className="product-section">
@@ -90,6 +74,23 @@ const ProductDetail = () => {
                 {/* Description */}
                 <div className="description-section">
                     <p>{item.description}</p>
+                </div>
+
+                {/* Seller Info - Moved to Bottom */}
+                <div className="unified-seller-card" style={{ marginTop: '24px', marginBottom: '40px' }}>
+                    <div className="unified-seller-left">
+                        <div className="unified-avatar">
+                            <User size={28} />
+                        </div>
+                        <div className="unified-info">
+                            <h4>{item.seller.name}</h4>
+                            <div className="rating-badge">
+                                <Star size={14} />
+                                <span>{item.seller.rating}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button className="unified-profile-btn">프로필</button>
                 </div>
             </div>
 
