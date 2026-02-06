@@ -147,7 +147,8 @@
 .product-bottom {
     margin-top: auto;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    /* 한 줄로 완벽 수평 정렬 */
     justify-content: space-between;
 }
 
