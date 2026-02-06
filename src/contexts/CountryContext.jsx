@@ -17,11 +17,32 @@ export const SUPPORTED_COUNTRIES = [
 ];
 
 export const CountryProvider = ({ children }) => {
-    const [selectedCountry, setSelectedCountry] = useState(SUPPORTED_COUNTRIES[0]); // Default: Germany
-    const [loading, setLoading] = useState(true);
+    // 1. Initial State: localStorage -> Default (Germany)
+    const [selectedCountry, setSelectedCountry] = useState(() => {
+        const saved = localStorage.getItem('selected_country');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                // Validate if it's still in supported list
+                const found = SUPPORTED_COUNTRIES.find(c => c.code === parsed.code);
+                return found || SUPPORTED_COUNTRIES[0];
+            } catch (e) {
+                return SUPPORTED_COUNTRIES[0];
+            }
+        }
+        return SUPPORTED_COUNTRIES[0];
+    });
+
+    const [loading, setLoading] = useState(!localStorage.getItem('selected_country'));
 
     useEffect(() => {
-        // Auto-detect country via API
+        // Only auto-detect if nothing is in localStorage
+        const saved = localStorage.getItem('selected_country');
+        if (saved) {
+            setLoading(false);
+            return;
+        }
+
         const detectCountry = async () => {
             try {
                 const response = await fetch('https://ipapi.co/json/');
@@ -32,13 +53,15 @@ export const CountryProvider = ({ children }) => {
 
                 if (country) {
                     setSelectedCountry(country);
+                    localStorage.setItem('selected_country', JSON.stringify(country));
                 } else {
-                    // Fallback to Germany if outside supported list
+                    // If detected outside EU, keep Germany but don't save to localStorage 
+                    // so we don't lock them in if it was just a transient error.
+                    // Or we could show a selection prompt.
                     setSelectedCountry(SUPPORTED_COUNTRIES[0]);
                 }
             } catch (error) {
                 console.error('Failed to detect country:', error);
-                // Fallback to Germany on error
                 setSelectedCountry(SUPPORTED_COUNTRIES[0]);
             } finally {
                 setLoading(false);
@@ -48,8 +71,13 @@ export const CountryProvider = ({ children }) => {
         detectCountry();
     }, []);
 
+    const updateCountry = (country) => {
+        setSelectedCountry(country);
+        localStorage.setItem('selected_country', JSON.stringify(country));
+    };
+
     return (
-        <CountryContext.Provider value={{ selectedCountry, setSelectedCountry, loading }}>
+        <CountryContext.Provider value={{ selectedCountry, setSelectedCountry: updateCountry, loading }}>
             {children}
         </CountryContext.Provider>
     );
