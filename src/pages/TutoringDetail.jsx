@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, GraduationCap, BookOpen, Award } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, GraduationCap, BookOpen, Award, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
 
 // 과외/레슨 상세 페이지
@@ -42,8 +42,8 @@ const TutoringDetail = () => {
                     <h1 className="tutoring-title">{tutoring.title}</h1>
                     <div className="detail-meta-row">
                         <span><Clock size={14} /> {tutoring.time}</span>
-                        <span>조회 {tutoring.views}</span>
-                        <span>좋아요 {tutoring.likes}</span>
+                        <span><Eye size={14} /> {tutoring.views}</span>
+                        <span><Heart size={14} /> {tutoring.likes}</span>
                     </div>
                     <p className="tutoring-pay">{tutoring.pay}</p>
                 </div>
@@ -74,7 +74,8 @@ const TutoringDetail = () => {
                         <div className="unified-info">
                             <h4>{tutoring.tutor.name}</h4>
                             <div className="rating-badge">
-                                <span>⭐ {tutoring.tutor.rating}</span>
+                                <Star size={14} />
+                                <span>{tutoring.tutor.rating}</span>
                             </div>
                         </div>
                     </div>

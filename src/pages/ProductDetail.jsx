@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
 
 // 중고거래 상세 페이지 (Style 1 - Classic Card)
@@ -50,7 +50,8 @@ const ProductDetail = () => {
                         <div className="unified-info">
                             <h4>{item.seller.name}</h4>
                             <div className="rating-badge">
-                                <span>⭐ {item.seller.rating}</span>
+                                <Star size={14} />
+                                <span>{item.seller.rating}</span>
                             </div>
                         </div>
                     </div>
@@ -64,8 +65,8 @@ const ProductDetail = () => {
                     <div className="product-meta">
                         <span><MapPin size={14} /> {item.location}</span>
                         <span><Clock size={14} /> {item.time}</span>
-                        <span>조회 {item.views}</span>
-                        <span>좋아요 {item.likes}</span>
+                        <span><Eye size={14} /> {item.views}</span>
+                        <span><Heart size={14} /> {item.likes}</span>
                     </div>
                 </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Users, Calendar, UserPlus } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Users, Calendar, UserPlus, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
 
 // 모임 상세 페이지
@@ -44,8 +44,8 @@ const MeetupDetail = () => {
                         <span>{meetup.date} {meetup.meetTime}</span>
                         <div style={{ width: '1px', height: '12px', background: '#ccc', margin: '0 8px' }}></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#888' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>조회 {meetup.views}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>좋아요 {meetup.likes}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Eye size={14} /> {meetup.views}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Heart size={14} /> {meetup.likes}</span>
                         </div>
                     </div>
                 </div>
@@ -89,7 +89,8 @@ const MeetupDetail = () => {
                         <div className="unified-info">
                             <h4>{meetup.host.name}</h4>
                             <div className="rating-badge">
-                                <span>⭐ {meetup.host.rating}</span>
+                                <Star size={14} />
+                                <span>{meetup.host.rating}</span>
                             </div>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Briefcase, Calendar, DollarSign } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Briefcase, Calendar, DollarSign, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
 
 // 알바 상세 페이지
@@ -41,8 +41,8 @@ const JobDetail = () => {
                     <h1 className="job-title">{job.title}</h1>
                     <div className="detail-meta-row">
                         <span><Clock size={14} /> {job.time}</span>
-                        <span>조회 {job.views}</span>
-                        <span>좋아요 {job.likes}</span>
+                        <span><Eye size={14} /> {job.views}</span>
+                        <span><Heart size={14} /> {job.likes}</span>
                     </div>
                     <p className="job-pay">{job.pay}</p>
                 </div>
@@ -88,7 +88,8 @@ const JobDetail = () => {
                         <div className="unified-info">
                             <h4>{job.employer.name}</h4>
                             <div className="rating-badge">
-                                <span>⭐ {job.employer.rating}</span>
+                                <Star size={14} />
+                                <span>{job.employer.rating}</span>
                             </div>
                         </div>
                     </div>
