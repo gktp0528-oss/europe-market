@@ -102,19 +102,19 @@ const Home = () => {
       <div className="fab-container">
         {/* Sub-buttons (appear when expanded) */}
         <div className={`fab-options ${fabExpanded ? 'expanded' : ''}`}>
-          <button className="fab-option" onClick={() => { navigate('/category/clothes'); setFabExpanded(false); }}>
+          <button className="fab-option" onClick={() => { navigate('/write?category=clothes'); setFabExpanded(false); }}>
             <ShoppingBag size={18} />
             <span>중고거래</span>
           </button>
-          <button className="fab-option" onClick={() => { navigate('/category/jobs'); setFabExpanded(false); }}>
+          <button className="fab-option" onClick={() => { navigate('/write?category=jobs'); setFabExpanded(false); }}>
             <Briefcase size={18} />
             <span>알바</span>
           </button>
-          <button className="fab-option" onClick={() => { navigate('/category/tutoring'); setFabExpanded(false); }}>
+          <button className="fab-option" onClick={() => { navigate('/write?category=tutoring'); setFabExpanded(false); }}>
             <GraduationCap size={18} />
             <span>과외/레슨</span>
           </button>
-          <button className="fab-option" onClick={() => { navigate('/category/meetups'); setFabExpanded(false); }}>
+          <button className="fab-option" onClick={() => { navigate('/write?category=meetups'); setFabExpanded(false); }}>
             <Users size={18} />
             <span>모임</span>
           </button>
