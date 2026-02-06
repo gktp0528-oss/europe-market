@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock, Heart, Eye } from 'lucide-react';
@@ -6,30 +6,39 @@ import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
 import Header from '../components/Header';
 import AdBanner from '../components/AdBanner';
-
-const POPULAR_ITEMS = [
-  { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR', views: 156, likes: 12 },
-  { id: 2, title: '아이폰 13 미니', price: '350유로', location: '베를린 미테', time: '5분 전', color: '#F0F8FF', country: 'DE', views: 243, likes: 25 },
-  { id: 3, title: '빈티지 원피스', price: '25파운드', location: '런던 소호', time: '12분 전', color: '#FFFAF0', country: 'GB', views: 89, likes: 8 },
-  { id: 4, title: '네스프레소 머신', price: '50유로', location: '뮌헨', time: '30분 전', color: '#F5F5F5', country: 'DE', views: 167, likes: 15 },
-  { id: 5, title: '전기밥솥 팝니다', price: '40유로', location: '암스테르담', time: '1시간 전', color: '#E8F5E9', country: 'NL', views: 92, likes: 10 },
-  { id: 6, title: '자전거 급처', price: '80유로', location: '프랑크푸르트', time: '2시간 전', color: '#FFF3E0', country: 'DE', views: 110, likes: 18 },
-  { id: 7, title: '캐시미어 코트', price: '300유로', location: '밀라노', time: '3시간 전', color: '#ECEFF1', country: 'IT', views: 78, likes: 6 },
-  { id: 8, title: '한국어 가이드 구함', price: '협의', location: '비엔나', time: '4시간 전', color: '#F1F8E9', country: 'AT', views: 56, likes: 4 },
-  { id: 9, title: '부다페스트 한인민박', price: '45유로', location: '부다페스트', time: '5시간 전', color: '#E1F5FE', country: 'HU', views: 134, likes: 22 },
-  { id: 10, title: '프라하 스냅 촬영', price: '80유로', location: '프라하', time: '6시간 전', color: '#FFF3E0', country: 'CZ', views: 210, likes: 31 },
-  { id: 11, title: '한식당 주방 보조', price: '시급 12유로', location: '베를린', time: '7시간 전', color: '#F3E5F5', country: 'DE', views: 145, likes: 9 },
-  { id: 12, title: '루이비통 카드지갑', price: '200유로', location: '파리', time: '8시간 전', color: '#FAFAFA', country: 'FR', views: 320, likes: 45 },
-];
+import { supabase } from '../lib/supabase';
 
 const Home = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountry();
+  const [popularItems, setPopularItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter by country if not ALL, then sort by views top 10
-  const filteredPopular = POPULAR_ITEMS
+  useEffect(() => {
+    fetchPopularPosts();
+  }, []);
+
+  const fetchPopularPosts = async () => {
+    try {
+      setLoading(true);
+      // 집계된 인기글 캐시 테이블에서 데이터 가져오기
+      const { data, error } = await supabase
+        .from('popular_posts_cache')
+        .select('*')
+        .order('rank', { ascending: true });
+
+      if (error) throw error;
+      setPopularItems(data || []);
+    } catch (error) {
+      console.error('인기글 로딩 실패:', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 국가 필터 적용 (캐시된 데이터 내에서 선택된 국가가 있다면 필터링)
+  const filteredPopular = popularItems
     .filter(item => selectedCountry.code === 'ALL' || item.country === selectedCountry.code)
-    .sort((a, b) => b.views - a.views)
     .slice(0, 10);
 
   return (
