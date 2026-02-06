@@ -8,10 +8,10 @@ const FloatingActionButton = () => {
     const [fabExpanded, setFabExpanded] = useState(false);
 
     const options = [
-        { icon: ShoppingBag, label: '중고거래', path: '/category/clothes' },
-        { icon: Briefcase, label: '알바', path: '/category/jobs' },
-        { icon: GraduationCap, label: '과외/레슨', path: '/category/tutoring' },
-        { icon: Users, label: '모임', path: '/category/meetups' },
+        { icon: ShoppingBag, label: '중고거래', path: '/write/used' },
+        { icon: Briefcase, label: '알바', path: '/write/job' },
+        { icon: GraduationCap, label: '과외/레슨', path: '/write/tutoring' },
+        { icon: Users, label: '모임', path: '/write/meetup' },
     ];
 
     const handleOptionClick = (path) => {
