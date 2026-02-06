@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
@@ -7,6 +7,20 @@ import './DetailPage.css';
 const ProductDetail = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const [currentImage, setCurrentImage] = useState(0);
+
+    const images = [
+        '/images/nike1.png',
+        '/images/nike2.png',
+        '/images/nike3.png'
+    ];
+
+    const handleScroll = (e) => {
+        const scrollLeft = e.target.scrollLeft;
+        const width = e.target.offsetWidth;
+        const index = Math.round(scrollLeft / width);
+        setCurrentImage(index);
+    };
 
     // Mock Data - 나중에 실제 데이터로 교체
     const allItems = [
@@ -33,9 +47,23 @@ const ProductDetail = () => {
                 </div>
             </header>
 
-            {/* Main Image */}
-            <div className="detail-image" style={{ backgroundColor: item.color }}>
-                <span className="image-placeholder">상품 이미지</span>
+            {/* Image Slider */}
+            <div className="image-wrapper">
+                <div className="slider-container" onScroll={handleScroll}>
+                    {images.map((src, index) => (
+                        <div key={index} className="slider-item">
+                            <img src={src} alt={`Product ${index + 1}`} />
+                        </div>
+                    ))}
+                </div>
+                <div className="slider-dots">
+                    {images.map((_, index) => (
+                        <div
+                            key={index}
+                            className={`dot ${currentImage === index ? 'active' : ''}`}
+                        />
+                    ))}
+                </div>
             </div>
 
             {/* Content */}
