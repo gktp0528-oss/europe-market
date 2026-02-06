@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import './DetailPage.css';
@@ -22,6 +22,14 @@ const ProductDetail = () => {
         const index = Math.round(scrollLeft / width);
         setCurrentImage(index);
     };
+
+    const modalSliderRef = useRef(null);
+
+    useEffect(() => {
+        if (isModalOpen && modalSliderRef.current) {
+            modalSliderRef.current.scrollLeft = currentImage * modalSliderRef.current.offsetWidth;
+        }
+    }, [isModalOpen]);
 
     // Mock Data - 나중에 실제 데이터로 교체
     const allItems = [
@@ -74,7 +82,13 @@ const ProductDetail = () => {
                         <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
                             &times;
                         </button>
-                        <img src={images[currentImage]} alt="Zoomed Product" />
+                        <div className="modal-slider-container" ref={modalSliderRef} onScroll={handleScroll}>
+                            {images.map((src, index) => (
+                                <div key={index} className="modal-slider-item">
+                                    <img src={src} alt="Zoomed Product" />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
