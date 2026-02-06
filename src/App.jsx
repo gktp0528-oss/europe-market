@@ -13,6 +13,7 @@ import JobDetail from './pages/JobDetail';
 import TutoringDetail from './pages/TutoringDetail';
 import MeetupDetail from './pages/MeetupDetail';
 import { CountryProvider } from './contexts/CountryContext';
+import WritePost from './pages/WritePost';
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
 const AppContent = () => {
@@ -23,7 +24,8 @@ const AppContent = () => {
     location.pathname.startsWith('/detail/') ||
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
-    location.pathname.startsWith('/meetup/');
+    location.pathname.startsWith('/meetup/') ||
+    location.pathname === '/write';
 
   return (
     <div className="mobile-container">
@@ -42,6 +44,7 @@ const AppContent = () => {
         <Route path="/chat" element={<div className="flex-center full-screen">채팅 화면 준비중 💬</div>} />
         <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
         <Route path="/mypage" element={<div className="flex-center full-screen">마이페이지 준비중 👤</div>} />
+        <Route path="/write" element={<WritePost />} />
       </Routes>
 
       {/* 상세페이지가 아닐 때만 네비게이션 표시 */}
