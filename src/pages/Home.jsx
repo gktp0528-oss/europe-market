@@ -74,18 +74,18 @@ const Home = () => {
         </div>
 
         {filteredPopular.length > 0 ? (
-          <div className="horizontal-scroll">
+          <div className="popular-list">
             {filteredPopular.map((item, index) => (
-              <div key={item.id} className="popular-card-wrapper">
-                <div className="rank-badge">{index + 1}</div>
-                <ItemCard
-                  title={item.title}
-                  price={item.price}
-                  location={item.location}
-                  time={item.time}
-                  color={item.color}
-                />
-              </div>
+              <PopularItemCard
+                key={item.id}
+                rank={index + 1}
+                title={item.title}
+                price={item.price}
+                location={item.location}
+                time={item.time}
+                color={item.color}
+                onClick={() => navigate(`/detail/${item.id}`)}
+              />
             ))}
           </div>
         ) : (
@@ -113,6 +113,26 @@ const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
       </div>
       <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none' }}>{title}</span>
     </button>
+  );
+};
+
+// Horizontal Popular Item Card
+const PopularItemCard = ({ rank, title, price, location, time, color, onClick }) => {
+  return (
+    <div className="popular-item-card" onClick={onClick}>
+      <div className="popular-card-left">
+        <div className="rank-badge-horizontal">{rank}</div>
+        <div className="popular-image-placeholder" style={{ backgroundColor: color }}></div>
+      </div>
+      <div className="popular-info">
+        <h4 className="popular-title">{title}</h4>
+        <p className="popular-price">{price}</p>
+        <div className="popular-meta">
+          <span><MapPin size={10} /> {location}</span>
+          <span><Clock size={10} /> {time}</span>
+        </div>
+      </div>
+    </div>
   );
 };
 

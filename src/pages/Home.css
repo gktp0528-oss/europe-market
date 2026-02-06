@@ -151,6 +151,101 @@
     /* Chrome/Safari */
 }
 
+.popular-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.popular-item-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.popular-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.popular-card-left {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.popular-image-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+.rank-badge-horizontal {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    background: var(--color-primary-pink, #FF7675);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    z-index: 5;
+    box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+}
+
+.popular-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.popular-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popular-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-primary-pink);
+    margin: 0;
+}
+
+.popular-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-sub);
+    margin-top: 2px;
+}
+
+.popular-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
 .popular-card-wrapper {
     position: relative;
     padding-top: 10px;
