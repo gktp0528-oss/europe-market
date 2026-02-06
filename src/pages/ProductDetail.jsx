@@ -117,7 +117,7 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Quick Info Cards (Location & Trade Time) */}
-                <div className="job-info-cards" style={{ marginTop: '20px', marginBottom: '20px' }}>
+                <div className="job-info-cards">
                     <div className="info-card">
                         <MapPin size={18} />
                         <div>
@@ -140,7 +140,7 @@ const ProductDetail = () => {
                 </div>
 
                 {/* Seller Info - Moved to Bottom */}
-                <div className="unified-seller-card" style={{ marginTop: '24px', marginBottom: '40px' }}>
+                <div className="unified-seller-card">
                     <div className="unified-seller-left">
                         <div className="unified-avatar">
                             <User size={28} />

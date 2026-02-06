@@ -51,23 +51,20 @@ const MeetupDetail = () => {
                 </div>
 
                 {/* Info Cards */}
-                <div className="meetup-info-cards">
-                    <div className="meetup-info-card">
-                        <MapPin size={20} />
+                <div className="job-info-cards">
+                    <div className="info-card">
+                        <MapPin size={18} />
                         <div>
                             <span className="label">장소</span>
                             <span className="value">{meetup.location}</span>
                         </div>
                     </div>
-                    <div className="meetup-info-card">
-                        <Users size={20} />
+                    <div className="info-card">
+                        <Users size={18} />
                         <div>
                             <span className="label">참가자</span>
                             <span className="value">{meetup.participants.current}/{meetup.participants.max}명</span>
                         </div>
-                    </div>
-                    <div className="meetup-info-card">
-                        <span className="fee-badge">{meetup.fee}</span>
                     </div>
                 </div>
 

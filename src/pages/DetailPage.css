@@ -238,6 +238,10 @@
     padding: 20px 0;
 }
 
+.style-1 .product-section {
+    margin-bottom: 20px;
+}
+
 .style-1 .product-title {
     font-size: 20px;
     font-weight: 700;
@@ -826,7 +830,8 @@
 }
 
 .image-modal-content img {
-    /* Removed single image style */
+    display: none;
+    /* Deprecated: individual images now wrapped in modal-slider-item */
 }
 
 .modal-slider-container {
@@ -909,14 +914,6 @@
     }
 }
 
-border: 1px solid #ddd;
-border-radius: 8px;
-background: white;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-}
 
 .style-meetup .join-btn {
     flex: 1;
