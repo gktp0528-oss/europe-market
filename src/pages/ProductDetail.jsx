@@ -45,12 +45,12 @@ const ProductDetail = () => {
                 {/* Product Info */}
                 <div className="product-section">
                     <h1 className="product-title">{item.title}</h1>
-                    <p className="product-price">{item.price}</p>
-                    <div className="product-meta">
+                    <div className="product-meta" style={{ marginBottom: '16px' }}>
                         <span><Clock size={14} /> {item.time}</span>
                         <span><Eye size={14} /> {item.views}</span>
                         <span><Heart size={14} /> {item.likes}</span>
                     </div>
+                    <p className="product-price" style={{ color: '#4CAF50', fontSize: '22px', fontWeight: '800', margin: 0 }}>{item.price}</p>
                 </div>
 
                 {/* Quick Info Cards (Location & Trade Time) */}
