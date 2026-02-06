@@ -24,20 +24,9 @@ const Home = () => {
   );
 
   return (
-    <div className="home-container" style={{ paddingTop: 0 }}>
+    <div className="home-container" style={{ paddingTop: '20px' }}>
 
-      {/* 2. Intro Section */}
-      <section className="intro-section">
-        <div className="intro-text">
-          <h2>{selectedCountry.name} 한인 커뮤니티 🇪🇺</h2>
-          <p>거래부터 알바, 과외, 모임까지<br />유럽 한인들의 생활 플랫폼</p>
-        </div>
-        <div className="intro-decoration">
-          <span style={{ fontSize: '40px' }}>{selectedCountry.flag}</span>
-        </div>
-      </section>
-
-      {/* 3. Category Grid */}
+      {/* 2. Category Grid */}
       <section className="category-section">
         <h3 className="section-title">카테고리</h3>
         <div className="category-grid">
