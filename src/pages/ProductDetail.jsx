@@ -153,6 +153,7 @@ const ProductDetail = () => {
 
                 {/* Description - Last */}
                 <div className="description-section">
+                    <h3>제품 내용</h3>
                     <p>{item.description}</p>
                 </div>
             </div>
