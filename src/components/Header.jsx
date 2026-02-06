@@ -37,17 +37,17 @@ const Header = () => {
               {pageTitle && <span className="header-title">{pageTitle}</span>}
             </div>
           ) : (
-            <h1 className="logo-text">이유살이</h1>
+            <button className="country-select-logo" onClick={() => setIsModalOpen(true)}>
+              {selectedCountry.name}
+            </button>
           )}
         </div>
 
-        <button className="country-select-header" onClick={() => setIsModalOpen(true)}>
-          <span className="country-flag">{selectedCountry.flag}</span>
-          <span className="country-name">{selectedCountry.name}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+        {!isHome && (
+          <button className="country-select-header-minimal" onClick={() => setIsModalOpen(true)}>
+            <span className="country-name-small">{selectedCountry.name}</span>
+          </button>
+        )}
 
         <div className="header-right">
           <button className="icon-btn">
@@ -91,39 +91,34 @@ const Header = () => {
               color: #2D3436;
             }
 
-            .logo-text {
+            .country-select-logo {
               font-family: 'Quicksand', sans-serif;
               font-size: 20px;
               font-weight: 800;
               color: var(--text-main, #2D3436);
-              margin: 0;
+              background: none;
+              border: none;
+              padding: 0;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              letter-spacing: -0.5px;
             }
 
-            .country-select-header {
+            .country-select-header-minimal {
               display: flex;
               align-items: center;
               gap: 4px;
-              background: #F8F9FA;
-              padding: 6px 12px;
-              border-radius: 20px;
-              border: 1px solid rgba(0, 0, 0, 0.03);
+              background: none;
+              border: none;
+              padding: 4px 8px;
               cursor: pointer;
-              transition: all 0.2s ease;
+              color: #495057;
             }
 
-            .country-select-header:hover {
-              background: #F1F3F5;
-              transform: translateY(-1px);
-            }
-
-            .country-flag {
-              font-size: 16px;
-            }
-
-            .country-name {
+            .country-name-small {
               font-size: 13px;
               font-weight: 700;
-              color: #495057;
             }
 
             .header-right {

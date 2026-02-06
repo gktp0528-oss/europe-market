@@ -19,7 +19,9 @@ const Home = () => {
   const navigate = useNavigate();
   const { selectedCountry } = useCountry();
 
-  const filteredItems = DUMMY_ITEMS.filter(item => item.country === selectedCountry.code);
+  const filteredItems = DUMMY_ITEMS.filter(item =>
+    selectedCountry.code === 'ALL' || item.country === selectedCountry.code
+  );
 
   return (
     <div className="home-container" style={{ paddingTop: 0 }}>

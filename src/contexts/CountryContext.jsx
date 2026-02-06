@@ -2,8 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CountryContext = createContext();
 
-// 10 Countries with Korean communities
+// 11 Countries with Korean communities
 export const SUPPORTED_COUNTRIES = [
+    { code: 'ALL', name: '전체', flag: '🌍', lat: 48.8566, lng: 2.3522 }, // Default/All
     { code: 'DE', name: '독일', flag: '🇩🇪', lat: 51.1657, lng: 10.4515 },
     { code: 'FR', name: '프랑스', flag: '🇫🇷', lat: 46.2276, lng: 2.2137 },
     { code: 'GB', name: '영국', flag: '🇬🇧', lat: 55.3781, lng: -3.4360 },

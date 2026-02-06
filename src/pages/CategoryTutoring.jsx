@@ -24,7 +24,9 @@ const CategoryTutoring = () => {
         { id: 11, title: '기타 레슨 (초급)', pay: '시급 7,000포린트', location: '부다페스트 11구', time: '6시간 전', color: '#D7CCC8', country: 'HU' },
     ];
 
-    const filteredItems = items.filter(item => item.country === selectedCountry.code);
+    const filteredItems = items.filter(item =>
+        selectedCountry.code === 'ALL' || item.country === selectedCountry.code
+    );
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>

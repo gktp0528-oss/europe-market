@@ -28,7 +28,9 @@ const CategoryClothes = () => {
         { id: 13, title: '닥터마틴 부츠 250mm', price: '55,000포린트', location: '부다페스트 11구', time: '3시간 전', color: '#2F1810', country: 'HU' },
     ];
 
-    const filteredItems = items.filter(item => item.country === selectedCountry.code);
+    const filteredItems = items.filter(item =>
+        selectedCountry.code === 'ALL' || item.country === selectedCountry.code
+    );
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>

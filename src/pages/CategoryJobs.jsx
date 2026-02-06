@@ -24,7 +24,9 @@ const CategoryJobs = () => {
         { id: 11, title: '한인 게스트하우스 청소', pay: '시급 2,200포린트', location: '부다페스트 7구', time: '5시간 전', color: '#DCEDC8', country: 'HU' },
     ];
 
-    const filteredItems = items.filter(item => item.country === selectedCountry.code);
+    const filteredItems = items.filter(item =>
+        selectedCountry.code === 'ALL' || item.country === selectedCountry.code
+    );
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>

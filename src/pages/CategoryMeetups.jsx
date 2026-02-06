@@ -24,7 +24,9 @@ const CategoryMeetups = () => {
         { id: 11, title: '다뉴브강 야경 산책', date: '매주 금요일', location: '자유의 다리', time: '4시간 전', color: '#90CAF9', country: 'HU' },
     ];
 
-    const filteredItems = items.filter(item => item.country === selectedCountry.code);
+    const filteredItems = items.filter(item =>
+        selectedCountry.code === 'ALL' || item.country === selectedCountry.code
+    );
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>
