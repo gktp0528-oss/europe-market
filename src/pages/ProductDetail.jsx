@@ -50,7 +50,7 @@ const ProductDetail = () => {
                         <span><Eye size={14} /> {item.views}</span>
                         <span><Heart size={14} /> {item.likes}</span>
                     </div>
-                    <p className="product-price" style={{ color: '#4CAF50', fontSize: '22px', fontWeight: '800', margin: 0 }}>{item.price}</p>
+                    <p className="product-price" style={{ color: '#333', fontSize: '22px', fontWeight: '800', margin: 0 }}>{item.price}</p>
                 </div>
 
                 {/* Quick Info Cards (Location & Trade Time) */}
