@@ -17,34 +17,33 @@ export const SUPPORTED_COUNTRIES = [
 ];
 
 export const CountryProvider = ({ children }) => {
-    // 1. Initial State: localStorage -> Default (Germany)
+    // 1. Initial State: Always start with null if no saved country to avoid flashing Germany
     const [selectedCountry, setSelectedCountry] = useState(() => {
         const saved = localStorage.getItem('selected_country');
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                // Validate if it's still in supported list
                 const found = SUPPORTED_COUNTRIES.find(c => c.code === parsed.code);
-                return found || SUPPORTED_COUNTRIES[0];
+                return found || null;
             } catch (e) {
-                return SUPPORTED_COUNTRIES[0];
+                return null;
             }
         }
-        return SUPPORTED_COUNTRIES[0];
+        return null;
     });
 
-    const [loading, setLoading] = useState(!localStorage.getItem('selected_country'));
+    const [loading, setLoading] = useState(!selectedCountry);
 
     useEffect(() => {
-        // Only auto-detect if nothing is in localStorage
-        const saved = localStorage.getItem('selected_country');
-        if (saved) {
+        // Only auto-detect if nothing is in localStorage or initial state is null
+        if (selectedCountry) {
             setLoading(false);
             return;
         }
 
         const detectCountry = async () => {
             try {
+                // Using ipapi.co for accurate location detection
                 const response = await fetch('https://ipapi.co/json/');
                 const data = await response.json();
                 const detectedCode = data.country_code;
@@ -53,23 +52,26 @@ export const CountryProvider = ({ children }) => {
 
                 if (country) {
                     setSelectedCountry(country);
+                    // We don't save auto-detected country to localStorage immediately 
+                    // unless you want to lock them in. Let's save it so it's consistent.
                     localStorage.setItem('selected_country', JSON.stringify(country));
                 } else {
-                    // If detected outside EU, keep Germany but don't save to localStorage 
-                    // so we don't lock them in if it was just a transient error.
-                    // Or we could show a selection prompt.
+                    // Default to Germany only if detected outside supported list
                     setSelectedCountry(SUPPORTED_COUNTRIES[0]);
+                    localStorage.setItem('selected_country', JSON.stringify(SUPPORTED_COUNTRIES[0]));
                 }
             } catch (error) {
                 console.error('Failed to detect country:', error);
+                // Fallback to Germany on network error
                 setSelectedCountry(SUPPORTED_COUNTRIES[0]);
+                localStorage.setItem('selected_country', JSON.stringify(SUPPORTED_COUNTRIES[0]));
             } finally {
                 setLoading(false);
             }
         };
 
         detectCountry();
-    }, []);
+    }, [selectedCountry]);
 
     const updateCountry = (country) => {
         setSelectedCountry(country);
