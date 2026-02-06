@@ -134,12 +134,7 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* Description */}
-                <div className="description-section">
-                    <p>{item.description}</p>
-                </div>
-
-                {/* Seller Info - Moved to Bottom */}
+                {/* Seller Info */}
                 <div className="unified-seller-card">
                     <div className="unified-seller-left">
                         <div className="unified-avatar">
@@ -154,6 +149,11 @@ const ProductDetail = () => {
                         </div>
                     </div>
                     <button className="unified-profile-btn">프로필</button>
+                </div>
+
+                {/* Description - Last */}
+                <div className="description-section">
+                    <p>{item.description}</p>
                 </div>
             </div>
 
