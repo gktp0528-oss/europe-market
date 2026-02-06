@@ -16,21 +16,12 @@ import WriteUsed from './pages/WriteUsed';
 import WriteJob from './pages/WriteJob';
 import WriteTutoring from './pages/WriteTutoring';
 import WriteMeetup from './pages/WriteMeetup';
-import { CountryProvider, useCountry } from './contexts/CountryContext';
+import Header from './components/Header';
+import { CountryProvider } from './contexts/CountryContext';
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
 const AppContent = () => {
-  const { loading } = useCountry();
   const location = useLocation();
-
-  if (loading) {
-    return (
-      <div className="flex-center full-screen" style={{ flexDirection: 'column', gap: '20px' }}>
-        <div className="loading-spinner"></div>
-        <p style={{ color: 'var(--text-main)', fontWeight: '500' }}>당신의 위치를 확인하고 있어요... 🌍</p>
-      </div>
-    );
-  }
 
   // 상세페이지 경로 확인
   const isDetailPage =
@@ -42,6 +33,7 @@ const AppContent = () => {
 
   return (
     <div className="mobile-container">
+      {!isDetailPage && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/category/clothes" element={<CategoryClothes />} />

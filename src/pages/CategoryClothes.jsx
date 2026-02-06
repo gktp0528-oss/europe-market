@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
+import Header from '../components/Header';
 import './CategoryClothes.css';
 
 const CategoryClothes = () => {
@@ -30,14 +31,7 @@ const CategoryClothes = () => {
     const filteredItems = items.filter(item => item.country === selectedCountry.code);
 
     return (
-        <div className="category-page">
-            <header className="category-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
-                    <ArrowLeft size={24} />
-                </button>
-                <h1 className="header-title">의류 ({selectedCountry.name})</h1>
-                <div className="header-spacer"></div>
-            </header>
+        <div className="category-page" style={{ paddingTop: 0 }}>
 
             <div className="product-grid">
                 {filteredItems.length > 0 ? (

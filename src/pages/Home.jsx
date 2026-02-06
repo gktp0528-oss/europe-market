@@ -4,6 +4,7 @@ import './Home.css';
 import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
+import Header from '../components/Header';
 
 const DUMMY_ITEMS = [
   { id: 1, title: '이케아 조명 팔아요', price: '15유로', location: '파리 15구', time: '1분 전', color: '#FFF0F0', country: 'FR' },
@@ -21,14 +22,7 @@ const Home = () => {
   const filteredItems = DUMMY_ITEMS.filter(item => item.country === selectedCountry.code);
 
   return (
-    <div className="home-container">
-      {/* 1. Header */}
-      <header className="home-header">
-        <h1 className="logo-text">이유살이</h1>
-        <button className="profile-btn">
-          <User size={20} />
-        </button>
-      </header>
+    <div className="home-container" style={{ paddingTop: 0 }}>
 
       {/* 2. Intro Section */}
       <section className="intro-section">

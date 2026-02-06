@@ -17,33 +17,13 @@ export const SUPPORTED_COUNTRIES = [
 ];
 
 export const CountryProvider = ({ children }) => {
-    // 1. Initial State: Always start with null if no saved country to avoid flashing Germany
-    const [selectedCountry, setSelectedCountry] = useState(() => {
-        const saved = localStorage.getItem('selected_country');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                const found = SUPPORTED_COUNTRIES.find(c => c.code === parsed.code);
-                return found || null;
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
-    });
-
-    const [loading, setLoading] = useState(!selectedCountry);
+    const [selectedCountry, setSelectedCountry] = useState(SUPPORTED_COUNTRIES[0]); // Default: Germany
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Only auto-detect if nothing is in localStorage or initial state is null
-        if (selectedCountry) {
-            setLoading(false);
-            return;
-        }
-
+        // Auto-detect country via API
         const detectCountry = async () => {
             try {
-                // Using ipapi.co for accurate location detection
                 const response = await fetch('https://ipapi.co/json/');
                 const data = await response.json();
                 const detectedCode = data.country_code;
@@ -52,34 +32,24 @@ export const CountryProvider = ({ children }) => {
 
                 if (country) {
                     setSelectedCountry(country);
-                    // We don't save auto-detected country to localStorage immediately 
-                    // unless you want to lock them in. Let's save it so it's consistent.
-                    localStorage.setItem('selected_country', JSON.stringify(country));
                 } else {
-                    // Default to Germany only if detected outside supported list
+                    // Fallback to Germany if outside supported list
                     setSelectedCountry(SUPPORTED_COUNTRIES[0]);
-                    localStorage.setItem('selected_country', JSON.stringify(SUPPORTED_COUNTRIES[0]));
                 }
             } catch (error) {
                 console.error('Failed to detect country:', error);
-                // Fallback to Germany on network error
+                // Fallback to Germany on error
                 setSelectedCountry(SUPPORTED_COUNTRIES[0]);
-                localStorage.setItem('selected_country', JSON.stringify(SUPPORTED_COUNTRIES[0]));
             } finally {
                 setLoading(false);
             }
         };
 
         detectCountry();
-    }, [selectedCountry]);
-
-    const updateCountry = (country) => {
-        setSelectedCountry(country);
-        localStorage.setItem('selected_country', JSON.stringify(country));
-    };
+    }, []);
 
     return (
-        <CountryContext.Provider value={{ selectedCountry, setSelectedCountry: updateCountry, loading }}>
+        <CountryContext.Provider value={{ selectedCountry, setSelectedCountry, loading }}>
             {children}
         </CountryContext.Provider>
     );
