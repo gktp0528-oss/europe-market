@@ -89,6 +89,14 @@ const ProductDetail = () => {
                                 </div>
                             ))}
                         </div>
+                        <div className="modal-slider-dots">
+                            {images.map((_, index) => (
+                                <div
+                                    key={index}
+                                    className={`modal-dot ${currentImage === index ? 'active' : ''}`}
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
