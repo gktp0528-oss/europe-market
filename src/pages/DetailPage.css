@@ -260,6 +260,7 @@
 }
 
 .style-1 .chat-btn {
+    flex: 1;
     padding: 14px 24px;
     background: #FF6B6B;
     color: white;

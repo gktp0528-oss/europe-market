@@ -99,9 +99,6 @@ const ProductDetail = () => {
                 <button className="like-btn">
                     <Heart size={24} />
                 </button>
-                <div className="price-display">
-                    <strong>{item.price}</strong>
-                </div>
                 <button className="chat-btn">
                     <MessageCircle size={20} />
                     채팅하기
