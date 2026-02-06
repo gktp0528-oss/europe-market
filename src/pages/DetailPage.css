@@ -266,11 +266,9 @@
 }
 
 .style-1 .description-section {
-    padding: 20px;
-    background: #FAFAFA;
-    border-radius: 16px;
-    border: 1px solid #f0f0f0;
-    margin-top: 20px;
+    \n padding: 20px 0;
+    \n margin-top: 20px;
+    \n
 }
 
 .style-1 .description-section h3 {
