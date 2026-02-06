@@ -118,7 +118,10 @@ const ProductDetail = () => {
 
                 {/* Quick Info Cards (Location & Trade Time) */}
                 <div className="job-info-cards">
-                    <div className="info-card">
+                    <div
+                        className="info-card clickable"
+                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`, '_blank')}
+                    >
                         <MapPin size={18} />
                         <div>
                             <span className="label">거래 희망 장소</span>

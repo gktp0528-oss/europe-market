@@ -63,7 +63,10 @@ const JobDetail = () => {
                             <span className="value">{job.workTime}</span>
                         </div>
                     </div>
-                    <div className="info-card">
+                    <div
+                        className="info-card clickable"
+                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.location)}`, '_blank')}
+                    >
                         <MapPin size={18} />
                         <div>
                             <span className="label">위치</span>

@@ -57,7 +57,10 @@ const TutoringDetail = () => {
                             <span className="value">{tutoring.level}</span>
                         </div>
                     </div>
-                    <div className="info-card">
+                    <div
+                        className="info-card clickable"
+                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tutoring.location)}`, '_blank')}
+                    >
                         <MapPin size={18} />
                         <div>
                             <span className="label">수업 장소</span>

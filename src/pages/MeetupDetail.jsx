@@ -52,7 +52,10 @@ const MeetupDetail = () => {
 
                 {/* Info Cards */}
                 <div className="meetup-info-cards">
-                    <div className="meetup-info-card">
+                    <div
+                        className="meetup-info-card clickable"
+                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetup.location)}`, '_blank')}
+                    >
                         <MapPin size={20} />
                         <div>
                             <span className="label">장소</span>
