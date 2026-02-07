@@ -28,6 +28,13 @@ const WriteTutoring = () => {
         description: '',
     });
 
+    const [tutoringType, setTutoringType] = useState('tutoring'); // 'tutoring' or 'lesson'
+
+    const handleTypeChange = (type) => {
+        setTutoringType(type);
+        setFormData(prev => ({ ...prev, title: '', subject: '', description: '' })); // Reset relevant fields
+    };
+
     const handleLocationSelect = (data) => {
         setFormData({
             ...formData,
@@ -36,6 +43,11 @@ const WriteTutoring = () => {
         });
         setShowLocationPicker(false);
     };
+
+
+
+
+    const isFormValid = formData.title && formData.subject && formData.description && formData.location;
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
@@ -51,7 +63,7 @@ const WriteTutoring = () => {
                     location: formData.location,
                     latitude: formData.locationData?.lat,
                     longitude: formData.locationData?.lng,
-                    description: `과목: ${formData.subject}\n\n${formData.description}`,
+                    description: `[${tutoringType === 'tutoring' ? '과외' : '레슨'}] ${tutoringType === 'tutoring' ? '과목' : '분야'}: ${formData.subject}\n\n${formData.description}`,
                     country_code: countryCode,
                     time_ago: '방금 전',
                     views: 0,
@@ -61,7 +73,7 @@ const WriteTutoring = () => {
 
             if (dbError) throw dbError;
 
-            alert('과외글이 성공적으로 등록되었습니다! ✨');
+            alert(`${tutoringType === 'tutoring' ? '과외' : '레슨'}글이 성공적으로 등록되었습니다! ✨`);
             navigate('/category/tutoring');
 
         } catch (error) {
@@ -72,47 +84,77 @@ const WriteTutoring = () => {
         }
     };
 
-    const isFormValid = formData.title && formData.subject && formData.description && formData.location;
+    // Dynamic labels based on type
+    const labels = {
+        title: tutoringType === 'tutoring' ? '과외 제목' : '레슨 제목',
+        subject: tutoringType === 'tutoring' ? '과목' : '분야/악기',
+        pay: tutoringType === 'tutoring' ? '과외비' : '레슨비',
+        location: tutoringType === 'tutoring' ? '과외 장소' : '레슨 장소',
+        description: tutoringType === 'tutoring' ? '선생님 소개 & 수업 방식' : '레슨 커리큘럼 & 소개',
+        placeholder: {
+            title: tutoringType === 'tutoring' ? '예: 초등 수학 꼼꼼하게 봐드립니다' : '예: 취미 피아노 레슨합니다',
+            subject: tutoringType === 'tutoring' ? '예: 수학, 영어, 프랑스어' : '예: 피아노, 요가, 보컬',
+            description: tutoringType === 'tutoring'
+                ? '학력, 경력, 수업 방식 등을 자세히 적어주세요.'
+                : '레슨 경력, 커리큘럼, 대상 수강생 등을 적어주세요.'
+        }
+    };
 
     return (
         <div className="write-page">
             <header className="write-header">
-                <button onClick={() => navigate(-1)}><ArrowLeft size={24} /></button>
-                <h1>과외/레슨 글쓰기</h1>
+                <button onClick={() => navigate(-1)} className="back-btn"><ArrowLeft size={24} /></button>
+                <h1>{tutoringType === 'tutoring' ? '과외 구하기' : '레슨 모집'}</h1>
                 <div style={{ width: 24 }}></div>
             </header>
 
             <div className="write-content">
+                {/* Type Selection */}
+                <div className="segment-control" style={{ marginBottom: '20px' }}>
+                    <button
+                        className={`segment-btn ${tutoringType === 'tutoring' ? 'active' : ''}`}
+                        onClick={() => handleTypeChange('tutoring')}
+                    >
+                        📚 과외
+                    </button>
+                    <button
+                        className={`segment-btn ${tutoringType === 'lesson' ? 'active' : ''}`}
+                        onClick={() => handleTypeChange('lesson')}
+                    >
+                        🎹 레슨
+                    </button>
+                </div>
+
                 <div className="form-group">
-                    <label>레슨 제목</label>
+                    <label>{labels.title}</label>
                     <input
                         type="text"
                         className="input-field"
-                        placeholder="레슨/과외 제목을 입력해주세요"
+                        placeholder={labels.placeholder.title}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
                 </div>
 
                 <div className="form-group">
-                    <label>과목/분야</label>
+                    <label>{labels.subject}</label>
                     <input
                         type="text"
                         className="input-field"
-                        placeholder="예: 프랑스어 회화, 초등 수학"
+                        placeholder={labels.placeholder.subject}
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     />
                 </div>
 
                 <div className="form-group">
-                    <label>레슨 위치</label>
+                    <label>{labels.location}</label>
                     <div className="input-with-icon" onClick={() => setShowLocationPicker(true)} style={{ cursor: 'pointer', border: '1px solid #e1e8f0', borderRadius: '12px', padding: '4px 12px' }}>
                         <MapPin size={18} className="field-icon" style={{ color: '#64748b' }} />
                         <input
                             type="text"
                             className="input-field no-border"
-                            placeholder="레슨 위치를 선택해주세요"
+                            placeholder="위치를 선택해주세요"
                             value={formData.location}
                             readOnly
                             style={{ pointerEvents: 'none' }}
@@ -121,7 +163,7 @@ const WriteTutoring = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>레슨비 정보</label>
+                    <label>{labels.pay}</label>
                     <input
                         type="text"
                         className="input-field"
@@ -132,10 +174,10 @@ const WriteTutoring = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>레슨 상세 설명</label>
+                    <label>{labels.description}</label>
                     <textarea
                         className="input-field textarea-field"
-                        placeholder="커리큘럼, 대상 학생 등을 설명해주세요!"
+                        placeholder={labels.placeholder.description}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
