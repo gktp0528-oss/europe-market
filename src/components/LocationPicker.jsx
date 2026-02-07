@@ -28,30 +28,53 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
         setLoading(true);
         try {
             // Construct query
-            // If specific country is selected, append it to query for better filtering
-            // Note: With self-hosted Europe data, we are already limited to Europe.
-            // This allows further narrowing to a specific country.
+            // Photon works best with English country names or local names.
+            // We'll use a mapping or just rely on the country code if possible, but Photon doesn't strictly support countryCode filter in public API.
+            // Best approach: Append English country name.
+
+            const COUNTRY_NAMES_EN = {
+                'ALL': '',
+                'DE': 'Germany',
+                'FR': 'France',
+                'GB': 'United Kingdom',
+                'IT': 'Italy',
+                'ES': 'Spain',
+                'AT': 'Austria',
+                'NL': 'Netherlands',
+                'HU': 'Hungary',
+                'CZ': 'Czech Republic',
+                'PL': 'Poland'
+            };
+
             let finalQuery = searchText;
 
             if (countryCode && countryCode !== 'ALL') {
-                const country = SUPPORTED_COUNTRIES.find(c => c.code === countryCode);
-                if (country) {
-                    finalQuery = `${searchText}, ${country.name}`;
+                const countryNameEn = COUNTRY_NAMES_EN[countryCode];
+                if (countryNameEn) {
+                    finalQuery = `${searchText}, ${countryNameEn}`;
                 }
             }
 
             const params = new URLSearchParams({
+                q: finalQuery,
                 lang: 'en',
+                limit: '15'
             });
 
             // If we have access to user location or country center, we could add lat/lon bias
+            // Bias is very effective in Photon
             if (countryCode && countryCode !== 'ALL') {
                 const country = SUPPORTED_COUNTRIES.find(c => c.code === countryCode);
                 if (country) {
                     params.append('lat', country.lat);
                     params.append('lon', country.lng);
+                    // Add zoom level to focus on the country
+                    params.append('zoom', '5');
                 }
             }
+
+            // Remove 'osm_tag' filters if they are too restrictive, but generally we want places.
+            // params.append('osm_tag', '!boundary'); // Example: Exclude boundaries if needed
 
             const response = await fetch(`${API_URL}?${params}`);
             const data = await response.json();
