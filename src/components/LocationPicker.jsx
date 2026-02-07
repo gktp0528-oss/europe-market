@@ -50,7 +50,7 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
                         onRetrieve={handleRetrieve}
                         placeholder="유럽 내 장소나 주소를 입력해보세요"
                         options={{
-                            countries: searchCountries,
+                            country: searchCountries.join(','),
                             language: 'ko',
                             limit: 5
                         }}
