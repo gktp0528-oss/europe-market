@@ -1,40 +1,23 @@
-import React, { useState, useRef } from 'react';
-import { Search, X, MapPin, Loader2 } from 'lucide-react';
-import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
+import React, { useState } from 'react';
+import { Search, X, MapPin } from 'lucide-react';
+import { SearchBox } from '@mapbox/search-js-react';
 import './LocationPicker.css';
 
-const libraries = ['places'];
-
 const LocationPicker = ({ countryCode, onSelect, onClose }) => {
-    const [search, setSearch] = useState('');
-    const autocompleteRef = useRef(null);
-    const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    const [searchValue, setSearchValue] = useState('');
+    const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-    const { isLoaded, loadError } = useJsApiLoader({
-        googleMapsApiKey,
-        libraries,
-        language: 'ko', // Korean for names if possible
-    });
+    const handleRetrieve = (res) => {
+        if (res && res.features && res.features[0]) {
+            const feature = res.features[0];
+            const coordinates = feature.geometry.coordinates;
 
-    const onLoad = (autocomplete) => {
-        autocompleteRef.current = autocomplete;
-    };
-
-    const onPlaceChanged = () => {
-        if (autocompleteRef.current !== null) {
-            const place = autocompleteRef.current.getPlace();
-            if (place.formatted_address) {
-                // We send a structured object or just the address string depending on need.
-                // For now, let's send the full info so the parent can decide.
-                onSelect({
-                    address: place.formatted_address,
-                    name: place.name,
-                    lat: place.geometry?.location?.lat(),
-                    lng: place.geometry?.location?.lng()
-                });
-            }
-        } else {
-            console.log('Autocomplete is not loaded yet!');
+            onSelect({
+                address: feature.properties.full_address || feature.properties.name,
+                name: feature.properties.name,
+                lat: coordinates[1],
+                lng: coordinates[0]
+            });
         }
     };
 
@@ -46,48 +29,65 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
                     <button onClick={onClose} className="close-btn"><X size={24} /></button>
                 </div>
 
-                {!isLoaded ? (
-                    <div className="loading-container">
-                        <Loader2 className="animate-spin" size={32} />
-                        <p>지도를 불러오는 중...</p>
-                    </div>
-                ) : loadError ? (
-                    <div className="error-container">
-                        <p>구글 맵을 불러오지 못했습니다 🥲</p>
-                        <p className="error-hint">API 키 설정을 확인해 주세요.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="search-bar-wrapper">
-                            <Search size={18} className="search-icon" />
-                            <Autocomplete
-                                onLoad={onLoad}
-                                onPlaceChanged={onPlaceChanged}
-                                options={{
-                                    componentRestrictions: { country: countryCode?.toLowerCase() || 'fr' },
-                                    fields: ['formatted_address', 'geometry', 'name']
-                                }}
-                            >
-                                <input
-                                    type="text"
-                                    placeholder="장소나 주소를 입력해보세요 (예: 파리 에펠탑)"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    autoFocus
-                                />
-                            </Autocomplete>
-                        </div>
+                <div className="search-bar-wrapper">
+                    <Search size={18} className="search-icon" />
+                    <SearchBox
+                        accessToken={mapboxToken}
+                        value={searchValue}
+                        onChange={(val) => setSearchValue(val)}
+                        onRetrieve={handleRetrieve}
+                        placeholder="장소나 주소를 입력해보세요"
+                        options={{
+                            countries: [countryCode?.toLowerCase() || 'fr'],
+                            language: 'ko',
+                            limit: 5
+                        }}
+                        theme={{
+                            variables: {
+                                fontFamily: 'inherit',
+                                borderRadius: '12px',
+                                colorPrimary: '#3b82f6',
+                                colorBackground: '#f1f5f9',
+                                colorText: '#1e293b'
+                            },
+                            css: `
+                                .mapboxgl-ctrl-geocoder {
+                                    width: 100%;
+                                    max-width: none;
+                                    box-shadow: none;
+                                    background: none;
+                                }
+                                .mapbox-search-box-container {
+                                    width: 100%;
+                                }
+                                input {
+                                    padding-left: 44px !important;
+                                    height: 48px;
+                                    font-size: 16px !important;
+                                    border: 1px solid transparent !important;
+                                    background-color: #f1f5f9 !important;
+                                }
+                                input:focus {
+                                    background-color: #fff !important;
+                                    border-color: #3b82f6 !important;
+                                    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+                                }
+                                .mapboxgl-ctrl-geocoder--icon-search {
+                                    display: none;
+                                }
+                            `
+                        }}
+                    />
+                </div>
 
-                        <div className="picker-hint">
-                            <MapPin size={14} />
-                            <span>입력한 국가({countryCode}) 내의 장소만 검색됩니다.</span>
-                        </div>
+                <div className="picker-hint">
+                    <MapPin size={14} />
+                    <span>입력하신 국가({countryCode}) 내 장소만 검색됩니다.</span>
+                </div>
 
-                        <div className="google-attribution">
-                            Powered by Google
-                        </div>
-                    </>
-                )}
+                <div className="mapbox-attribution">
+                    Powered by Mapbox
+                </div>
             </div>
         </div>
     );
