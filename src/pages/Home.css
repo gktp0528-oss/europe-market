@@ -87,45 +87,13 @@
     box-shadow: var(--shadow-soft);
 
     /* Animation setup */
-    opacity: 0;
-    animation: fadeInUp 0.6s ease forwards;
+    /* Animation removed as per user request */
+    /* opacity: 0; */
+    /* animation: fadeInUp 0.6s ease forwards; */
 }
 
-.category-card:hover {
-    transform: scale(1.05) translateY(-5px);
-    box-shadow: var(--shadow-hover);
-}
-
-.card-icon-wrapper {
-    background: rgba(255, 255, 255, 0.3);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.9);
-    /* White text looks good on pastel */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+/* Animations removed */
+/* @keyframes fadeInUp { ... } */
 
 /* Real-time Section */
 .realtime-section {
