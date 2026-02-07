@@ -90,27 +90,34 @@ const TutoringDetail = () => {
                 </div>
 
                 {/* Quick Info Cards */}
-                <div className="job-info-cards">
-                    <div className="info-card">
-                        <BookOpen size={18} />
-                        <div>
+                {/* Unified Info Card */}
+                <div className="unified-info-card">
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <BookOpen size={20} />
+                        </div>
+                        <div className="info-text">
                             <span className="label">수업 레벨</span>
                             <span className="value">상세참조</span>
                         </div>
                     </div>
                     <div
-                        className="info-card clickable"
+                        className="info-row clickable"
                         onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tutoring.location)}`, '_blank')}
                     >
-                        <MapPin size={18} />
-                        <div>
-                            <span className="label">수업 장소</span>
+                        <div className="icon-box">
+                            <MapPin size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">수업 장소 (지도보기)</span>
                             <span className="value">{tutoring.location}</span>
                         </div>
                     </div>
-                    <div className="info-card">
-                        <Award size={18} />
-                        <div>
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <Award size={20} />
+                        </div>
+                        <div className="info-text">
                             <span className="label">수업 방식</span>
                             <span className="value">문의</span>
                         </div>

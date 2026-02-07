@@ -130,21 +130,26 @@ const JobDetail = () => {
                 </div>
 
                 {/* Quick Info Cards */}
-                <div className="job-info-cards">
-                    <div className="info-card">
-                        <Calendar size={18} />
-                        <div>
+                {/* Unified Info Card */}
+                <div className="unified-info-card">
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <Calendar size={20} />
+                        </div>
+                        <div className="info-text">
                             <span className="label">근무일시</span>
                             <span className="value">{job.trade_time}</span>
                         </div>
                     </div>
                     <div
-                        className="info-card clickable"
+                        className="info-row clickable"
                         onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.location)}`, '_blank')}
                     >
-                        <MapPin size={18} />
-                        <div>
-                            <span className="label">위치</span>
+                        <div className="icon-box">
+                            <MapPin size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">위치 (지도보기)</span>
                             <span className="value">{job.location}</span>
                         </div>
                     </div>

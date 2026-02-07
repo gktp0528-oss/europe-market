@@ -91,26 +91,37 @@ const MeetupDetail = () => {
                 </div>
 
                 {/* Info Cards */}
-                <div className="meetup-info-cards">
+                {/* Unified Info Card */}
+                <div className="unified-info-card">
                     <div
-                        className="meetup-info-card clickable"
+                        className="info-row clickable"
                         onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetup.location)}`, '_blank')}
                     >
-                        <MapPin size={20} />
-                        <div>
-                            <span className="label">장소</span>
+                        <div className="icon-box">
+                            <MapPin size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">장소 (지도보기)</span>
                             <span className="value">{meetup.location}</span>
                         </div>
                     </div>
-                    <div className="meetup-info-card">
-                        <Users size={20} />
-                        <div>
-                            <span className="label">참가자</span>
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <Users size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">참가 인원</span>
                             <span className="value">모집 {maxMembers}</span>
                         </div>
                     </div>
-                    <div className="meetup-info-card">
-                        <span className="fee-badge">회비 문의</span>
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <Star size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">참가비</span>
+                            <span className="value">회비 문의</span>
+                        </div>
                     </div>
                 </div>
 
