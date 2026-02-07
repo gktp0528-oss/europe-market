@@ -406,6 +406,9 @@
 .style-tutoring .info-card div {
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    /* Required for text truncation in flex child */
+    flex: 1;
 }
 
 .style-job .info-card .label,
@@ -420,6 +423,11 @@
 .style-tutoring .info-card .value {
     font-size: 14px;
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    /* Ensure it behaves as a block for ellipsis */
 }
 
 .style-job .requirements-section {
