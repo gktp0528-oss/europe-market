@@ -72,7 +72,15 @@ const TutoringDetail = () => {
 
             {/* Hero Section */}
             <div className="tutoring-hero" style={{ backgroundColor: tutoring.color || '#C5CAE9' }}>
-                <GraduationCap size={48} color="#666" style={{ opacity: 0.3 }} />
+                {tutoring.image_urls && tutoring.image_urls.length > 0 ? (
+                    <img
+                        src={tutoring.image_urls[0]}
+                        alt={tutoring.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                ) : (
+                    <GraduationCap size={48} color="#666" style={{ opacity: 0.3 }} />
+                )}
             </div>
 
             {/* Content */}

@@ -55,7 +55,15 @@ const CategoryTutoring = () => {
                             style={{ cursor: 'pointer' }}
                         >
                             <div className="product-image" style={{ backgroundColor: item.color || '#F5F5F5' }}>
-                                <GraduationCap size={40} color="#666" style={{ opacity: 0.3 }} />
+                                {item.image_urls && item.image_urls.length > 0 ? (
+                                    <img
+                                        src={item.image_urls[0]}
+                                        alt={item.title}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <GraduationCap size={40} color="#666" style={{ opacity: 0.3 }} />
+                                )}
                             </div>
                             <div className="product-info">
                                 <h3 className="product-title">{item.title}</h3>
