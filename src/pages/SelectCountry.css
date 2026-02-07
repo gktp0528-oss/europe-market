@@ -74,21 +74,22 @@
 
 .country-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
 }
 
 .country-card {
     background-color: #f8fafc;
     border: 1px solid #f1f5f9;
     border-radius: 16px;
-    padding: 24px 16px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    aspect-ratio: 1;
 }
 
 .country-card:hover {
@@ -102,17 +103,18 @@
 }
 
 .flag-circle {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     overflow: hidden;
-    margin-bottom: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 2px solid #fff;
     background-color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .flag-img {
@@ -122,9 +124,12 @@
 }
 
 .country-name {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: #334155;
+    text-align: center;
+    word-break: keep-all;
+    line-height: 1.2;
 }
 
 /* Animations */

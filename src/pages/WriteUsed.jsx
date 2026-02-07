@@ -210,15 +210,21 @@ const WriteUsed = () => {
                             />
                         </div>
                         <div className="input-divider"></div>
-                        <div className="input-with-icon">
-                            <Clock size={18} className="field-icon" />
-                            <input
-                                type="text"
-                                className="input-field no-border"
-                                placeholder="선호하는 거래 시간을 입력해주세요"
-                                value={formData.tradeTime}
-                                onChange={(e) => setFormData({ ...formData, tradeTime: e.target.value })}
-                            />
+                        <div className="time-selector-group">
+                            <div className="time-icon-wrapper">
+                                <Clock size={18} className="field-icon" />
+                            </div>
+                            <div className="time-chips-container">
+                                {['오전', '오후', '저녁', '주말', '무관'].map((time) => (
+                                    <button
+                                        key={time}
+                                        className={`time-chip ${formData.tradeTime === time ? 'active' : ''}`}
+                                        onClick={() => setFormData({ ...formData, tradeTime: time })}
+                                    >
+                                        {time}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
