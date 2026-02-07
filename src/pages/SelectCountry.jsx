@@ -46,7 +46,13 @@ const SelectCountry = () => {
                             className="country-card"
                             onClick={() => handleCountrySelect(country)}
                         >
-                            <span className="country-flag">{country.flag}</span>
+                            <div className="flag-circle">
+                                <img
+                                    src={`https://flagcdn.com/${country.code.toLowerCase()}.svg`}
+                                    alt={country.name}
+                                    className="flag-img"
+                                />
+                            </div>
                             <span className="country-name">{country.name}</span>
                         </button>
                     ))}

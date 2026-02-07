@@ -18,6 +18,7 @@ import WriteTutoring from './pages/WriteTutoring';
 import WriteMeetup from './pages/WriteMeetup';
 import SelectCountry from './pages/SelectCountry';
 import Header from './components/Header';
+import ScrollToTop from './components/ScrollToTop';
 import { CountryProvider } from './contexts/CountryContext';
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
@@ -68,6 +69,7 @@ function App() {
   return (
     <CountryProvider>
       <Router>
+        <ScrollToTop />
         <AppContent />
       </Router>
     </CountryProvider>
