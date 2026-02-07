@@ -105,7 +105,7 @@ const WriteTutoring = () => {
         }
     };
 
-    const payTypeOptions = ['시급', '회당', '건당', '월급', '총액'];
+    const payTypeOptions = ['시급', '회당'];
 
     return (
         <div className="write-page">
