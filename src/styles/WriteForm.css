@@ -291,33 +291,45 @@
 
 .day-chip {
     flex: 0 0 auto;
-    min-width: 40px;
-    padding: 0 12px;
-    height: 40px;
-    border-radius: 12px;
-    border: 1px solid #E0E0E0;
-    background-color: white;
-    color: #888;
-    font-size: 14px;
+    min-width: 44px;
+    padding: 0 16px;
+    height: 38px;
+    border-radius: 100px;
+    /* Pill shape */
+    border: 1px solid #E2E8F0;
+    background-color: #F8FAFC;
+    color: #64748B;
+    font-size: 13.5px;
     font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
 }
 
 .day-chip:hover {
-    background-color: #F5F5F5;
+    background-color: #F1F5F9;
+    border-color: #CBD5E1;
 }
 
 .day-chip.active {
     background-color: #FFF9C4;
-    /* Yellow for Job */
     border-color: #FBC02D;
-    color: #F9A825;
+    color: #F57F17;
     font-weight: 700;
+    box-shadow: 0 2px 8px rgba(251, 192, 45, 0.2);
+}
+
+
+/* --- Job Write Form Specifics --- */
+.day-chip.active.job-active {
+    background-color: #FFF9C4;
+    border-color: #FBC02D;
+    color: #F57F17;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(251, 192, 45, 0.2);
 }
 
 .time-range-picker {
@@ -334,11 +346,18 @@
     flex: 1;
     display: flex;
     align-items: center;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 0 14px;
+    height: 48px;
+    transition: all 0.2s ease;
+}
+
+.time-input-box:focus-within {
     background: white;
-    border: 1px solid #E0E0E0;
-    border-radius: 12px;
-    padding: 0 12px;
-    height: 44px;
+    border-color: #00BCD4;
+    box-shadow: 0 0 0 4px rgba(0, 188, 212, 0.1);
 }
 
 .time-input-box input {
@@ -359,29 +378,31 @@
 /* Segment Control */
 .segment-control {
     display: flex;
-    background: #f1f5f9;
-    border-radius: 12px;
-    padding: 4px;
+    background: #F1F5F9;
+    border-radius: 14px;
+    padding: 5px;
+    gap: 2px;
 }
 
 .segment-btn {
     flex: 1;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 11px;
+    border-radius: 10px;
     border: none;
     background: transparent;
     font-size: 14px;
     font-weight: 500;
-    color: #64748b;
+    color: #64748B;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .segment-btn.active {
     background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     font-weight: 700;
     color: #00BCD4;
+    transform: translateY(-1px);
 }
 
 /* Tag Chips */

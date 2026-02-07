@@ -233,13 +233,13 @@ const WriteMeetup = () => {
                     <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <Tag size={16} /> 모임 성격 (멀티 선택 가능)
                     </label>
-                    <div className="tag-chips-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
+                    <div className="tag-chips-container" style={{ marginTop: '8px' }}>
                         {MEETUP_TAGS.map(tag => (
                             <div
                                 key={tag}
-                                className={`day-chip ${formData.tags.includes(tag) ? 'active' : ''}`}
+                                className={`day-chip ${formData.tags.includes(tag) ? 'active meetup-active' : ''}`}
                                 onClick={() => toggleTag(tag)}
-                                style={{ padding: '8px 16px', fontSize: '13px', cursor: 'pointer' }}
+                                style={{ padding: '0 20px', fontSize: '13px' }}
                             >
                                 {tag}
                             </div>
@@ -250,32 +250,18 @@ const WriteMeetup = () => {
                 {/* Online / Offline Toggle */}
                 <div className="form-group">
                     <label>모임 방식</label>
-                    <div className="segment-control" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginTop: '8px' }}>
+                    <div className="segment-control" style={{ marginTop: '8px' }}>
                         <button
                             className={`segment-btn ${formData.onOffline === 'offline' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, onOffline: 'offline' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.onOffline === 'offline' ? 'white' : 'transparent',
-                                boxShadow: formData.onOffline === 'offline' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.onOffline === 'offline' ? '700' : '500',
-                                color: formData.onOffline === 'offline' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                             <Globe size={16} /> 오프라인
                         </button>
                         <button
                             className={`segment-btn ${formData.onOffline === 'online' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, onOffline: 'online', location: '온라인 (상세 내용 참고)' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.onOffline === 'online' ? 'white' : 'transparent',
-                                boxShadow: formData.onOffline === 'online' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.onOffline === 'online' ? '700' : '500',
-                                color: formData.onOffline === 'online' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                         >
                             <Monitor size={16} /> 온라인
                         </button>
@@ -286,15 +272,15 @@ const WriteMeetup = () => {
                 <div className="form-group">
                     <label>{formData.onOffline === 'offline' ? '모임 장소' : '온라인 링크 또는 참여 방법'}</label>
                     {formData.onOffline === 'offline' ? (
-                        <div className="input-with-icon" onClick={() => setShowLocationPicker(true)} style={{ cursor: 'pointer', border: '1px solid #e1e8f0', borderRadius: '12px', padding: '4px 12px' }}>
-                            <MapPin size={18} className="field-icon" style={{ color: '#64748b' }} />
+                        <div className="input-with-icon" onClick={() => setShowLocationPicker(true)} style={{ cursor: 'pointer', border: '1px solid #E2E8F0', borderRadius: '16px', padding: '6px 16px', background: '#F8FAFC' }}>
+                            <MapPin size={18} className="field-icon" style={{ color: '#00BCD4' }} />
                             <input
                                 type="text"
                                 className="input-field no-border"
                                 placeholder="모임 장소를 선택해주세요"
                                 value={formData.location}
                                 readOnly
-                                style={{ pointerEvents: 'none' }}
+                                style={{ pointerEvents: 'none', background: 'transparent' }}
                             />
                         </div>
                     ) : (
@@ -311,40 +297,24 @@ const WriteMeetup = () => {
                 {/* Date & Time with Type Toggle */}
                 <div className="form-group">
                     <label>모임 일시</label>
-                    <div className="segment-control" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginTop: '8px', marginBottom: '12px' }}>
+                    <div className="segment-control" style={{ marginTop: '8px', marginBottom: '12px' }}>
                         <button
                             className={`segment-btn ${formData.meetupType === 'one-time' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, meetupType: 'one-time' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.meetupType === 'one-time' ? 'white' : 'transparent',
-                                boxShadow: formData.meetupType === 'one-time' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.meetupType === 'one-time' ? '700' : '500',
-                                color: formData.meetupType === 'one-time' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             한 번만 만나요
                         </button>
                         <button
                             className={`segment-btn ${formData.meetupType === 'recurring' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, meetupType: 'recurring' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.meetupType === 'recurring' ? 'white' : 'transparent',
-                                boxShadow: formData.meetupType === 'recurring' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.meetupType === 'recurring' ? '700' : '500',
-                                color: formData.meetupType === 'recurring' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             자주 만나요 (정기)
                         </button>
                     </div>
 
                     {formData.meetupType === 'one-time' ? (
-                        <div className="time-input-box" style={{ marginBottom: '8px' }}>
-                            <Calendar size={16} />
+                        <div className="time-input-box" style={{ marginBottom: '12px' }}>
+                            <Calendar size={18} style={{ color: '#00BCD4' }} />
                             <input
                                 type="date"
                                 value={formData.date}
@@ -352,12 +322,12 @@ const WriteMeetup = () => {
                             />
                         </div>
                     ) : (
-                        <div className="recurring-options" style={{ marginBottom: '12px' }}>
+                        <div className="recurring-options" style={{ marginBottom: '16px' }}>
                             <div className="days-selector" style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
                                 {['월', '화', '수', '목', '금', '토', '일'].map(day => (
                                     <div
                                         key={day}
-                                        className={`day-chip ${formData.repeatDays.includes(day) ? 'active' : ''}`}
+                                        className={`day-chip ${formData.repeatDays.includes(day) ? 'active meetup-active' : ''}`}
                                         onClick={() => toggleRepeatDay(day)}
                                         style={{ flex: 1, minWidth: '40px' }}
                                     >
@@ -365,13 +335,12 @@ const WriteMeetup = () => {
                                     </div>
                                 ))}
                             </div>
-                            <div className="repeat-cycle-selector" style={{ display: 'flex', gap: '8px' }}>
+                            <div className="segment-control" style={{ gap: '4px' }}>
                                 {['매주', '격주', '매월'].map(cycle => (
                                     <button
                                         key={cycle}
                                         className={`segment-btn ${formData.repeatCycle === cycle ? 'active' : ''}`}
                                         onClick={() => setFormData({ ...formData, repeatCycle: cycle })}
-                                        style={{ border: '1px solid #e1e8f0', borderRadius: '10px', flex: 1 }}
                                     >
                                         {cycle}
                                     </button>
@@ -380,18 +349,18 @@ const WriteMeetup = () => {
                         </div>
                     )}
 
-                    <div className="time-range-picker">
-                        <div className="time-input-box" style={{ flex: 1 }}>
-                            <Clock size={16} />
+                    <div className="time-range-picker" style={{ gap: '8px', background: 'transparent', padding: 0 }}>
+                        <div className="time-input-box">
+                            <Clock size={18} style={{ color: '#00BCD4' }} />
                             <input
                                 type="time"
                                 value={formData.startTime}
                                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                             />
                         </div>
-                        <span style={{ color: '#cbd5e1' }}>~</span>
-                        <div className="time-input-box" style={{ flex: 1 }}>
-                            <Clock size={16} />
+                        <span style={{ color: '#CBD5E1', fontWeight: '500' }}>~</span>
+                        <div className="time-input-box">
+                            <Clock size={18} style={{ color: '#00BCD4' }} />
                             <input
                                 type="time"
                                 value={formData.endTime}
@@ -404,32 +373,16 @@ const WriteMeetup = () => {
                 {/* Fee Toggle */}
                 <div className="form-group">
                     <label>참가비</label>
-                    <div className="segment-control" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginTop: '8px', marginBottom: !formData.isFree ? '12px' : '0' }}>
+                    <div className="segment-control" style={{ marginTop: '8px', marginBottom: !formData.isFree ? '12px' : '0' }}>
                         <button
                             className={`segment-btn ${formData.isFree ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, isFree: true, fee: '' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.isFree ? 'white' : 'transparent',
-                                boxShadow: formData.isFree ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.isFree ? '700' : '500',
-                                color: formData.isFree ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             무료
                         </button>
                         <button
                             className={`segment-btn ${!formData.isFree ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, isFree: false })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: !formData.isFree ? 'white' : 'transparent',
-                                boxShadow: !formData.isFree ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: !formData.isFree ? '700' : '500',
-                                color: !formData.isFree ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             유료 (회비 있음)
                         </button>
@@ -442,8 +395,9 @@ const WriteMeetup = () => {
                                 placeholder="금액 입력"
                                 value={formData.fee}
                                 onChange={handleFeeChange}
+                                style={{ background: 'white', border: '1px solid #00BCD4', boxShadow: '0 0 0 4px rgba(0, 188, 212, 0.05)' }}
                             />
-                            <span className="currency-label">{currency}</span>
+                            <span className="currency-label" style={{ color: '#0097A7' }}>{currency}</span>
                         </div>
                     )}
                 </div>
@@ -451,14 +405,15 @@ const WriteMeetup = () => {
                 {/* Members */}
                 <div className="form-group">
                     <label>모집 인원</label>
-                    <div className="input-with-icon">
-                        <Users size={18} className="field-icon" style={{ color: '#64748b' }} />
+                    <div className="time-input-box">
+                        <Users size={18} style={{ color: '#00BCD4' }} />
                         <input
                             type="number"
                             className="input-field no-border"
                             placeholder="최대 참여 가능 인원 (숫자)"
                             value={formData.members}
                             onChange={(e) => setFormData({ ...formData, members: e.target.value })}
+                            style={{ background: 'transparent' }}
                         />
                     </div>
                 </div>
@@ -466,59 +421,50 @@ const WriteMeetup = () => {
                 {/* Approval Method */}
                 <div className="form-group">
                     <label>참여 승인 방식</label>
-                    <div className="segment-control" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginTop: '8px' }}>
+                    <div className="segment-control" style={{ marginTop: '8px' }}>
                         <button
                             className={`segment-btn ${formData.approvalType === 'first-come' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, approvalType: 'first-come' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.approvalType === 'first-come' ? 'white' : 'transparent',
-                                boxShadow: formData.approvalType === 'first-come' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.approvalType === 'first-come' ? '700' : '500',
-                                color: formData.approvalType === 'first-come' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             선착순 마감
                         </button>
                         <button
                             className={`segment-btn ${formData.approvalType === 'approval' ? 'active' : ''}`}
                             onClick={() => setFormData({ ...formData, approvalType: 'approval' })}
-                            style={{
-                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
-                                background: formData.approvalType === 'approval' ? 'white' : 'transparent',
-                                boxShadow: formData.approvalType === 'approval' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
-                                fontWeight: formData.approvalType === 'approval' ? '700' : '500',
-                                color: formData.approvalType === 'approval' ? '#00BCD4' : '#64748b',
-                                cursor: 'pointer'
-                            }}
                         >
                             호스트 승인제
                         </button>
                     </div>
-                    <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', marginLeft: '4px' }}>
-                        {formData.approvalType === 'first-come'
-                            ? '💡 신청 즉시 바로 참여가 확정됩니다.'
-                            : '💡 호스트가 신청서 확인 후 수락해야 참여가 확정됩니다.'}
-                    </p>
+                    <div style={{
+                        marginTop: '12px', padding: '12px', background: '#F0F9FF', borderRadius: '12px',
+                        display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid #E0F2FE'
+                    }}>
+                        <CheckCircle size={16} style={{ color: '#0EA5E9' }} />
+                        <p style={{ fontSize: '12px', color: '#0369A1', fontWeight: '500' }}>
+                            {formData.approvalType === 'first-come'
+                                ? '신청 즉시 바로 참여가 확정됩니다.'
+                                : '호스트가 신청서 확인 후 수락해야 참여가 확정됩니다.'}
+                        </p>
+                    </div>
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{ marginTop: '8px' }}>
                     <label>모임 상세 내용</label>
                     <textarea
                         className="input-field textarea-field"
                         placeholder="어떤 모임인가요? 준비물이나 상세 일정이 있다면 적어주세요!"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        style={{ height: '150px' }}
+                        style={{ height: '180px', background: 'white' }}
                     />
                 </div>
 
-                <div className="submit-container">
+                <div className="submit-container" style={{ marginTop: '12px', border: 'none' }}>
                     <button
                         className="submit-btn-bottom"
                         disabled={!isFormValid || isSubmitting}
                         onClick={handleSubmit}
+                        style={{ background: 'linear-gradient(135deg, #00BCD4, #0097A7)', boxShadow: '0 8px 16px rgba(0, 188, 212, 0.25)' }}
                     >
                         {isSubmitting ? '등록 중...' : '모임 만들기'}
                     </button>
