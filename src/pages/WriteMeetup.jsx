@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
-import LocationSelector from '../components/LocationSelector';
+import LocationPicker from '../components/LocationPicker';
 import '../styles/WriteForm.css';
 
 const WriteMeetup = () => {
@@ -11,16 +11,12 @@ const WriteMeetup = () => {
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
 
-    // Get country info for cities
-    const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
-    const cities = countryInfo.cities || [];
-
-    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         date: '',
-        members: '',
         location: '',
+        members: '',
         description: '',
     });
 
@@ -35,6 +31,26 @@ const WriteMeetup = () => {
             </header>
 
             <div className="write-content">
+                <div className="form-group">
+                    <label>모임 장소</label>
+                    <div className="input-with-icon clickable-input" onClick={() => setIsLocationPickerOpen(true)}>
+                        <MapPin size={18} className="field-icon" />
+                        <input
+                            type="text"
+                            className="input-field no-border"
+                            placeholder="모임 장소를 선택해주세요"
+                            value={formData.location}
+                            readOnly
+                        />
+                    </div>
+                    <LocationPicker
+                        isOpen={isLocationPickerOpen}
+                        onClose={() => setIsLocationPickerOpen(false)}
+                        onSelect={(loc) => setFormData({ ...formData, location: loc })}
+                        countryCode={countryCode}
+                    />
+                </div>
+
                 <div className="form-group">
                     <label>모임 이름</label>
                     <input
@@ -69,22 +85,10 @@ const WriteMeetup = () => {
                 </div>
 
                 <div className="form-group">
-                    <label>모임 장소</label>
-                    <div className="input-with-icon-wrapper" onClick={() => setIsLocationModalOpen(true)} style={{ cursor: 'pointer' }}>
-                        <div className="input-field" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <MapPin size={18} color="#888" />
-                            <span style={{ color: formData.location ? '#333' : '#999' }}>
-                                {formData.location || '모임 도시를 선택해주세요'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="form-group">
                     <label>모임 상세 내용</label>
                     <textarea
                         className="input-field textarea-field"
-                        placeholder="어떤 모임인가요? 상세한 모임 장소 등을 적어주세요!"
+                        placeholder="어떤 모임인가요? 모임 장소 등을 적어주세요!"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
@@ -96,14 +100,6 @@ const WriteMeetup = () => {
                     </button>
                 </div>
             </div>
-
-            <LocationSelector
-                isOpen={isLocationModalOpen}
-                onClose={() => setIsLocationModalOpen(false)}
-                onSelect={(val) => setFormData({ ...formData, location: val })}
-                cities={cities}
-                currentCountryName={countryInfo.name}
-            />
         </div>
     );
 };

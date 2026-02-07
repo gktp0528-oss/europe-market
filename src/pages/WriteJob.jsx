@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
-import LocationSelector from '../components/LocationSelector';
+import LocationPicker from '../components/LocationPicker';
 import '../styles/WriteForm.css';
 
 const WriteJob = () => {
@@ -11,12 +11,11 @@ const WriteJob = () => {
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
 
-    // Get country info for currency and cities
+    // Get country info for currency
     const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
     const currency = countryInfo.currencySymbol;
-    const cities = countryInfo.cities || [];
 
-    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         pay: '',
@@ -59,6 +58,26 @@ const WriteJob = () => {
                 </div>
 
                 <div className="form-group">
+                    <label>근무 지역</label>
+                    <div className="input-with-icon clickable-input" onClick={() => setIsLocationPickerOpen(true)}>
+                        <MapPin size={18} className="field-icon" />
+                        <input
+                            type="text"
+                            className="input-field no-border"
+                            placeholder="근무 지역을 선택해주세요"
+                            value={formData.location}
+                            readOnly
+                        />
+                    </div>
+                    <LocationPicker
+                        isOpen={isLocationPickerOpen}
+                        onClose={() => setIsLocationPickerOpen(false)}
+                        onSelect={(loc) => setFormData({ ...formData, location: loc })}
+                        countryCode={countryCode}
+                    />
+                </div>
+
+                <div className="form-group">
                     <label>근무 시간</label>
                     <input
                         type="text"
@@ -67,18 +86,6 @@ const WriteJob = () => {
                         value={formData.time}
                         onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                     />
-                </div>
-
-                <div className="form-group">
-                    <label>근무 지역</label>
-                    <div className="input-with-icon-wrapper" onClick={() => setIsLocationModalOpen(true)} style={{ cursor: 'pointer' }}>
-                        <div className="input-field" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <MapPin size={18} color="#888" />
-                            <span style={{ color: formData.location ? '#333' : '#999' }}>
-                                {formData.location || '근무 도시를 선택해주세요'}
-                            </span>
-                        </div>
-                    </div>
                 </div>
 
                 <div className="form-group">
@@ -97,14 +104,6 @@ const WriteJob = () => {
                     </button>
                 </div>
             </div>
-
-            <LocationSelector
-                isOpen={isLocationModalOpen}
-                onClose={() => setIsLocationModalOpen(false)}
-                onSelect={(val) => setFormData({ ...formData, location: val })}
-                cities={cities}
-                currentCountryName={countryInfo.name}
-            />
         </div>
     );
 };
