@@ -39,6 +39,87 @@
     cursor: not-allowed;
 }
 
+/* Progress Bar */
+.progress-container {
+    padding: 20px 20px 0;
+    background: white;
+}
+
+.progress-bar-wrapper {
+    height: 4px;
+    background: #F1F5F9;
+    border-radius: 2px;
+    display: flex;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00BCD4, #0097A7);
+    transition: width 0.3s ease;
+}
+
+.step-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.step-info .current-step {
+    color: #00BCD4;
+}
+
+.step-info .step-label {
+    color: #64748B;
+}
+
+/* Multi-step Navigation */
+.step-navigation {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #F1F5F9;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-btn.back {
+    background: #F1F5F9;
+    color: #64748B;
+    border: none;
+}
+
+.nav-btn.next {
+    background: linear-gradient(135deg, #00BCD4, #0097A7);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 188, 212, 0.2);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-btn.back:active {
+    background: #E2E8F0;
+}
+
+.nav-btn.next:active {
+    transform: scale(0.98);
+}
+
 .submit-container {
     margin-top: 20px;
     padding-top: 20px;
@@ -426,4 +507,13 @@
     border-color: #00BCD4;
     color: #0097A7;
     font-weight: 700;
+}
+/* Multi-step Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
 }
