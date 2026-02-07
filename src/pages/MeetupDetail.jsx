@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './DetailPage.css';
 
