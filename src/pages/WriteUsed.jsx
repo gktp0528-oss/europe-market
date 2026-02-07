@@ -4,6 +4,7 @@ import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getCountryCodeFromLocation } from '../lib/locationUtils';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
+import LocationSelector from '../components/LocationSelector';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
@@ -15,10 +16,12 @@ const WriteUsed = () => {
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
-    // Get country info for currency
+    // Get country info for currency and cities
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
     const currency = selectedCountryInfo.currencySymbol;
+    const cities = selectedCountryInfo.cities || [];
 
     const [formData, setFormData] = useState({
         title: '',
@@ -184,14 +187,15 @@ const WriteUsed = () => {
                 <div className="form-group transaction-group">
                     <label>거래 정보</label>
                     <div className="transaction-cards-input">
-                        <div className="input-with-icon">
+                        <div className="input-with-icon" onClick={() => setIsLocationModalOpen(true)}>
                             <MapPin size={18} className="field-icon" />
                             <input
                                 type="text"
                                 className="input-field no-border"
-                                placeholder="선호하는 거래 위치를 입력해주세요"
+                                placeholder="거래 도시를 선택해주세요"
                                 value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                readOnly
+                                style={{ cursor: 'pointer' }}
                             />
                         </div>
                         <div className="input-divider"></div>
@@ -228,6 +232,14 @@ const WriteUsed = () => {
                     </button>
                 </div>
             </div>
+
+            <LocationSelector
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onSelect={(loc) => setFormData({ ...formData, location: loc })}
+                cities={cities}
+                currentCountryName={selectedCountryInfo.name}
+            />
         </div>
     );
 };
