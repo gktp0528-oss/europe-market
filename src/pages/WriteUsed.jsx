@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { getCountryCodeFromLocation } from '../lib/locationUtils';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import '../styles/WriteForm.css';
 
@@ -89,8 +88,8 @@ const WriteUsed = () => {
                 uploadedUrls.push(publicUrl);
             }
 
-            // 2. Identify Country (Use initial if manual check fails)
-            const countryCode = getCountryCodeFromLocation(formData.location) || initialCountryCode;
+            // 2. Identify Country (Use the one selected from the previous page)
+            const countryCode = initialCountryCode;
 
             // 3. Save to Database
             const { error: dbError } = await supabase
