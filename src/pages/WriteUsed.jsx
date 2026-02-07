@@ -4,7 +4,6 @@ import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getCountryCodeFromLocation } from '../lib/locationUtils';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
-import LocationPicker from '../components/LocationPicker';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
@@ -16,7 +15,6 @@ const WriteUsed = () => {
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
 
     // Get country info for currency
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
@@ -186,22 +184,16 @@ const WriteUsed = () => {
                 <div className="form-group transaction-group">
                     <label>거래 정보</label>
                     <div className="transaction-cards-input">
-                        <div className="input-with-icon clickable-input" onClick={() => setIsLocationPickerOpen(true)}>
+                        <div className="input-with-icon">
                             <MapPin size={18} className="field-icon" />
                             <input
                                 type="text"
                                 className="input-field no-border"
-                                placeholder="어디서 거래하고 싶으신가요?"
+                                placeholder="선호하는 거래 위치를 입력해주세요"
                                 value={formData.location}
-                                readOnly
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             />
                         </div>
-                        <LocationPicker
-                            isOpen={isLocationPickerOpen}
-                            onClose={() => setIsLocationPickerOpen(false)}
-                            onSelect={(loc) => setFormData({ ...formData, location: loc })}
-                            countryCode={initialCountryCode}
-                        />
                         <div className="input-divider"></div>
                         <div className="input-with-icon">
                             <Clock size={18} className="field-icon" />

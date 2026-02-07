@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Camera, MapPin } from 'lucide-react';
-import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
-import LocationPicker from '../components/LocationPicker';
+import { ArrowLeft, Camera } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteMeetup = () => {
@@ -11,16 +9,14 @@ const WriteMeetup = () => {
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
 
-    const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         date: '',
-        location: '',
         members: '',
         description: '',
     });
 
-    const isFormValid = formData.title && formData.date && formData.description && formData.location;
+    const isFormValid = formData.title && formData.date && formData.description;
 
     return (
         <div className="write-page">
@@ -31,26 +27,6 @@ const WriteMeetup = () => {
             </header>
 
             <div className="write-content">
-                <div className="form-group">
-                    <label>모임 장소</label>
-                    <div className="input-with-icon clickable-input" onClick={() => setIsLocationPickerOpen(true)}>
-                        <MapPin size={18} className="field-icon" />
-                        <input
-                            type="text"
-                            className="input-field no-border"
-                            placeholder="모임 장소를 선택해주세요"
-                            value={formData.location}
-                            readOnly
-                        />
-                    </div>
-                    <LocationPicker
-                        isOpen={isLocationPickerOpen}
-                        onClose={() => setIsLocationPickerOpen(false)}
-                        onSelect={(loc) => setFormData({ ...formData, location: loc })}
-                        countryCode={countryCode}
-                    />
-                </div>
-
                 <div className="form-group">
                     <label>모임 이름</label>
                     <input

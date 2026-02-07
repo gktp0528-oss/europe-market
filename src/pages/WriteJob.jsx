@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Camera, MapPin } from 'lucide-react';
+import { ArrowLeft, Camera } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
-import LocationPicker from '../components/LocationPicker';
 import '../styles/WriteForm.css';
 
 const WriteJob = () => {
@@ -15,16 +14,14 @@ const WriteJob = () => {
     const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
     const currency = countryInfo.currencySymbol;
 
-    const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         pay: '',
         time: '',
-        location: '',
         description: '',
     });
 
-    const isFormValid = formData.title && formData.pay && formData.description && formData.location;
+    const isFormValid = formData.title && formData.pay && formData.description;
 
     return (
         <div className="write-page">
@@ -54,26 +51,6 @@ const WriteJob = () => {
                         placeholder={`예: 시급 12${currency}, 일당 100${currency}`}
                         value={formData.pay}
                         onChange={(e) => setFormData({ ...formData, pay: e.target.value })}
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>근무 지역</label>
-                    <div className="input-with-icon clickable-input" onClick={() => setIsLocationPickerOpen(true)}>
-                        <MapPin size={18} className="field-icon" />
-                        <input
-                            type="text"
-                            className="input-field no-border"
-                            placeholder="근무 지역을 선택해주세요"
-                            value={formData.location}
-                            readOnly
-                        />
-                    </div>
-                    <LocationPicker
-                        isOpen={isLocationPickerOpen}
-                        onClose={() => setIsLocationPickerOpen(false)}
-                        onSelect={(loc) => setFormData({ ...formData, location: loc })}
-                        countryCode={countryCode}
                     />
                 </div>
 
