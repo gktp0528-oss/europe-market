@@ -94,7 +94,7 @@ const WriteTutoring = () => {
         title: tutoringType === 'tutoring' ? '과외 제목' : '레슨 제목',
         subject: tutoringType === 'tutoring' ? '과목' : '분야/악기',
         pay: tutoringType === 'tutoring' ? '과외비' : '레슨비',
-        location: tutoringType === 'tutoring' ? '과외 장소' : '레슨 장소',
+        location: tutoringType === 'tutoring' ? '활동 지역' : '레슨 장소',
         description: tutoringType === 'tutoring' ? '선생님 소개 & 수업 방식' : '레슨 커리큘럼 & 소개',
         placeholder: {
             title: tutoringType === 'tutoring' ? '예: 초등 수학 꼼꼼하게 봐드립니다' : '예: 취미 피아노 레슨합니다',
@@ -161,7 +161,7 @@ const WriteTutoring = () => {
                         <input
                             type="text"
                             className="input-field no-border"
-                            placeholder="위치를 선택해주세요"
+                            placeholder={tutoringType === 'tutoring' ? '활동 가능한 지역을 선택해주세요' : '레슨 장소를 선택해주세요'}
                             value={formData.location}
                             readOnly
                             style={{ pointerEvents: 'none' }}
