@@ -385,7 +385,8 @@
 .style-1 .job-info-cards,
 .style-tutoring .job-info-cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Force equal width regardless of content */
     gap: 12px;
     margin-bottom: 24px;
 }
@@ -407,7 +408,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    /* Required for text truncation in flex child */
+    /* Critical for truncating text inside flex item */
     flex: 1;
 }
 
