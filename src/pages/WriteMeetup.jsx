@@ -177,10 +177,10 @@ const WriteMeetup = () => {
     };
 
     // Step-by-step validation
-    const isStep1Valid = formData.title && formData.description && formData.tags.length > 0;
+    const isStep1Valid = formData.title && formData.tags.length > 0;
     const isStep2Valid = (formData.meetupType === 'one-time' ? formData.date : formData.repeatDays.length > 0) &&
         formData.startTime && formData.endTime && formData.location;
-    const isStep3Valid = formData.members && (formData.isFree || formData.fee);
+    const isStep3Valid = formData.members && (formData.isFree || formData.fee) && formData.description;
 
     const isNextDisabled = (step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid);
     const isSubmitValid = isStep1Valid && isStep2Valid && isStep3Valid;
@@ -272,17 +272,6 @@ const WriteMeetup = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
-
-                        <div className="form-group" style={{ marginTop: '8px' }}>
-                            <label>모임 상세 내용</label>
-                            <textarea
-                                className="input-field textarea-field"
-                                placeholder="어떤 모임인가요? 준비물이나 상세 일정이 있다면 적어주세요!"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                style={{ height: '180px', background: 'white' }}
-                            />
                         </div>
                     </div>
                 )}
@@ -492,6 +481,17 @@ const WriteMeetup = () => {
                                         : '호스트가 신청서 확인 후 수락해야 참여가 확정됩니다.'}
                                 </p>
                             </div>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '8px' }}>
+                            <label>모임 상세 내용</label>
+                            <textarea
+                                className="input-field textarea-field"
+                                placeholder="어떤 모임인가요? 준비물이나 상세 일정이 있다면 적어주세요!"
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                style={{ height: '180px', background: 'white' }}
+                            />
                         </div>
                     </div>
                 )}
