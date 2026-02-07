@@ -18,8 +18,7 @@ const WriteUsed = () => {
 
     // Get country info for currency
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
-    const currency = initialCountryCode === 'GB' ? '파운드' : '유로';
-    const currencySymbol = initialCountryCode === 'GB' ? '£' : '€';
+    const currency = selectedCountryInfo.currencySymbol;
 
     const [formData, setFormData] = useState({
         title: '',

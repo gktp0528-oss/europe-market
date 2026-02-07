@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera } from 'lucide-react';
+import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import '../styles/WriteForm.css';
 
 const WriteTutoring = () => {
@@ -8,7 +9,10 @@ const WriteTutoring = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
-    const currency = countryCode === 'GB' ? '파운드' : '유로';
+
+    // Get country info for currency
+    const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
+    const currency = countryInfo.currencySymbol;
 
     const [formData, setFormData] = useState({
         title: '',
