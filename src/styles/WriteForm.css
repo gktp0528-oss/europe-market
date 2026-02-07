@@ -39,6 +39,36 @@
     cursor: not-allowed;
 }
 
+.submit-container {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #F0F0F0;
+}
+
+.submit-btn-bottom {
+    width: 100%;
+    padding: 18px;
+    background-color: var(--color-primary-pink);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.submit-btn-bottom:active {
+    transform: scale(0.98);
+    background-color: #F06292;
+}
+
+.submit-btn-bottom:disabled {
+    background-color: #EEE;
+    color: #AAA;
+    cursor: not-allowed;
+}
+
 .write-content {
     padding: 24px 20px;
     display: flex;

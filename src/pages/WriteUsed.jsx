@@ -20,7 +20,7 @@ const WriteUsed = () => {
             <header className="write-header">
                 <button onClick={() => navigate(-1)}><ArrowLeft size={24} /></button>
                 <h1>중고거래 글쓰기</h1>
-                <button className="submit-btn" disabled={!isFormValid}>완료</button>
+                <div style={{ width: 24 }}></div> {/* Space holder */}
             </header>
 
             <div className="write-content">
@@ -91,6 +91,12 @@ const WriteUsed = () => {
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
+                </div>
+
+                <div className="submit-container">
+                    <button className="submit-btn-bottom" disabled={!isFormValid}>
+                        작성 완료
+                    </button>
                 </div>
             </div>
         </div>
