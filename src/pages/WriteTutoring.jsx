@@ -22,7 +22,8 @@ const WriteTutoring = () => {
     const [formData, setFormData] = useState({
         title: '',
         subject: '',
-        pay: '',
+        payType: '시급',
+        payAmount: '',
         location: '',
         locationData: null,
         description: '',
@@ -44,22 +45,26 @@ const WriteTutoring = () => {
         setShowLocationPicker(false);
     };
 
+    const handlePayChange = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, '');
+        setFormData({ ...formData, payAmount: value ? Number(value).toLocaleString() : '' });
+    };
 
-
-
-    const isFormValid = formData.title && formData.subject && formData.description && formData.location;
+    const isFormValid = formData.title && formData.subject && formData.description && formData.location && formData.payAmount;
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
 
         setIsSubmitting(true);
         try {
+            const formattedPay = `${formData.payType} ${formData.payAmount}${currency}`;
+
             const { error: dbError } = await supabase
                 .from('posts')
                 .insert({
                     category: 'tutoring',
                     title: formData.title,
-                    price: formData.pay,
+                    price: formattedPay,
                     location: formData.location,
                     latitude: formData.locationData?.lat,
                     longitude: formData.locationData?.lng,
@@ -99,6 +104,8 @@ const WriteTutoring = () => {
                 : '레슨 경력, 커리큘럼, 대상 수강생 등을 적어주세요.'
         }
     };
+
+    const payTypeOptions = ['시급', '회당', '건당', '월급', '총액'];
 
     return (
         <div className="write-page">
@@ -164,13 +171,23 @@ const WriteTutoring = () => {
 
                 <div className="form-group">
                     <label>{labels.pay}</label>
-                    <input
-                        type="text"
-                        className="input-field"
-                        placeholder={`예: 시급 30${currency}, 회당 상의`}
-                        value={formData.pay}
-                        onChange={(e) => setFormData({ ...formData, pay: e.target.value })}
-                    />
+                    <div className="price-input-wrapper">
+                        <select
+                            className="pay-type-select"
+                            value={formData.payType}
+                            onChange={(e) => setFormData({ ...formData, payType: e.target.value })}
+                        >
+                            {payTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                        <input
+                            type="text"
+                            className="input-field"
+                            placeholder="금액 입력"
+                            value={formData.payAmount}
+                            onChange={handlePayChange}
+                        />
+                        <span className="currency-label">{currency}</span>
+                    </div>
                 </div>
 
                 <div className="form-group">
