@@ -41,9 +41,7 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
             }
 
             const params = new URLSearchParams({
-                q: finalQuery,
-                lang: 'ko',
-                limit: '5'
+                lang: 'en',
             });
 
             // If we have access to user location or country center, we could add lat/lon bias
