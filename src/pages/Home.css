@@ -72,6 +72,13 @@
     gap: 12px;
 }
 
+@media (max-width: 400px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
 .category-card {
     padding: 16px 8px;
     /* Slim rectangle instead of square */
