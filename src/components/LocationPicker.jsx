@@ -14,9 +14,20 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
     const API_URL = import.meta.env.VITE_PHOTON_API_URL || 'http://localhost:2322/api';
 
     useEffect(() => {
-        if (inputRef.current) {
-            inputRef.current.focus();
-        }
+        // Prevent background scrolling when picker is open
+        document.body.style.overflow = 'hidden';
+
+        const timer = setTimeout(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }, 150); // Small delay to avoid mobile layout jump during animation
+
+        return () => {
+            // Restore scrolling when picker is closed
+            document.body.style.overflow = 'auto';
+            clearTimeout(timer);
+        };
     }, []);
 
     const searchPlaces = async (searchText) => {
