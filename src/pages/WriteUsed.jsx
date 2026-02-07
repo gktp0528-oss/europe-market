@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera } from 'lucide-react';
+import { ArrowLeft, Camera, MapPin, Clock } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
@@ -8,10 +8,12 @@ const WriteUsed = () => {
     const [formData, setFormData] = useState({
         title: '',
         price: '',
+        location: '',
+        tradeTime: '',
         description: '',
     });
 
-    const isFormValid = formData.title && formData.price && formData.description;
+    const isFormValid = formData.title && formData.price && formData.description && formData.location;
 
     return (
         <div className="write-page">
@@ -54,8 +56,35 @@ const WriteUsed = () => {
                     </div>
                 </div>
 
+                <div className="form-group transaction-group">
+                    <label>거래 정보</label>
+                    <div className="transaction-cards-input">
+                        <div className="input-with-icon">
+                            <MapPin size={18} className="field-icon" />
+                            <input
+                                type="text"
+                                className="input-field no-border"
+                                placeholder="거래 희망 장소를 입력해주세요"
+                                value={formData.location}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            />
+                        </div>
+                        <div className="input-divider"></div>
+                        <div className="input-with-icon">
+                            <Clock size={18} className="field-icon" />
+                            <input
+                                type="text"
+                                className="input-field no-border"
+                                placeholder="희망 거래 시간을 입력해주세요"
+                                value={formData.tradeTime}
+                                onChange={(e) => setFormData({ ...formData, tradeTime: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="form-group">
-                    <label>설명</label>
+                    <label>제품 내용</label>
                     <textarea
                         className="input-field textarea-field"
                         placeholder="게시글 내용을 작성해주세요. (판매 금지 물품은 게시가 제한될 수 있어요)"

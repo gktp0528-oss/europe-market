@@ -106,10 +106,10 @@ const TutoringDetail = () => {
                 <button className="like-btn">
                     <Heart size={24} />
                 </button>
-                <div className="price-info">
-                    <span className="label">레슨비</span>
-                    <strong>{tutoring.pay}</strong>
-                </div>
+                <button className="chat-btn">
+                    <MessageCircle size={20} />
+                    문의하기
+                </button>
                 <button className="inquiry-btn">
                     <MessageCircle size={20} />
                     문의하기
