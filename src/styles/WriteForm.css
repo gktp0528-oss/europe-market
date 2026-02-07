@@ -48,7 +48,8 @@
 .submit-btn-bottom {
     width: 100%;
     padding: 18px;
-    background-color: var(--color-primary-pink);
+    background-color: #E91E63;
+    /* Darker Pink */
     color: white;
     font-size: 16px;
     font-weight: 700;
@@ -60,7 +61,7 @@
 
 .submit-btn-bottom:active {
     transform: scale(0.98);
-    background-color: #F06292;
+    background-color: #C2185B;
 }
 
 .submit-btn-bottom:disabled {
@@ -136,6 +137,7 @@
 }
 
 .image-upload-box {
+    flex-shrink: 0;
     width: 80px;
     height: 80px;
     border-radius: 16px;
@@ -147,6 +149,39 @@
     color: #999;
     gap: 4px;
     background-color: #F9F9F9;
+    cursor: pointer;
+}
+
+.image-preview-item {
+    position: relative;
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid #F0F0F0;
+}
+
+.remove-img-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
 }
 
 .image-upload-box span {

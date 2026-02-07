@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, MapPin, Clock } from 'lucide-react';
+import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
+    const [images, setImages] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
         price: '',
+        displayPrice: '',
         location: '',
         tradeTime: '',
         description: '',
     });
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (images.length + files.length > 10) {
+            alert('사진은 최대 10장까지 업로드할 수 있어요.');
+            return;
+        }
+
+        const newImages = files.map(file => ({
+            id: Math.random().toString(36).substr(2, 9),
+            url: URL.createObjectURL(file),
+            file
+        }));
+
+        setImages([...images, ...newImages]);
+    };
+
+    const removeImage = (id) => {
+        setImages(images.filter(img => img.id !== id));
+    };
+
+    const handlePriceChange = (e) => {
+        const value = e.target.value.replace(/[^0-9]/g, '');
+        if (value === '') {
+            setFormData({ ...formData, price: '', displayPrice: '' });
+            return;
+        }
+
+        const formattedValue = Number(value).toLocaleString();
+        setFormData({
+            ...formData,
+            price: value,
+            displayPrice: formattedValue
+        });
+    };
 
     const isFormValid = formData.title && formData.price && formData.description && formData.location;
 
@@ -25,10 +63,26 @@ const WriteUsed = () => {
 
             <div className="write-content">
                 <div className="image-upload-section">
-                    <div className="image-upload-box">
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                    />
+                    <div className="image-upload-box" onClick={() => fileInputRef.current?.click()}>
                         <Camera size={24} />
-                        <span>0/10</span>
+                        <span>{images.length}/10</span>
                     </div>
+                    {images.map((img) => (
+                        <div key={img.id} className="image-preview-item">
+                            <img src={img.url} alt="upload preview" />
+                            <button className="remove-img-btn" onClick={() => removeImage(img.id)}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ))}
                 </div>
 
                 <div className="form-group">
@@ -46,11 +100,11 @@ const WriteUsed = () => {
                     <label>가격</label>
                     <div className="price-input-wrapper">
                         <input
-                            type="number"
+                            type="text"
                             className="input-field"
                             placeholder="가격을 입력해주세요"
-                            value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            value={formData.displayPrice}
+                            onChange={handlePriceChange}
                         />
                         <span className="currency-label">유로</span>
                     </div>
@@ -64,7 +118,7 @@ const WriteUsed = () => {
                             <input
                                 type="text"
                                 className="input-field no-border"
-                                placeholder="거래 희망 장소를 입력해주세요"
+                                placeholder="선호하는 거래 위치를 입력해주세요"
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             />
@@ -75,7 +129,7 @@ const WriteUsed = () => {
                             <input
                                 type="text"
                                 className="input-field no-border"
-                                placeholder="희망 거래 시간을 입력해주세요"
+                                placeholder="선호하는 거래 시간을 입력해주세요"
                                 value={formData.tradeTime}
                                 onChange={(e) => setFormData({ ...formData, tradeTime: e.target.value })}
                             />
