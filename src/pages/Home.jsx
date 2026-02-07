@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock, Heart, Eye } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
@@ -98,25 +98,25 @@ const Home = () => {
             title="중고거래"
             icon={ShoppingBag}
             delay="0s"
-            to="/category/clothes"
+            onClick={() => navigate('/category/clothes')}
           />
           <CategoryCard
             title="알바"
             icon={Briefcase}
             delay="0.1s"
-            to="/category/jobs"
+            onClick={() => navigate('/category/jobs')}
           />
           <CategoryCard
             title="과외/레슨"
             icon={GraduationCap}
             delay="0.2s"
-            to="/category/tutoring"
+            onClick={() => navigate('/category/tutoring')}
           />
           <CategoryCard
             title="모임"
             icon={Users}
             delay="0.3s"
-            to="/category/meetups"
+            onClick={() => navigate('/category/meetups')}
           />
         </div>
       </section>
@@ -175,28 +175,18 @@ const Home = () => {
 };
 
 // Reusable Category Card Component
-const CategoryCard = ({ title, icon: Icon, delay, to }) => {
+const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
   return (
-    <Link
-      to={to}
+    <button
       className="category-card"
-      style={{
-        backgroundColor: 'var(--category-bg)',
-        animationDelay: delay,
-        textDecoration: 'none',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        zIndex: 5
-      }}
+      style={{ backgroundColor: 'var(--category-bg)', animationDelay: delay }}
+      onClick={onClick}
     >
-      <div className="card-icon-wrapper" style={{ pointerEvents: 'none' }}>
+      <div className="card-icon-wrapper">
         <Icon size={24} strokeWidth={2} color="var(--color-primary-pink)" />
       </div>
-      <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none', pointerEvents: 'none' }}>{title}</span>
-    </Link>
+      <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none' }}>{title}</span>
+    </button>
   );
 };
 
