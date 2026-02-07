@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, X, MapPin } from 'lucide-react';
 import { SearchBox } from '@mapbox/search-js-react';
+import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import './LocationPicker.css';
 
 const LocationPicker = ({ countryCode, onSelect, onClose }) => {
     const [searchValue, setSearchValue] = useState('');
     const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+    // Filter countries for Mapbox (must be ISO 3166-1 alpha-2 codes)
+    const searchCountries = useMemo(() => {
+        if (!countryCode || countryCode === 'ALL') {
+            // Get all codes except 'ALL'
+            return SUPPORTED_COUNTRIES
+                .filter(c => c.code !== 'ALL')
+                .map(c => c.code.toLowerCase());
+        }
+        return [countryCode.toLowerCase()];
+    }, [countryCode]);
 
     const handleRetrieve = (res) => {
         if (res && res.features && res.features[0]) {
@@ -36,9 +48,9 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
                         value={searchValue}
                         onChange={(val) => setSearchValue(val)}
                         onRetrieve={handleRetrieve}
-                        placeholder="장소나 주소를 입력해보세요"
+                        placeholder="유럽 내 장소나 주소를 입력해보세요"
                         options={{
-                            countries: [countryCode?.toLowerCase() || 'fr'],
+                            countries: searchCountries,
                             language: 'ko',
                             limit: 5
                         }}
@@ -71,6 +83,7 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
                                     background-color: #fff !important;
                                     border-color: #3b82f6 !important;
                                     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+                                    border: 1px solid #3b82f6 !important;
                                 }
                                 .mapboxgl-ctrl-geocoder--icon-search {
                                     display: none;
@@ -82,7 +95,11 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
 
                 <div className="picker-hint">
                     <MapPin size={14} />
-                    <span>입력하신 국가({countryCode}) 내 장소만 검색됩니다.</span>
+                    <span>
+                        {countryCode === 'ALL'
+                            ? '유럽 10개국 내 장소만 검색됩니다.'
+                            : `입력하신 국가(${countryCode}) 내 장소만 검색됩니다.`}
+                    </span>
                 </div>
 
                 <div className="mapbox-attribution">
