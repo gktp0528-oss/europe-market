@@ -129,8 +129,6 @@ const WriteMeetup = () => {
                 ? `${formData.date} ${formData.startTime}`
                 : `${formData.repeatDays.join(', ')} ${formData.startTime}`;
 
-            const fullDescription = `모집 인원: ${formData.members}명\n\n${formData.description}`;
-
             // 3. Save to Database
             const { error: dbError } = await supabase
                 .from('posts')
@@ -142,7 +140,7 @@ const WriteMeetup = () => {
                     location: formData.location,
                     latitude: formData.locationData?.lat,
                     longitude: formData.locationData?.lng,
-                    description: fullDescription,
+                    description: formData.description,
                     country_code: countryCode,
                     image_urls: uploadedUrls,
                     time_ago: '방금 전',
