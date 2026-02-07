@@ -25,9 +25,12 @@ const WriteMeetup = () => {
 
     const [formData, setFormData] = useState({
         title: '',
+        meetupType: 'one-time', // 'one-time' or 'recurring'
         date: '',
         startTime: '',
         endTime: '',
+        repeatDays: [], // ['월', '수'] etc.
+        repeatCycle: '매주', // '매주', '격주', '매월'
         isFree: true,
         fee: '',
         members: '',
@@ -82,6 +85,15 @@ const WriteMeetup = () => {
         }));
     };
 
+    const toggleRepeatDay = (day) => {
+        setFormData(prev => ({
+            ...prev,
+            repeatDays: prev.repeatDays.includes(day)
+                ? prev.repeatDays.filter(d => d !== day)
+                : [...prev.repeatDays, day]
+        }));
+    };
+
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
 
@@ -109,7 +121,12 @@ const WriteMeetup = () => {
 
             // 2. Format Data for DB
             const formattedFee = formData.isFree ? '무료' : `${formData.fee}${currency}`;
-            const formattedDate = `${formData.date} ${formData.startTime}`; // Store Date+StartTime in trade_time
+
+            // For recurring, store days and time. For one-time, store date and time.
+            const formattedDate = formData.meetupType === 'one-time'
+                ? `${formData.date} ${formData.startTime}`
+                : `${formData.repeatDays.join(', ')} ${formData.startTime}`;
+
             const fullDescription = `모집 인원: ${formData.members}명\n\n${formData.description}`;
 
             // 3. Save to Database
@@ -137,7 +154,10 @@ const WriteMeetup = () => {
                         startTime: formData.startTime,
                         endTime: formData.endTime,
                         isFree: formData.isFree,
-                        members: formData.members
+                        members: formData.members,
+                        meetupType: formData.meetupType,
+                        repeatDays: formData.repeatDays,
+                        repeatCycle: formData.repeatCycle
                     }
                 });
 
@@ -155,7 +175,7 @@ const WriteMeetup = () => {
     };
 
     const isFormValid = formData.title &&
-        formData.date &&
+        (formData.meetupType === 'one-time' ? formData.date : formData.repeatDays.length > 0) &&
         formData.startTime &&
         (formData.isFree || formData.fee) &&
         formData.members &&
@@ -288,17 +308,78 @@ const WriteMeetup = () => {
                     )}
                 </div>
 
-                {/* Date & Time */}
+                {/* Date & Time with Type Toggle */}
                 <div className="form-group">
                     <label>모임 일시</label>
-                    <div className="time-input-box" style={{ marginBottom: '8px' }}>
-                        <Calendar size={16} />
-                        <input
-                            type="date"
-                            value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        />
+                    <div className="segment-control" style={{ display: 'flex', background: '#f1f5f9', borderRadius: '12px', padding: '4px', marginTop: '8px', marginBottom: '12px' }}>
+                        <button
+                            className={`segment-btn ${formData.meetupType === 'one-time' ? 'active' : ''}`}
+                            onClick={() => setFormData({ ...formData, meetupType: 'one-time' })}
+                            style={{
+                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
+                                background: formData.meetupType === 'one-time' ? 'white' : 'transparent',
+                                boxShadow: formData.meetupType === 'one-time' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                                fontWeight: formData.meetupType === 'one-time' ? '700' : '500',
+                                color: formData.meetupType === 'one-time' ? '#00BCD4' : '#64748b',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            한 번만 만나요
+                        </button>
+                        <button
+                            className={`segment-btn ${formData.meetupType === 'recurring' ? 'active' : ''}`}
+                            onClick={() => setFormData({ ...formData, meetupType: 'recurring' })}
+                            style={{
+                                flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
+                                background: formData.meetupType === 'recurring' ? 'white' : 'transparent',
+                                boxShadow: formData.meetupType === 'recurring' ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                                fontWeight: formData.meetupType === 'recurring' ? '700' : '500',
+                                color: formData.meetupType === 'recurring' ? '#00BCD4' : '#64748b',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            자주 만나요 (정기)
+                        </button>
                     </div>
+
+                    {formData.meetupType === 'one-time' ? (
+                        <div className="time-input-box" style={{ marginBottom: '8px' }}>
+                            <Calendar size={16} />
+                            <input
+                                type="date"
+                                value={formData.date}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            />
+                        </div>
+                    ) : (
+                        <div className="recurring-options" style={{ marginBottom: '12px' }}>
+                            <div className="days-selector" style={{ display: 'flex', gap: '6px', marginBottom: '12px' }}>
+                                {['월', '화', '수', '목', '금', '토', '일'].map(day => (
+                                    <div
+                                        key={day}
+                                        className={`day-chip ${formData.repeatDays.includes(day) ? 'active' : ''}`}
+                                        onClick={() => toggleRepeatDay(day)}
+                                        style={{ flex: 1, minWidth: '40px' }}
+                                    >
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="repeat-cycle-selector" style={{ display: 'flex', gap: '8px' }}>
+                                {['매주', '격주', '매월'].map(cycle => (
+                                    <button
+                                        key={cycle}
+                                        className={`segment-btn ${formData.repeatCycle === cycle ? 'active' : ''}`}
+                                        onClick={() => setFormData({ ...formData, repeatCycle: cycle })}
+                                        style={{ border: '1px solid #e1e8f0', borderRadius: '10px', flex: 1 }}
+                                    >
+                                        {cycle}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="time-range-picker">
                         <div className="time-input-box" style={{ flex: 1 }}>
                             <Clock size={16} />

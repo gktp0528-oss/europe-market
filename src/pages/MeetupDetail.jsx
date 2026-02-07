@@ -66,6 +66,9 @@ const MeetupDetail = () => {
     const approvalType = metadata.approvalType || 'first-come';
     const startTime = metadata.startTime || '';
     const endTime = metadata.endTime || '';
+    const meetupType = metadata.meetupType || 'one-time';
+    const repeatDays = metadata.repeatDays || [];
+    const repeatCycle = metadata.repeatCycle || '매주';
 
     // Parse Description for Participants (legacy fallback)
     let maxMembers = metadata.members || '0';
@@ -81,8 +84,13 @@ const MeetupDetail = () => {
 
     // Smart Field Mapping for Backward Compatibility
     const isNewFormat = meetup.trade_time != null;
-    const dateOnly = meetup.trade_time ? meetup.trade_time.split(' ')[0] : (meetup.price && meetup.price.includes('-') ? meetup.price : '날짜 미정');
-    const displayDate = dateOnly;
+    const isRecurring = meetupType === 'recurring';
+
+    // For recurring: "매주 (월, 수)", For one-time: "2024-03-10"
+    const displayDate = isRecurring
+        ? `${repeatCycle} (${repeatDays.join(', ')})`
+        : (meetup.trade_time ? meetup.trade_time.split(' ')[0] : (meetup.price && meetup.price.includes('-') ? meetup.price : '날짜 미정'));
+
     const displayTime = startTime && endTime ? `${startTime} ~ ${endTime}` : (meetup.trade_time && meetup.trade_time.includes(':') ? meetup.trade_time.split(' ')[1] : '시간 미정');
     const displayFee = isNewFormat ? meetup.price : '회비 문의';
     const hasImages = meetup.image_urls && meetup.image_urls.length > 0;
