@@ -1,41 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Clock, Heart, Eye } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
+import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import './CategoryClothes.css';
 
 const CategoryClothes = () => {
     const navigate = useNavigate();
     const { selectedCountry } = useCountry();
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Mock Data for Clothing
-    const items = [
-        { id: 1, title: '폴로 랄프로렌 셔츠', price: '30유로', location: '파리 15구', time: '10분 전', color: '#F5F5DC', country: 'FR', views: 85, likes: 12 },
-        { id: 2, title: '빈티지 꽃무늬 원피스', price: '25유로', location: '마레지구', time: '30분 전', color: '#FFE4E1', country: 'FR', views: 120, likes: 18 },
-        { id: 3, title: '나이키 후드티', price: '20유로', location: '베를린 미테', time: '1시간 전', color: '#E6E6FA', country: 'DE', views: 240, likes: 35 },
-        { id: 4, title: 'COS 니트 가디건', price: '45파운드', location: '런던 소호', time: '2시간 전', color: '#F0FFFF', country: 'GB', views: 65, likes: 7 },
-        { id: 5, title: '자라 트렌치 코트', price: '40유로', location: '프랑크푸르트', time: '3시간 전', color: '#FFFACD', country: 'DE', views: 98, likes: 14 },
-        { id: 6, title: '아페쎄 데님 스커트', price: '50유로', location: '파리 11구', time: '5시간 전', color: '#E0FFFF', country: 'FR', views: 112, likes: 21 },
-        { id: 7, title: '아디다스 져지', price: '25유로', location: '뮌헨', time: '6시간 전', color: '#FAF0E6', country: 'DE', views: 76, likes: 8 },
-        { id: 8, title: '바버 왁스 자켓', price: '120파운드', location: '런던 킹스크로스', time: '1일 전', color: '#F0FFF0', country: 'GB', views: 154, likes: 29 },
-        { id: 9, title: '몽클레어 패딩', price: '500유로', location: '밀라노', time: '2일 전', color: '#F5F5F5', country: 'IT', views: 320, likes: 42 },
-        { id: 10, title: '구찌 가방', price: '800유로', location: '로마', time: '3일 전', color: '#FFF0F5', country: 'IT', views: 450, likes: 68 },
-        { id: 11, title: '캐시미어 코트 (새상품)', price: '120,000포린트', location: '부다페스트 5구', time: '15분 전', color: '#E8D5B7', country: 'HU', views: 42, likes: 5 },
-        { id: 12, title: '빈티지 헝가리 자수 블라우스', price: '35,000포린트', location: '부다페스트 7구', time: '1시간 전', color: '#FFDAB9', country: 'HU', views: 58, likes: 11 },
-        { id: 13, title: '닥터마틴 부츠 250mm', price: '55,000포린트', location: '부다페스트 11구', time: '3시간 전', color: '#2F1810', country: 'HU', views: 94, likes: 16 },
-    ];
+    const fetchPosts = async () => {
+        setLoading(true);
+        try {
+            let query = supabase
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-    const filteredItems = items.filter(item =>
-        selectedCountry.code === 'ALL' || item.country === selectedCountry.code
-    );
+            if (selectedCountry.code !== 'ALL') {
+                query = query.eq('country_code', selectedCountry.code);
+            }
+
+            const { data, error } = await query;
+
+            if (error) throw error;
+            setItems(data || []);
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPosts();
+    }, [selectedCountry]);
+
+    const filteredItems = items;
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>
 
             <div className="product-grid">
-                {filteredItems.length > 0 ? (
+                {loading ? (
+                    <div className="loading-state" style={{ margin: '40px auto', textAlign: 'center' }}>
+                        <p>게시글을 불러오고 있어요... 🔄</p>
+                    </div>
+                ) : filteredItems.length > 0 ? (
                     filteredItems.map((item) => (
                         <div
                             key={item.id}
@@ -43,21 +58,29 @@ const CategoryClothes = () => {
                             onClick={() => navigate(`/detail/${item.id}`)}
                             style={{ cursor: 'pointer' }}
                         >
-                            <div className="product-image" style={{ backgroundColor: item.color }}></div>
+                            <div
+                                className="product-image"
+                                style={{
+                                    backgroundColor: item.color || '#F5F5F5',
+                                    backgroundImage: item.image_urls && item.image_urls.length > 0 ? `url(${item.image_urls[0]})` : 'none',
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center'
+                                }}
+                            ></div>
                             <div className="product-info">
                                 <h3 className="product-title">{item.title}</h3>
                                 <div className="product-meta">
                                     <span><MapPin size={12} /> {item.location}</span>
-                                    <span><Clock size={12} /> {item.time}</span>
+                                    <span><Clock size={12} /> {item.time_ago || '방금 전'}</span>
                                 </div>
                                 <div className="product-bottom">
                                     <p className="product-price">{item.price}</p>
                                     <div className="product-interactions">
                                         <span className="interaction-item">
-                                            <Eye size={12} /> {item.views}
+                                            <Eye size={12} /> {item.views || 0}
                                         </span>
                                         <span className="interaction-item heart">
-                                            <Heart size={12} /> {item.likes}
+                                            <Heart size={12} /> {item.likes || 0}
                                         </span>
                                     </div>
                                 </div>
@@ -65,8 +88,9 @@ const CategoryClothes = () => {
                         </div>
                     ))
                 ) : (
-                    <div className="empty-state" style={{ margin: '20px auto' }}>
+                    <div className="empty-state" style={{ margin: '40px auto', textAlign: 'center' }}>
                         <p>해당 국가의 상품이 없습니다 🥲</p>
+                        <p style={{ fontSize: '13px', color: '#999', marginTop: '8px' }}>첫 번째 주인공이 되어보세요!</p>
                     </div>
                 )}
             </div>
