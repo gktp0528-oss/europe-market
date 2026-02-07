@@ -140,6 +140,7 @@ const Home = () => {
                 color={item.color}
                 likes={item.likes}
                 views={item.views}
+                category={item.category}
                 onClick={() => navigate(`/detail/${item.id}`)}
               />
             ))}
@@ -191,7 +192,9 @@ const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
 };
 
 // Horizontal Popular Item Card
-const PopularItemCard = ({ rank, title, price, location, time, color, likes, views, onClick }) => {
+const PopularItemCard = ({ rank, title, price, location, time, color, likes, views, category, onClick }) => {
+  const showPrice = category !== 'job' && category !== 'tutoring';
+
   return (
     <div className="popular-item-card" onClick={onClick}>
       <div className="popular-card-left">
@@ -205,7 +208,7 @@ const PopularItemCard = ({ rank, title, price, location, time, color, likes, vie
           <span><Clock size={10} /> {time}</span>
         </div>
         <div className="popular-bottom">
-          <p className="popular-price">{price}</p>
+          {showPrice && <p className="popular-price">{price}</p>}
           <div className="item-interactions">
             <span className="interaction-item">
               <Eye size={12} /> {views}

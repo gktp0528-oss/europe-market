@@ -55,14 +55,14 @@ const WriteTutoring = () => {
         setFormData({ ...formData, payAmount: value ? Number(value).toLocaleString() : '' });
     };
 
-    const isFormValid = formData.title && formData.subject && formData.description && formData.location && formData.payAmount;
+    const isFormValid = formData.title && formData.subject && formData.description && formData.location;
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
 
         setIsSubmitting(true);
         try {
-            const formattedPay = `${formData.payType} ${formData.payAmount}${currency}`;
+            const formattedPay = "수업료 협의";
 
             // Default images based on gender
             const maleImage = '/assets/defaults/tutor_male_animated.png';
@@ -196,26 +196,6 @@ const WriteTutoring = () => {
                     </div>
                 </div>
 
-                <div className="form-group">
-                    <label>{labels.pay}</label>
-                    <div className="price-input-wrapper">
-                        <select
-                            className="pay-type-select"
-                            value={formData.payType}
-                            onChange={(e) => setFormData({ ...formData, payType: e.target.value })}
-                        >
-                            {payTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                        <input
-                            type="text"
-                            className="input-field"
-                            placeholder="금액 입력"
-                            value={formData.payAmount}
-                            onChange={handlePayChange}
-                        />
-                        <span className="currency-label">{currency}</span>
-                    </div>
-                </div>
 
                 <div className="form-group">
                     <label>{labels.description}</label>

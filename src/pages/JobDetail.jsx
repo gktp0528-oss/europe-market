@@ -126,7 +126,6 @@ const JobDetail = () => {
                         <span><Eye size={14} /> {job.views || 0}</span>
                         <span><Heart size={14} /> {job.likes || 0}</span>
                     </div>
-                    <p className="job-pay" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#E91E63', marginTop: '8px' }}>{job.price}</p>
                 </div>
 
                 {/* Quick Info Cards */}

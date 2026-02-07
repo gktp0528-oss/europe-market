@@ -72,7 +72,6 @@ const CategoryTutoring = () => {
                                     <span><Clock size={12} /> {item.time_ago || '방금 전'}</span>
                                 </div>
                                 <div className="product-bottom">
-                                    <p className="product-price">{item.price}</p>
                                     <div className="product-interactions">
                                         <span className="interaction-item">
                                             <Eye size={12} /> {item.views || 0}

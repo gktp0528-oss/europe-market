@@ -94,7 +94,6 @@ const TutoringDetail = () => {
                         <span><Eye size={14} /> {tutoring.views || 0}</span>
                         <span><Heart size={14} /> {tutoring.likes || 0}</span>
                     </div>
-                    <p className="tutoring-pay" style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{tutoring.price}</p>
                 </div>
 
                 {/* Quick Info Cards */}

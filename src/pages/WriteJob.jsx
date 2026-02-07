@@ -116,7 +116,7 @@ const WriteJob = () => {
             }
 
             // 2. Format Data for DB
-            const formattedPay = `${formData.payType} ${formData.payAmount}${currency}`;
+            const formattedPay = "급여 협의";
             const formattedTime = formData.workDays.includes('무관')
                 ? '요일/시간 협의'
                 : `${formData.workDays.join(',')} ${formData.workTimeStart}~${formData.workTimeEnd}`;
@@ -156,7 +156,7 @@ const WriteJob = () => {
         }
     };
 
-    const isFormValid = formData.title && formData.payAmount && formData.description && formData.location && (formData.workDays.length > 0) && (formData.workDays.includes('무관') || (formData.workTimeStart && formData.workTimeEnd));
+    const isFormValid = formData.title && formData.description && formData.location && (formData.workDays.length > 0) && (formData.workDays.includes('무관') || (formData.workTimeStart && formData.workTimeEnd));
 
     return (
         <div className="write-page">
@@ -202,26 +202,6 @@ const WriteJob = () => {
                     />
                 </div>
 
-                <div className="form-group">
-                    <label>급여 정보</label>
-                    <div className="price-input-wrapper">
-                        <select
-                            className="pay-type-select"
-                            value={formData.payType}
-                            onChange={(e) => setFormData({ ...formData, payType: e.target.value })}
-                        >
-                            {payTypeOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                        </select>
-                        <input
-                            type="text"
-                            className="input-field"
-                            placeholder="금액 입력"
-                            value={formData.payAmount}
-                            onChange={handlePayChange}
-                        />
-                        <span className="currency-label">{currency}</span>
-                    </div>
-                </div>
 
                 <div className="form-group transaction-group">
                     <label>근무 조건</label>

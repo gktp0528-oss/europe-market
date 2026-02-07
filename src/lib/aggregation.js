@@ -46,6 +46,7 @@ export const updateTop10Snapshot = async () => {
                 time: item.time_ago, // or calculate from created_at
                 color: item.color,
                 country: item.country_code,
+                category: item.category,
                 views: item.views,
                 likes: item.likes
             }));
