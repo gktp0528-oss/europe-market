@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './DetailPage.css';
 
@@ -10,6 +10,7 @@ const MeetupDetail = () => {
     const { id } = useParams();
     const [meetup, setMeetup] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
     useEffect(() => {
         fetchMeetupDetail();
@@ -41,6 +42,20 @@ const MeetupDetail = () => {
         }
     };
 
+    const nextImage = (e) => {
+        e.stopPropagation();
+        if (meetup.image_urls && meetup.image_urls.length > 0) {
+            setCurrentImageIndex((prev) => (prev + 1) % meetup.image_urls.length);
+        }
+    };
+
+    const prevImage = (e) => {
+        e.stopPropagation();
+        if (meetup.image_urls && meetup.image_urls.length > 0) {
+            setCurrentImageIndex((prev) => (prev - 1 + meetup.image_urls.length) % meetup.image_urls.length);
+        }
+    };
+
     if (loading) return <div className="loading-spinner">Loading...</div>;
     if (!meetup) return <div className="error-message">존재하지 않는 모임입니다.</div>;
 
@@ -51,37 +66,70 @@ const MeetupDetail = () => {
     if (meetup.description && meetup.description.includes('모집 인원:')) {
         const parts = meetup.description.split('\n\n');
         if (parts.length > 0) {
-            maxMembers = parts[0].replace('모집 인원:', '').trim();
+            maxMembers = parts[0].replace('모집 인원:', '').replace('명', '').trim();
             descriptionBody = parts.slice(1).join('\n\n');
         }
     }
 
+    // Smart Field Mapping for Backward Compatibility
+    // Old: price = "Date String", trade_time = null
+    // New: price = "Fee String", trade_time = "Date String"
+    const isNewFormat = meetup.trade_time != null;
+    const displayDate = isNewFormat ? meetup.trade_time : meetup.price;
+    const displayFee = isNewFormat ? meetup.price : '회비 문의';
+    const hasImages = meetup.image_urls && meetup.image_urls.length > 0;
+
     return (
         <div className="detail-page style-meetup">
             {/* Header */}
-            <header className="detail-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
+            <header className="detail-header" style={{ background: hasImages ? 'transparent' : 'white' }}>
+                <button className="back-btn" onClick={() => navigate(-1)} style={{ color: hasImages ? 'white' : 'black' }}>
                     <ArrowLeft size={24} />
                 </button>
                 <div className="header-actions">
-                    <button className="action-btn"><Share2 size={20} /></button>
-                    <button className="action-btn"><Heart size={20} /></button>
+                    <button className="action-btn" style={{ color: hasImages ? 'white' : 'black' }}><Share2 size={20} /></button>
+                    <button className="action-btn" style={{ color: hasImages ? 'white' : 'black' }}><Heart size={20} /></button>
                 </div>
             </header>
 
-            {/* Hero Section */}
-            <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#80DEEA' }}>
-                <Users size={48} color="#666" style={{ opacity: 0.3 }} />
-            </div>
+            {/* Hero Section (Image Slider or Color) */}
+            {hasImages ? (
+                <div className="hero-slider-container" style={{ height: '300px', position: 'relative' }}>
+                    <img
+                        src={meetup.image_urls[currentImageIndex]}
+                        alt="Meetup Preview"
+                        className="hero-image"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    {meetup.image_urls.length > 1 && (
+                        <>
+                            <button className="slider-btn prev" onClick={prevImage}><ChevronLeft size={24} /></button>
+                            <button className="slider-btn next" onClick={nextImage}><ChevronRight size={24} /></button>
+                            <div className="slider-dots">
+                                {meetup.image_urls.map((_, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`dot ${currentImageIndex === idx ? 'active' : ''}`}
+                                    />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            ) : (
+                <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#E0F7FA', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Users size={48} color="#666" style={{ opacity: 0.3 }} />
+                </div>
+            )}
 
             {/* Content */}
-            <div className="detail-content">
+            <div className="detail-content" style={{ marginTop: hasImages ? '-20px' : '0', borderRadius: '24px 24px 0 0', background: 'white', position: 'relative', zIndex: 10, padding: '24px' }}>
                 {/* Title Section */}
                 <div className="meetup-title-section">
                     <h1 className="meetup-title">{meetup.title}</h1>
                     <div className="meetup-date-row">
-                        <Calendar size={16} />
-                        <span>{meetup.price}</span> {/* Date stored in price col */}
+                        <Clock size={16} />
+                        <span>{displayDate}</span>
                         <div style={{ width: '1px', height: '12px', background: '#ccc', margin: '0 8px' }}></div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#888' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Eye size={14} /> {meetup.views || 0}</span>
@@ -110,8 +158,8 @@ const MeetupDetail = () => {
                             <Users size={20} />
                         </div>
                         <div className="info-text">
-                            <span className="label">참가 인원</span>
-                            <span className="value">모집 {maxMembers}</span>
+                            <span className="label">모집 인원</span>
+                            <span className="value">{maxMembers}명</span>
                         </div>
                     </div>
                     <div className="info-row">
@@ -120,12 +168,12 @@ const MeetupDetail = () => {
                         </div>
                         <div className="info-text">
                             <span className="label">참가비</span>
-                            <span className="value">회비 문의</span>
+                            <span className="value">{displayFee}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Participant Bar (Mock for now since we don't track current participants in DB yet) */}
+                {/* Participant Bar (visual only) */}
                 <div className="participant-bar">
                     <div
                         className="participant-fill"
