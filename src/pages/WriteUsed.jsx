@@ -95,6 +95,7 @@ const WriteUsed = () => {
             const { error: dbError } = await supabase
                 .from('posts')
                 .insert({
+                    category: 'used',
                     title: formData.title,
                     price: `${formData.displayPrice}${currency}`,
                     location: formData.location,

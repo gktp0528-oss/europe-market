@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Camera } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import '../styles/WriteForm.css';
 

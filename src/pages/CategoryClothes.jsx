@@ -19,6 +19,7 @@ const CategoryClothes = () => {
             let query = supabase
                 .from('posts')
                 .select('*')
+                .eq('category', 'used')
                 .order('created_at', { ascending: false });
 
             if (selectedCountry.code !== 'ALL') {
