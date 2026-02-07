@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { getCountryCodeFromLocation } from '../lib/locationUtils';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         price: '',
@@ -49,6 +52,64 @@ const WriteUsed = () => {
             price: value,
             displayPrice: formattedValue
         });
+    };
+
+    const handleSubmit = async () => {
+        if (!isFormValid || isSubmitting) return;
+
+        setIsSubmitting(true);
+        try {
+            // 1. Upload Images
+            const uploadedUrls = [];
+            for (const img of images) {
+                const fileExt = img.file.name.split('.').pop();
+                const fileName = `${Math.random()}.${fileExt}`;
+                const filePath = `used/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('images')
+                    .upload(filePath, img.file);
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('images')
+                    .getPublicUrl(filePath);
+
+                uploadedUrls.push(publicUrl);
+            }
+
+            // 2. Identify Country
+            const countryCode = getCountryCodeFromLocation(formData.location);
+
+            // 3. Save to Database
+            const { error: dbError } = await supabase
+                .from('posts')
+                .insert({
+                    title: formData.title,
+                    price: `${formData.displayPrice}유로`,
+                    location: formData.location,
+                    description: formData.description,
+                    trade_time: formData.tradeTime,
+                    country_code: countryCode,
+                    image_urls: uploadedUrls,
+                    time_ago: '방금 전',
+                    views: 0,
+                    likes: 0,
+                    color: '#F5F5F5'
+                });
+
+            if (dbError) throw dbError;
+
+            alert('게시글이 성공적으로 등록되었습니다! ✨');
+            navigate('/category/clothes');
+
+        } catch (error) {
+            console.error('Submission failed:', error);
+            alert('등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const isFormValid = formData.title && formData.price && formData.description && formData.location;
@@ -148,8 +209,12 @@ const WriteUsed = () => {
                 </div>
 
                 <div className="submit-container">
-                    <button className="submit-btn-bottom" disabled={!isFormValid}>
-                        작성 완료
+                    <button
+                        className="submit-btn-bottom"
+                        disabled={!isFormValid || isSubmitting}
+                        onClick={handleSubmit}
+                    >
+                        {isSubmitting ? '등록 중...' : '작성 완료'}
                     </button>
                 </div>
             </div>
