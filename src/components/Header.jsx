@@ -3,12 +3,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, User, Search, Bell } from 'lucide-react';
 import CountryModal from './CountryModal';
 import { useCountry } from '../contexts/CountryContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedCountry } = useCountry();
+  const { user, signOut } = useAuth();
 
   const isHome = location.pathname === '/';
 
@@ -59,9 +61,23 @@ const Header = () => {
           <button className="icon-btn">
             <Search size={22} />
           </button>
-          <button className="icon-btn">
-            <User size={22} onClick={() => navigate('/mypage')} />
-          </button>
+          {user ? (
+            <button className="icon-btn" onClick={() => {
+              if (window.confirm('로그아웃 하시겠습니까?')) {
+                signOut();
+                navigate('/');
+              }
+            }}>
+              <div style={{ position: 'relative' }}>
+                <User size={22} color="#E91E63" />
+                <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: '#4CAF50', border: '1px solid white' }}></span>
+              </div>
+            </button>
+          ) : (
+            <button className="login-btn-header" onClick={() => navigate('/login')}>
+              <span style={{ fontSize: '13px', fontWeight: 'bold' }}>로그인</span>
+            </button>
+          )}
         </div>
 
         <style jsx>{`
@@ -153,6 +169,20 @@ const Header = () => {
 
             .back-btn {
               margin-left: -8px;
+            }
+
+            .login-btn-header {
+                background: #E91E63;
+                color: white;
+                border: none;
+                padding: 6px 12px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            .login-btn-header:hover {
+                background: #D81B60;
             }
           `}</style>
       </header>
