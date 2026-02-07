@@ -176,7 +176,8 @@
     border-radius: 16px;
     border: 1px solid #F0F0F0;
     background-color: #F9F9F9;
-    font-size: 15px;
+    font-size: 16px;
+    /* Prevent iOS zoom */
     color: var(--text-main);
     transition: all 0.2s;
 }
@@ -444,7 +445,8 @@
 .time-input-box input {
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 16px;
+    /* Prevent iOS zoom */
     width: 100%;
     margin-left: 8px;
     color: #333;
@@ -508,10 +510,18 @@
     color: #0097A7;
     font-weight: 700;
 }
+
 /* Multi-step Animation */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .animate-fade-in {
