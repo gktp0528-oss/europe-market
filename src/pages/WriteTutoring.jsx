@@ -30,10 +30,15 @@ const WriteTutoring = () => {
     });
 
     const [tutoringType, setTutoringType] = useState('tutoring'); // 'tutoring' or 'lesson'
+    const [gender, setGender] = useState('male'); // 'male' or 'female'
 
     const handleTypeChange = (type) => {
         setTutoringType(type);
         setFormData(prev => ({ ...prev, title: '', subject: '', description: '' })); // Reset relevant fields
+    };
+
+    const handleGenderChange = (selectedGender) => {
+        setGender(selectedGender);
     };
 
     const handleLocationSelect = (data) => {
@@ -59,6 +64,11 @@ const WriteTutoring = () => {
         try {
             const formattedPay = `${formData.payType} ${formData.payAmount}${currency}`;
 
+            // Default images based on gender
+            const maleImage = '/assets/defaults/tutor_male_animated.png';
+            const femaleImage = '/assets/defaults/tutor_female_animated.png';
+            const defaultImage = gender === 'male' ? maleImage : femaleImage;
+
             const { error: dbError } = await supabase
                 .from('posts')
                 .insert({
@@ -73,6 +83,7 @@ const WriteTutoring = () => {
                     time_ago: '방금 전',
                     views: 0,
                     likes: 0,
+                    image_urls: [defaultImage],
                     color: '#F5F5F5'
                 });
 
@@ -117,7 +128,7 @@ const WriteTutoring = () => {
 
             <div className="write-content">
                 {/* Type Selection */}
-                <div className="segment-control" style={{ marginBottom: '20px' }}>
+                <div className="segment-control" style={{ marginBottom: '12px' }}>
                     <button
                         className={`segment-btn ${tutoringType === 'tutoring' ? 'active' : ''}`}
                         onClick={() => handleTypeChange('tutoring')}
@@ -129,6 +140,22 @@ const WriteTutoring = () => {
                         onClick={() => handleTypeChange('lesson')}
                     >
                         🎹 레슨
+                    </button>
+                </div>
+
+                {/* Gender Selection */}
+                <div className="segment-control" style={{ marginBottom: '20px' }}>
+                    <button
+                        className={`segment-btn ${gender === 'male' ? 'active' : ''}`}
+                        onClick={() => handleGenderChange('male')}
+                    >
+                        👨‍🏫 남자 선생님
+                    </button>
+                    <button
+                        className={`segment-btn ${gender === 'female' ? 'active' : ''}`}
+                        onClick={() => handleGenderChange('female')}
+                    >
+                        👩‍🏫 여자 선생님
                     </button>
                 </div>
 
