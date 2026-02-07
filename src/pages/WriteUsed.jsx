@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
+import LocationPicker from '../components/LocationPicker';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
@@ -14,6 +15,7 @@ const WriteUsed = () => {
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showLocationPicker, setShowLocationPicker] = useState(false);
 
     // Get country info for currency
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
@@ -24,6 +26,7 @@ const WriteUsed = () => {
         price: '',
         displayPrice: '',
         location: '',
+        locationData: null, // Store coordinates and structured info
         tradeTime: '',
         description: '',
     });
@@ -63,6 +66,15 @@ const WriteUsed = () => {
         });
     };
 
+    const handleLocationSelect = (data) => {
+        setFormData({
+            ...formData,
+            location: data.address,
+            locationData: data
+        });
+        setShowLocationPicker(false);
+    };
+
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
 
@@ -99,6 +111,8 @@ const WriteUsed = () => {
                     title: formData.title,
                     price: `${formData.displayPrice}${currency}`,
                     location: formData.location,
+                    latitude: formData.locationData?.lat,
+                    longitude: formData.locationData?.lng,
                     description: formData.description,
                     trade_time: formData.tradeTime,
                     country_code: countryCode,
@@ -129,7 +143,7 @@ const WriteUsed = () => {
             <header className="write-header">
                 <button onClick={() => navigate(-1)}><ArrowLeft size={24} /></button>
                 <h1>중고거래 글쓰기</h1>
-                <div style={{ width: 24 }}></div> {/* Space holder */}
+                <div style={{ width: 24 }}></div>
             </header>
 
             <div className="write-content">
@@ -184,14 +198,15 @@ const WriteUsed = () => {
                 <div className="form-group transaction-group">
                     <label>거래 정보</label>
                     <div className="transaction-cards-input">
-                        <div className="input-with-icon">
+                        <div className="input-with-icon" onClick={() => setShowLocationPicker(true)} style={{ cursor: 'pointer' }}>
                             <MapPin size={18} className="field-icon" />
                             <input
                                 type="text"
                                 className="input-field no-border"
-                                placeholder="선호하는 거래 위치를 입력해주세요"
+                                placeholder="거래 위치를 선택해주세요"
                                 value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                readOnly
+                                style={{ pointerEvents: 'none' }}
                             />
                         </div>
                         <div className="input-divider"></div>
@@ -207,6 +222,14 @@ const WriteUsed = () => {
                         </div>
                     </div>
                 </div>
+
+                {showLocationPicker && (
+                    <LocationPicker
+                        countryCode={initialCountryCode}
+                        onSelect={handleLocationSelect}
+                        onClose={() => setShowLocationPicker(false)}
+                    />
+                )}
 
                 <div className="form-group">
                     <label>제품 내용</label>

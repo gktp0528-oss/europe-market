@@ -1,28 +1,42 @@
-import React, { useState } from 'react';
-import { Search, X, MapPin } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Search, X, MapPin, Loader2 } from 'lucide-react';
+import { useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import './LocationPicker.css';
 
-// Predefined set of cities for each country to ensure valid location data
-const CITY_DATA = {
-    'FR': ['Paris', 'Lyon', 'Marseille', 'Nice', 'Bordeaux', 'Lille', 'Strasbourg', 'Montpellier'],
-    'DE': ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Cologne', 'Düsseldorf', 'Stuttgart', 'Leipzig'],
-    'GB': ['London', 'Birmingham', 'Manchester', 'Glasgow', 'Liverpool', 'Edinburgh', 'Leeds', 'Bristol'],
-    'IT': ['Rome', 'Milan', 'Florence', 'Venice', 'Naples', 'Turin', 'Palermo', 'Bologna'],
-    'ES': ['Madrid', 'Barcelona', 'Valencia', 'Seville', 'Malaga', 'Bilbao', 'Zaragoza', 'Granada'],
-    'AT': ['Vienna', 'Salzburg', 'Innsbruck', 'Graz', 'Linz'],
-    'NL': ['Amsterdam', 'Rotterdam', 'Utrecht', 'The Hague', 'Eindhoven'],
-    'HU': ['Budapest', 'Debrecen', 'Szeged', 'Miskolc', 'Pécs'],
-    'CZ': ['Prague', 'Brno', 'Ostrava', 'Plzeň'],
-    'PL': ['Warsaw', 'Kraków', 'Łódź', 'Wrocław', 'Poznań']
-};
+const libraries = ['places'];
 
 const LocationPicker = ({ countryCode, onSelect, onClose }) => {
     const [search, setSearch] = useState('');
-    const cities = CITY_DATA[countryCode] || [];
+    const autocompleteRef = useRef(null);
+    const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-    const filteredCities = cities.filter(city =>
-        city.toLowerCase().includes(search.toLowerCase())
-    );
+    const { isLoaded, loadError } = useJsApiLoader({
+        googleMapsApiKey,
+        libraries,
+        language: 'ko', // Korean for names if possible
+    });
+
+    const onLoad = (autocomplete) => {
+        autocompleteRef.current = autocomplete;
+    };
+
+    const onPlaceChanged = () => {
+        if (autocompleteRef.current !== null) {
+            const place = autocompleteRef.current.getPlace();
+            if (place.formatted_address) {
+                // We send a structured object or just the address string depending on need.
+                // For now, let's send the full info so the parent can decide.
+                onSelect({
+                    address: place.formatted_address,
+                    name: place.name,
+                    lat: place.geometry?.location?.lat(),
+                    lng: place.geometry?.location?.lng()
+                });
+            }
+        } else {
+            console.log('Autocomplete is not loaded yet!');
+        }
+    };
 
     return (
         <div className="location-picker-overlay" onClick={onClose}>
@@ -32,33 +46,48 @@ const LocationPicker = ({ countryCode, onSelect, onClose }) => {
                     <button onClick={onClose} className="close-btn"><X size={24} /></button>
                 </div>
 
-                <div className="search-bar-wrapper">
-                    <Search size={18} className="search-icon" />
-                    <input
-                        type="text"
-                        placeholder="도시명을 검색해보세요"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        autoFocus
-                    />
-                </div>
-
-                <div className="city-list">
-                    {filteredCities.length > 0 ? (
-                        filteredCities.map((city) => (
-                            <button
-                                key={city}
-                                className="city-item"
-                                onClick={() => onSelect(`${city}, ${countryCode}`)}
+                {!isLoaded ? (
+                    <div className="loading-container">
+                        <Loader2 className="animate-spin" size={32} />
+                        <p>지도를 불러오는 중...</p>
+                    </div>
+                ) : loadError ? (
+                    <div className="error-container">
+                        <p>구글 맵을 불러오지 못했습니다 🥲</p>
+                        <p className="error-hint">API 키 설정을 확인해 주세요.</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="search-bar-wrapper">
+                            <Search size={18} className="search-icon" />
+                            <Autocomplete
+                                onLoad={onLoad}
+                                onPlaceChanged={onPlaceChanged}
+                                options={{
+                                    componentRestrictions: { country: countryCode?.toLowerCase() || 'fr' },
+                                    fields: ['formatted_address', 'geometry', 'name']
+                                }}
                             >
-                                <MapPin size={16} />
-                                <span>{city}</span>
-                            </button>
-                        ))
-                    ) : (
-                        <div className="no-result">검색 결과가 없습니다 🥲</div>
-                    )}
-                </div>
+                                <input
+                                    type="text"
+                                    placeholder="장소나 주소를 입력해보세요 (예: 파리 에펠탑)"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    autoFocus
+                                />
+                            </Autocomplete>
+                        </div>
+
+                        <div className="picker-hint">
+                            <MapPin size={14} />
+                            <span>입력한 국가({countryCode}) 내의 장소만 검색됩니다.</span>
+                        </div>
+
+                        <div className="google-attribution">
+                            Powered by Google
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
