@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './DetailPage.css';
 
@@ -59,11 +59,19 @@ const MeetupDetail = () => {
     if (loading) return <div className="loading-spinner">Loading...</div>;
     if (!meetup) return <div className="error-message">존재하지 않는 모임입니다.</div>;
 
-    // Parse Description for Participants
-    let maxMembers = '0';
+    // Metadata extraction with defaults for backward compatibility
+    const metadata = meetup.metadata || {};
+    const tags = metadata.tags || [];
+    const onOffline = metadata.onOffline || 'offline';
+    const approvalType = metadata.approvalType || 'first-come';
+    const startTime = metadata.startTime || '';
+    const endTime = metadata.endTime || '';
+
+    // Parse Description for Participants (legacy fallback)
+    let maxMembers = metadata.members || '0';
     let descriptionBody = meetup.description;
 
-    if (meetup.description && meetup.description.includes('모집 인원:')) {
+    if (!metadata.members && meetup.description && meetup.description.includes('모집 인원:')) {
         const parts = meetup.description.split('\n\n');
         if (parts.length > 0) {
             maxMembers = parts[0].replace('모집 인원:', '').replace('명', '').trim();
@@ -72,10 +80,10 @@ const MeetupDetail = () => {
     }
 
     // Smart Field Mapping for Backward Compatibility
-    // Old: price = "Date String", trade_time = null
-    // New: price = "Fee String", trade_time = "Date String"
     const isNewFormat = meetup.trade_time != null;
-    const displayDate = isNewFormat ? meetup.trade_time : meetup.price;
+    const dateOnly = meetup.trade_time ? meetup.trade_time.split(' ')[0] : (meetup.price && meetup.price.includes('-') ? meetup.price : '날짜 미정');
+    const displayDate = dateOnly;
+    const displayTime = startTime && endTime ? `${startTime} ~ ${endTime}` : (meetup.trade_time && meetup.trade_time.includes(':') ? meetup.trade_time.split(' ')[1] : '시간 미정');
     const displayFee = isNewFormat ? meetup.price : '회비 문의';
     const hasImages = meetup.image_urls && meetup.image_urls.length > 0;
 
@@ -117,21 +125,35 @@ const MeetupDetail = () => {
                     )}
                 </div>
             ) : (
-                <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#E0F7FA', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#E0F7FA', height: '230px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Users size={48} color="#666" style={{ opacity: 0.3 }} />
                 </div>
             )}
 
             {/* Content */}
             <div className="detail-content" style={{ marginTop: hasImages ? '-20px' : '0', borderRadius: '24px 24px 0 0', background: 'white', position: 'relative', zIndex: 10, padding: '24px' }}>
+
+                {/* Tags */}
+                {tags.length > 0 && (
+                    <div className="meetup-tags-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                        {tags.map(tag => (
+                            <span key={tag} style={{ padding: '4px 10px', background: '#F0F9FF', color: '#0097A7', borderRadius: '100px', fontSize: '12px', fontWeight: '600' }}>
+                                #{tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 {/* Title Section */}
                 <div className="meetup-title-section">
-                    <h1 className="meetup-title">{meetup.title}</h1>
-                    <div className="meetup-date-row">
-                        <Clock size={16} />
-                        <span>{displayDate}</span>
-                        <div style={{ width: '1px', height: '12px', background: '#ccc', margin: '0 8px' }}></div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#888' }}>
+                    <h1 className="meetup-title" style={{ fontSize: '22px', fontWeight: '800', lineHeight: '1.3', marginBottom: '12px' }}>{meetup.title}</h1>
+                    <div className="meetup-date-row" style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#666', fontSize: '14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Calendar size={16} color="#00BCD4" />
+                            <span>{displayDate}</span>
+                        </div>
+                        <div style={{ width: '1px', height: '12px', background: '#eee' }}></div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Eye size={14} /> {meetup.views || 0}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Heart size={14} /> {meetup.likes || 0}</span>
                         </div>
@@ -139,31 +161,48 @@ const MeetupDetail = () => {
                 </div>
 
                 {/* Info Cards */}
-                {/* Unified Info Card */}
-                <div className="unified-info-card">
+                <div className="unified-info-card" style={{ marginTop: '24px' }}>
+                    {/* Method & Location */}
                     <div
-                        className="info-row clickable"
-                        onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetup.location)}`, '_blank')}
+                        className={`info-row ${onOffline === 'offline' ? 'clickable' : ''}`}
+                        onClick={() => onOffline === 'offline' && window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meetup.location)}`, '_blank')}
                     >
-                        <div className="icon-box">
-                            <MapPin size={20} />
+                        <div className="icon-box" style={{ background: '#E0F7FA', color: '#0097A7' }}>
+                            {onOffline === 'offline' ? <MapPin size={20} /> : <Monitor size={20} />}
                         </div>
                         <div className="info-text">
-                            <span className="label">장소 (지도보기)</span>
-                            <span className="value">{meetup.location}</span>
+                            <span className="label">{onOffline === 'offline' ? '장소 (지도보기)' : '진행 방식'}</span>
+                            <span className="value">{onOffline === 'offline' ? meetup.location : '온라인 모임'}</span>
                         </div>
                     </div>
+
+                    {/* Time */}
                     <div className="info-row">
-                        <div className="icon-box">
+                        <div className="icon-box" style={{ background: '#F3E5F5', color: '#7B1FA2' }}>
+                            <Clock size={20} />
+                        </div>
+                        <div className="info-text">
+                            <span className="label">시간</span>
+                            <span className="value">{displayTime}</span>
+                        </div>
+                    </div>
+
+                    {/* Members & Approval */}
+                    <div className="info-row">
+                        <div className="icon-box" style={{ background: '#E8F5E9', color: '#2E7D32' }}>
                             <Users size={20} />
                         </div>
                         <div className="info-text">
-                            <span className="label">모집 인원</span>
-                            <span className="value">{maxMembers}명</span>
+                            <span className="label">모집 인원 & 승인 방식</span>
+                            <span className="value">
+                                {maxMembers}명 · {approvalType === 'first-come' ? '선착순' : '승인제'}
+                            </span>
                         </div>
                     </div>
+
+                    {/* Fee */}
                     <div className="info-row">
-                        <div className="icon-box">
+                        <div className="icon-box" style={{ background: '#FFF3E0', color: '#E65100' }}>
                             <Star size={20} />
                         </div>
                         <div className="info-text">
@@ -173,23 +212,28 @@ const MeetupDetail = () => {
                     </div>
                 </div>
 
-                {/* Participant Bar (visual only) */}
-                <div className="participant-bar">
-                    <div
-                        className="participant-fill"
-                        style={{ width: '10%' }}
-                    ></div>
+                {/* Participation Status (Visual) */}
+                <div className="participation-status" style={{ marginTop: '20px', padding: '16px', background: '#F8F9FA', borderRadius: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
+                        <span style={{ color: '#666' }}>신청 인원 1명</span>
+                        <span style={{ fontWeight: '700', color: '#00BCD4' }}>최대 {maxMembers}명</span>
+                    </div>
+                    <div className="participant-bar" style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div
+                            className="participant-fill"
+                            style={{ width: '10%', height: '100%', background: '#00BCD4' }}
+                        ></div>
+                    </div>
                 </div>
 
                 {/* Host Card */}
-                {/* Unified Host Card */}
-                <div className="unified-seller-card">
+                <div className="unified-seller-card" style={{ marginTop: '24px' }}>
                     <div className="unified-seller-left">
                         <div className="unified-avatar">
                             <User size={28} />
                         </div>
                         <div className="unified-info">
-                            <h4>주최자</h4>
+                            <h4>호스트</h4>
                             <div className="rating-badge">
                                 <Star size={14} />
                                 <span>--</span>
@@ -200,20 +244,31 @@ const MeetupDetail = () => {
                 </div>
 
                 {/* Description */}
-                <div className="description-section meetup">
-                    <h3>모임 소개</h3>
-                    <p style={{ whiteSpace: 'pre-line' }}>{descriptionBody}</p>
+                <div className="description-section meetup" style={{ marginTop: '24px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '12px' }}>모임 소개</h3>
+                    <p style={{ whiteSpace: 'pre-line', lineHeight: '1.6', color: '#333' }}>{descriptionBody}</p>
                 </div>
             </div>
 
             {/* Bottom Bar */}
-            <div className="bottom-bar meetup-bar">
-                <button className="like-btn">
+            <div className="bottom-bar meetup-bar" style={{
+                position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+                width: '100%', maxWidth: '480px', display: 'flex', gap: '12px', padding: '12px 20px',
+                background: 'white', borderTop: '1px solid #eee', zIndex: 1000
+            }}>
+                <button className="like-btn" style={{
+                    width: '48px', height: '48px', border: '1px solid #ddd', borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
                     <Heart size={24} />
                 </button>
-                <button className="join-btn">
-                    <UserPlus size={20} />
-                    참가 신청
+                <button className="join-btn" style={{
+                    flex: 1, padding: '16px', background: 'linear-gradient(135deg, #00BCD4, #0097A7)',
+                    color: 'white', border: 'none', borderRadius: '16px', fontSize: '16px', fontWeight: '700',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                }}>
+                    {approvalType === 'first-come' ? <UserPlus size={20} /> : <CheckCircle size={20} />}
+                    {approvalType === 'first-come' ? '참가 신청' : '승인 요청하기'}
                 </button>
             </div>
         </div>

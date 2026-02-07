@@ -354,3 +354,54 @@
     font-weight: bold;
     color: #CCC;
 }
+
+/* Segment Control */
+.segment-control {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.segment-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.segment-btn.active {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-weight: 700;
+    color: #00BCD4;
+}
+
+/* Tag Chips */
+.tag-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Meetup Specific Colors */
+.day-chip.active-meetup {
+    background-color: #E0F7FA;
+    border-color: #00BCD4;
+    color: #0097A7;
+    font-weight: 700;
+}
+
+.day-chip.active {
+    /* Main color is cyan for meetups now if used in WriteMeetup */
+    background-color: #E0F7FA;
+    border-color: #00BCD4;
+    color: #0097A7;
+    font-weight: 700;
+}
