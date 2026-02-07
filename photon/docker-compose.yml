@@ -1,0 +1,12 @@
+version: '3'
+services:
+  photon:
+    image: komoot/photon
+    container_name: europe-photon
+    ports:
+      - "2322:2322"
+    volumes:
+      - ./photon_data:/photon/photon_data
+    restart: unless-stopped
+    # Use a custom command if needed, but the default entrypoint usually handles searching if data exists.
+    # To import, we will use a separate one-off command in init.sh
