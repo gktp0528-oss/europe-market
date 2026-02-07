@@ -1,15 +1,26 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getCountryCodeFromLocation } from '../lib/locationUtils';
+import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const initialCountryCode = queryParams.get('country') || 'FR';
+
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Get country info for currency
+    const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
+    const currency = initialCountryCode === 'GB' ? '파운드' : '유로';
+    const currencySymbol = initialCountryCode === 'GB' ? '£' : '€';
+
     const [formData, setFormData] = useState({
         title: '',
         price: '',
@@ -79,15 +90,15 @@ const WriteUsed = () => {
                 uploadedUrls.push(publicUrl);
             }
 
-            // 2. Identify Country
-            const countryCode = getCountryCodeFromLocation(formData.location);
+            // 2. Identify Country (Use initial if manual check fails)
+            const countryCode = getCountryCodeFromLocation(formData.location) || initialCountryCode;
 
             // 3. Save to Database
             const { error: dbError } = await supabase
                 .from('posts')
                 .insert({
                     title: formData.title,
-                    price: `${formData.displayPrice}유로`,
+                    price: `${formData.displayPrice}${currency}`,
                     location: formData.location,
                     description: formData.description,
                     trade_time: formData.tradeTime,
@@ -167,7 +178,7 @@ const WriteUsed = () => {
                             value={formData.displayPrice}
                             onChange={handlePriceChange}
                         />
-                        <span className="currency-label">유로</span>
+                        <span className="currency-label">{currency}</span>
                     </div>
                 </div>
 

@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteTutoring = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const countryCode = queryParams.get('country') || 'FR';
+    const currency = countryCode === 'GB' ? '파운드' : '유로';
+
     const [formData, setFormData] = useState({
         title: '',
         subject: '',
@@ -50,7 +55,7 @@ const WriteTutoring = () => {
                     <input
                         type="text"
                         className="input-field"
-                        placeholder="예: 시급 30유로, 회당 상의"
+                        placeholder={`예: 시급 30${currency}, 회당 상의`}
                         value={formData.pay}
                         onChange={(e) => setFormData({ ...formData, pay: e.target.value })}
                     />

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteMeetup = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const countryCode = queryParams.get('country') || 'FR';
+
     const [formData, setFormData] = useState({
         title: '',
         date: '',

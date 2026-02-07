@@ -1,0 +1,170 @@
+.select-country-page {
+    background-color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.select-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    background-color: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.select-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: #333;
+}
+
+.select-content {
+    flex: 1;
+    padding: 40px 24px;
+    overflow-y: auto;
+}
+
+.select-intro {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+}
+
+.globe-icon {
+    color: #3b82f6;
+}
+
+.select-intro h2 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #111;
+    margin-bottom: 12px;
+}
+
+.select-intro p {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.country-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.country-card {
+    background-color: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.country-card:hover {
+    background-color: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.country-card:active {
+    transform: scale(0.98);
+}
+
+.country-flag {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.country-name {
+    font-size: 15px;
+    font-weight: 500;
+    color: #334155;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.country-card {
+    animation: fadeIn 0.4s ease forwards;
+}
+
+.country-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.country-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.country-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.country-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.country-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.country-card:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.country-card:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+.country-card:nth-child(8) {
+    animation-delay: 0.4s;
+}
+
+.country-card:nth-child(9) {
+    animation-delay: 0.45s;
+}
+
+.country-card:nth-child(10) {
+    animation-delay: 0.5s;
+}

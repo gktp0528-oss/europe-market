@@ -16,6 +16,7 @@ import WriteUsed from './pages/WriteUsed';
 import WriteJob from './pages/WriteJob';
 import WriteTutoring from './pages/WriteTutoring';
 import WriteMeetup from './pages/WriteMeetup';
+import SelectCountry from './pages/SelectCountry';
 import Header from './components/Header';
 import { CountryProvider } from './contexts/CountryContext';
 
@@ -45,7 +46,8 @@ const AppContent = () => {
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/tutoring/:id" element={<TutoringDetail />} />
         <Route path="/meetup/:id" element={<MeetupDetail />} />
-        {/* Write Pages */}
+        {/* Write Selection & Forms */}
+        <Route path="/write/select/:type" element={<SelectCountry />} />
         <Route path="/write/used" element={<WriteUsed />} />
         <Route path="/write/job" element={<WriteJob />} />
         <Route path="/write/tutoring" element={<WriteTutoring />} />
