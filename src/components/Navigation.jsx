@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, MessageCircle, Bell, User } from 'lucide-react';
+import { Home, MessageCircle, Search, User, Plus } from 'lucide-react';
 import './Navigation.css';
 
 const Navigation = () => {
