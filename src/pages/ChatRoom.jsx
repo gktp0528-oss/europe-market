@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useChatUnread } from '../contexts/ChatUnreadContext';
 import { ArrowLeft, Send, Image as ImageIcon } from 'lucide-react';
 import '../styles/WriteForm.css';
 import '../styles/Chat.css';
@@ -10,6 +11,7 @@ const ChatRoom = () => {
     const { id } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { markAsRead, setActiveConversationId } = useChatUnread();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [otherUser, setOtherUser] = useState(null);
@@ -142,13 +144,7 @@ const ChatRoom = () => {
                 })
                 .subscribe();
 
-            // Realtime 장애/지연 대비 폴백 동기화
-            const pollingInterval = setInterval(() => {
-                fetchMessages(id);
-            }, 2000);
-
             return () => {
-                clearInterval(pollingInterval);
                 supabase.removeChannel(channel);
             };
         }
@@ -311,6 +307,7 @@ const ChatRoom = () => {
                         placeholder="메시지 보내기..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
+                        onFocus={scrollToBottom}
                     />
                     {newMessage.trim() && (
                         <button type="submit" className="chat-send-btn">

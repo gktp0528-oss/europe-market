@@ -50,6 +50,7 @@ const AppContent = () => {
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
+    location.pathname.startsWith('/chat/') ||
     location.pathname.startsWith('/write/') ||
     location.pathname === '/login' ||
     location.pathname === '/signup';
@@ -102,14 +103,18 @@ const AppContent = () => {
   );
 };
 
+import { ChatUnreadProvider } from './contexts/ChatUnreadContext';
+
 function App() {
   return (
     <CountryProvider>
       <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <AppContent />
-        </Router>
+        <ChatUnreadProvider>
+          <Router>
+            <ScrollToTop />
+            <AppContent />
+          </Router>
+        </ChatUnreadProvider>
       </AuthProvider>
     </CountryProvider>
   );

@@ -1,0 +1,104 @@
+# 채팅 실시간 수신 + 숫자 알림 배지 구현 계획
+
+## 1) 목표/요구사항 정리
+- 채팅방 내부(`ChatRoom`)에서는 상대 메시지가 오면 즉시 화면에 표시되어야 함.
+- 사용자가 특정 채팅방 밖에 있을 때 상대 메시지가 오면:
+1. 채팅 리스트의 해당 방에 숫자 배지 표시
+2. 하단 네비게이션 채팅 아이콘에 전체 unread 합계 배지 표시
+- unread는 "상대방이 보낸 메시지 수"만 카운트해야 함.
+- 예시 검증: 3개 방에서 각 2개 메시지 수신 시 리스트는 각 `2`, 하단 배지는 `6`.
+
+## 2) 현재 구조 기준 핵심 갭
+- `messages.is_read` 컬럼은 이미 있으나, 읽음 처리/미읽음 집계 로직이 프론트에 없음.
+- `ChatList`는 현재 unread 숫자를 그리지 않음.
+- `Navigation`은 채팅 아이콘 숫자 배지를 지원하지 않음.
+- 전역 unread 상태(합계 + 방별)를 관리하는 Context/Store가 없음.
+
+## 3) 구현 전략 (권장: 2단계)
+
+### 단계 A. DB/조회 기반 안정화
+1. 읽음 처리 RPC 추가
+- `mark_conversation_read(p_conversation_id uuid)` 함수 추가:
+  - 대상: 해당 채팅방에서 `sender_id != auth.uid()` AND `is_read = false`
+  - 동작: `is_read = true` 업데이트
+2. unread 조회 함수 또는 쿼리 표준화
+- 방별 unread 집계 쿼리:
+  - `conversation_id` 기준 `count(*)`
+  - 조건: `sender_id != auth.uid()`, `is_read = false`
+3. 성능 보강 인덱스
+- `messages (conversation_id, is_read, sender_id, created_at)` 복합 인덱스 추가.
+
+### 단계 B. 프론트 실시간 UX 연결
+1. 전역 상태 추가 (`ChatUnreadContext`)
+- 상태:
+  - `unreadByConversation: Record<conversationId, number>`
+  - `totalUnread: number`
+  - `activeConversationId: string | null`
+- API:
+  - `refreshUnreadCounts()`
+  - `markConversationAsRead(conversationId)`
+  - `setActiveConversation(conversationId | null)`
+2. 전역 Realtime 구독
+- `messages` INSERT 이벤트 구독.
+- 수신 메시지가 내 메시지가 아니면:
+  - 현재 열려 있는 동일 채팅방이 아니면 unread 증가(또는 refresh).
+  - 현재 동일 채팅방이면 즉시 읽음 처리(카운트 증가 없이 유지).
+3. `ChatRoom` 연동
+- 방 진입 시 `setActiveConversation(id)` 호출.
+- 초기 로딩 직후 `markConversationAsRead(id)` 호출.
+- 상대 메시지 수신 시(현재 방) 즉시 읽음 처리.
+- 방 이탈 시 `setActiveConversation(null)` 처리.
+4. `ChatList` 연동
+- 각 아이템 우측에 `unreadByConversation[chat.id]` 숫자 배지 표시.
+- `0`이면 숨김, `1+`이면 표시.
+5. `Navigation` 연동
+- 채팅 아이콘에 `totalUnread` 숫자 배지 표시.
+- 표시 규칙:
+  - `0`: 숨김
+  - `1~99`: 숫자 그대로
+  - `100+`: `99+` 표기
+
+## 4) 상세 동작 규칙
+1. 카운트 증가 조건
+- 내 메시지(`sender_id === auth.uid()`)는 카운트 제외.
+- 내가 현재 보고 있는 방 메시지는 수신 즉시 읽음 처리되어 카운트 제외.
+2. 카운트 감소 조건
+- 채팅방 진입 시 해당 방 상대 메시지를 모두 읽음 처리 후 해당 배지를 `0`.
+- 여러 기기 동시 사용 대비: 주기적 `refreshUnreadCounts()` 또는 `UPDATE(is_read)` 이벤트 반영.
+3. 정렬/표시
+- `ChatList` 정렬은 기존 `updated_at DESC` 유지.
+- unread 숫자만 추가, 기존 마지막 메시지/시간 표시는 유지.
+
+## 5) UI 변경 포인트
+1. `/src/pages/ChatList.jsx`
+- 방별 배지 렌더링(채팅 아이템 우측).
+2. `/src/components/Navigation.jsx`
+- 채팅 아이콘 배지 렌더링.
+3. `/src/components/Navigation.css`, `/src/styles/Chat.css`
+- 배지 공통 스타일 추가(원형/최소너비/숫자 중앙정렬).
+4. `/src/App.jsx`
+- `AuthProvider` 하위에 `ChatUnreadProvider` 삽입.
+
+## 6) 검증 시나리오 (필수)
+1. 실시간 수신
+- A/B 두 계정으로 같은 방 접속, A가 보낸 메시지가 B 화면에 즉시 표시되는지 확인.
+2. 방 밖 수신 카운트
+- B가 홈 화면에 있을 때 A가 메시지 1개 전송:
+  - 하단 채팅 아이콘 `+1`
+  - 채팅 리스트 해당 방 `1`
+3. 다중 방 합계
+- 3개 방 각각 2개씩 수신 후:
+  - 각 방 배지 `2`
+  - 하단 배지 `6`
+4. 읽음 처리
+- 해당 방 진입 즉시 그 방 배지가 `0`으로 내려가고, 하단 합계도 동일하게 감소.
+5. 자기 메시지 제외
+- 내가 보낸 메시지로는 배지 증가하지 않아야 함.
+
+## 7) 작업 순서 (실행 체크리스트)
+1. SQL 마이그레이션 작성: 읽음 처리 RPC + 인덱스.
+2. `ChatUnreadContext` 생성 및 전역 구독 구현.
+3. `ChatRoom` 읽음 처리/활성 방 상태 연동.
+4. `ChatList` 방별 숫자 배지 표시.
+5. `Navigation` 전체 합계 배지 표시.
+6. 수동 E2E 테스트(2계정) 및 버그 수정.

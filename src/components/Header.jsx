@@ -33,33 +33,58 @@ const Header = () => {
   };
 
   const pageTitle = getPageTitle();
+  const getCurrentCategoryParam = () => {
+    if (location.pathname.startsWith('/category/clothes')) return 'used';
+    if (location.pathname.startsWith('/category/jobs')) return 'job';
+    if (location.pathname.startsWith('/category/tutoring')) return 'tutoring';
+    if (location.pathname.startsWith('/category/meetups')) return 'meetup';
+    return 'all';
+  };
 
   if (isCategoryPage) {
     return (
       <>
-        <header className="header category-header-shell">
+        <div className="category-header-shell">
           <div className="category-top-row">
-            <button className="icon-btn back-btn category-only-back" onClick={() => navigate(-1)} aria-label="뒤로 가기">
-              <ArrowLeft size={24} />
+            <div className="category-top-left">
+              <button className="category-back-btn" onClick={() => navigate(-1)} aria-label="뒤로 가기">
+                <ArrowLeft size={24} />
+              </button>
+            </div>
+            <button className="category-country-btn" onClick={() => setIsModalOpen(true)} aria-label="국가 선택">
+              <span className="category-country-name">{selectedCountry.name}</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: '1px' }}>
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </button>
+            <div className="category-top-right">
+              <button
+                className="category-search-btn"
+                onClick={() => navigate(`/search?category=${getCurrentCategoryParam()}&country=${selectedCountry.code}`)}
+                aria-label="검색"
+              >
+                <Search size={22} />
+              </button>
+            </div>
           </div>
-          <nav className="category-tabs-bar" aria-label="카테고리 탭">
-            {categoryTabs.map((tab) => {
-              const isActive = location.pathname.startsWith(tab.path);
-              return (
-                <button
-                  key={tab.path}
-                  className={`category-tab ${isActive ? 'active' : ''}`}
-                  onClick={() => navigate(tab.path)}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
+        </div>
+        <nav className="category-tabs-bar" aria-label="카테고리 탭">
+          {categoryTabs.map((tab) => {
+            const isActive = location.pathname.startsWith(tab.path);
+            return (
+              <button
+                key={tab.path}
+                className={`category-tab ${isActive ? 'active' : ''}`}
+                onClick={() => navigate(tab.path)}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
 
-          <style jsx>{`
-            .header.category-header-shell {
+        <style jsx>{`
+            .category-header-shell {
               position: relative;
               top: auto;
               z-index: 500;
@@ -73,27 +98,63 @@ const Header = () => {
 
             .category-top-row {
               height: 56px;
-              display: flex;
+              display: grid;
+              grid-template-columns: 48px 1fr 48px;
               align-items: center;
-              padding: 0 10px;
+              padding: 0 8px;
               border-bottom: 1px solid rgba(0, 0, 0, 0.06);
               background: white;
             }
 
-            .icon-btn {
-              background: none;
-              border: none;
-              padding: 8px;
-              border-radius: 50%;
-              color: #2D3436;
-              cursor: pointer;
+            .category-top-left,
+            .category-top-right {
               display: flex;
               align-items: center;
               justify-content: center;
             }
 
-            .category-only-back {
-              margin-left: -2px;
+            .category-back-btn,
+            .category-search-btn {
+              background: none;
+              border: none;
+              padding: 8px;
+              color: #2D3436;
+              cursor: pointer;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .category-back-btn:hover,
+            .category-search-btn:hover {
+              background: rgba(0, 0, 0, 0.04);
+            }
+
+            .category-country-btn {
+              justify-self: center;
+              max-width: 100%;
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              border: none;
+              background: none;
+              padding: 6px 10px;
+              border-radius: 999px;
+              cursor: pointer;
+              color: #2D3436;
+              font-weight: 700;
+            }
+
+            .category-country-btn:hover {
+              background: rgba(0, 0, 0, 0.04);
+            }
+
+            .category-country-name {
+              font-size: 14px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
 
             .category-tabs-bar {
@@ -123,7 +184,7 @@ const Header = () => {
               border-bottom-color: #2D3436;
             }
           `}</style>
-        </header>
+        <CountryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </>
     );
   }

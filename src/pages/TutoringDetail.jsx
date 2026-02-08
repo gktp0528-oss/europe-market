@@ -39,11 +39,6 @@ const TutoringDetail = () => {
         }
     };
 
-    useEffect(() => {
-        fetchTutoringDetail();
-        incrementViewCount();
-    }, [id, fetchTutoringDetail, incrementViewCount]);
-
     const fetchTutoringDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
@@ -68,6 +63,11 @@ const TutoringDetail = () => {
             console.error('Error incrementing view count:', error);
         }
     }, [id]);
+
+    useEffect(() => {
+        fetchTutoringDetail();
+        incrementViewCount();
+    }, [id, fetchTutoringDetail, incrementViewCount]);
 
     if (loading) return <div className="loading-spinner">Loading...</div>;
     if (!tutoring) return <div className="error-message">존재하지 않는 게시글입니다.</div>;
@@ -104,7 +104,7 @@ const TutoringDetail = () => {
                     <img
                         src={tutoring.image_urls[0]}
                         alt={tutoring.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#f9f9f9' }}
                     />
                 ) : (
                     <GraduationCap size={48} color="#666" style={{ opacity: 0.3 }} />

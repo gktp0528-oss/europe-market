@@ -38,7 +38,7 @@ const Home = () => {
         .select('top_items')
         .eq('snapshot_date', todayStr)
         .eq('country_code', targetCountry)
-        .single();
+        .maybeSingle();
 
       if (todayData && todayData.top_items && todayData.top_items.length > 0) {
         setPopularItems(todayData.top_items);
@@ -51,7 +51,7 @@ const Home = () => {
           .select('top_items')
           .eq('snapshot_date', yesterdayStr)
           .eq('country_code', targetCountry)
-          .single();
+          .maybeSingle();
 
         if (yesterdayData && yesterdayData.top_items) {
           setPopularItems(yesterdayData.top_items);

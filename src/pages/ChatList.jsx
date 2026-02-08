@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, User, MessageCircle } from 'lucide-react';
+import { useChatUnread } from '../contexts/ChatUnreadContext';
 import '../styles/WriteForm.css';
 import '../styles/Chat.css'; // Reusing layout styles
 
 const ChatList = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { unreadByConversation } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -145,7 +147,14 @@ const ChatList = () => {
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="chat-time">{chat.time}</span>
+                                        <div className="chat-meta">
+                                            <span className="chat-time">{chat.time}</span>
+                                            {unreadByConversation[chat.id] > 0 && (
+                                                <span className="unread-badge">
+                                                    {unreadByConversation[chat.id]}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                     <p className="chat-last-message">
                                         {chat.lastMessage || '새로운 대화가 시작되었습니다.'}
