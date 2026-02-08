@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,6 +15,29 @@ const ChatRoom = () => {
     const [otherUser, setOtherUser] = useState(null);
     const [post, setPost] = useState(null);
     const messagesEndRef = useRef(null);
+
+    const reconcileMessages = useCallback((prev, fetched) => {
+        const fetchedIds = new Set((fetched || []).map((m) => m.id));
+        const sendingMessages = prev.filter(
+            (m) => m.status === 'sending' && !fetchedIds.has(m.id)
+        );
+
+        return [...(fetched || []), ...sendingMessages].sort(
+            (a, b) => new Date(a.created_at) - new Date(b.created_at)
+        );
+    }, []);
+
+    const fetchMessages = useCallback(async (conversationId) => {
+        const { data } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conversationId)
+            .order('created_at', { ascending: true });
+
+        if (data) {
+            setMessages((prev) => reconcileMessages(prev, data));
+        }
+    }, [reconcileMessages]);
 
     // Scroll to bottom
     const scrollToBottom = () => {
@@ -91,20 +114,8 @@ const ChatRoom = () => {
                 }
             };
 
-            const fetchMessages = async () => {
-                const { data } = await supabase
-                    .from('messages')
-                    .select('*')
-                    .eq('conversation_id', id)
-                    .order('created_at', { ascending: true });
-
-                if (data) {
-                    setMessages(data);
-                }
-            };
-
             fetchConversation();
-            fetchMessages();
+            fetchMessages(id);
 
             // Subscribe to new messages
             const channel = supabase
@@ -124,16 +135,24 @@ const ChatRoom = () => {
                         // with same content and sender, we could potentially replace it.
                         // But since we already have the map logic in handleSendMessage,
                         // this check is just a safeguard to prevent double appending.
-                        return [...prev, payload.new];
+                        return [...prev, payload.new].sort(
+                            (a, b) => new Date(a.created_at) - new Date(b.created_at)
+                        );
                     });
                 })
                 .subscribe();
 
+            // Realtime 장애/지연 대비 폴백 동기화
+            const pollingInterval = setInterval(() => {
+                fetchMessages(id);
+            }, 2000);
+
             return () => {
+                clearInterval(pollingInterval);
                 supabase.removeChannel(channel);
             };
         }
-    }, [id, user, navigate]);
+    }, [id, user, navigate, fetchMessages]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
@@ -154,7 +173,7 @@ const ChatRoom = () => {
                     .rpc('get_or_create_conversation', {
                         p_participant1_id: user.id,
                         p_participant2_id: sellerId,
-                        p_post_id: parseInt(postId)
+                        p_post_id: Number(postId)
                     });
 
                 if (convError) throw convError;

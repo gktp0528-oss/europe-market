@@ -50,13 +50,17 @@ const AppContent = () => {
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
-    location.pathname.startsWith('/write/');
+    location.pathname.startsWith('/write/') ||
+    location.pathname === '/login' ||
+    location.pathname === '/signup';
 
   // 전역 헤더를 숨길 페이지 (상세페이지, 글쓰기, 채팅, 검색 등 - 고유 헤더 사용)
   const hideHeader =
     hideNavigation ||
     location.pathname.startsWith('/chat') ||
-    location.pathname === '/search';
+    location.pathname === '/search' ||
+    location.pathname === '/login' ||
+    location.pathname === '/signup';
 
   return (
     <div className="mobile-container" style={{ paddingBottom: hideNavigation ? 0 : '90px' }}>
