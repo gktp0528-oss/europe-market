@@ -58,7 +58,7 @@ const Header = () => {
         )}
 
         <div className="header-right">
-          <button className="icon-btn">
+          <button className="icon-btn" onClick={() => navigate('/search')}>
             <Search size={22} />
           </button>
           {user ? (

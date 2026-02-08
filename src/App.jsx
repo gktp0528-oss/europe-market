@@ -23,28 +23,32 @@ import ChatList from './pages/ChatList';
 import ChatRoom from './pages/ChatRoom';
 import MyPage from './pages/MyPage';
 import MyPosts from './pages/MyPosts';
-import Header from './components/Header';
-import ScrollToTop from './components/ScrollToTop';
-import { CountryProvider } from './contexts/CountryContext';
-import { AuthProvider } from './contexts/AuthContext';
+import Search from './pages/Search';
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
 const AppContent = () => {
   const location = useLocation();
 
-  // 상세페이지 경로 확인
-  const isDetailPage =
+  // 하단 네비게이션을 숨길 페이지 (상세페이지, 글쓰기 등)
+  const hideNavigation =
     location.pathname.startsWith('/detail/') ||
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
     location.pathname.startsWith('/write/');
 
+  // 전역 헤더를 숨길 페이지 (상세페이지, 글쓰기, 채팅, 검색 등 - 고유 헤더 사용)
+  const hideHeader =
+    hideNavigation ||
+    location.pathname.startsWith('/chat') ||
+    location.pathname === '/search';
+
   return (
-    <div className="mobile-container" style={{ paddingBottom: isDetailPage ? 0 : '90px' }}>
-      {!isDetailPage && <Header />}
+    <div className="mobile-container" style={{ paddingBottom: hideNavigation ? 0 : '90px' }}>
+      {!hideHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/category/clothes" element={<CategoryClothes />} />
         <Route path="/category/jobs" element={<CategoryJobs />} />
         <Route path="/category/tutoring" element={<CategoryTutoring />} />
@@ -60,7 +64,6 @@ const AppContent = () => {
         <Route path="/write/job" element={<WriteJob />} />
         <Route path="/write/tutoring" element={<WriteTutoring />} />
         <Route path="/write/meetup" element={<WriteMeetup />} />
-        <Route path="/write/meetup" element={<WriteMeetup />} />
 
         {/* Chat Routes */}
         <Route path="/chat" element={<ChatList />} />
@@ -73,7 +76,7 @@ const AppContent = () => {
         <Route path="/signup" element={<Signup />} />
       </Routes>
       {/* 상세페이지가 아닐 때만 네비게이션 표시 */}
-      {!isDetailPage && <Navigation />}
+      {!hideNavigation && <Navigation />}
     </div>
   );
 };
