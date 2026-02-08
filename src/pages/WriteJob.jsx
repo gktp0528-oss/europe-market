@@ -99,6 +99,11 @@ const WriteJob = () => {
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -148,7 +153,7 @@ const WriteJob = () => {
                     views: 0,
                     likes: 0,
                     color: '#FFF9C4', // Light yellow for jobs
-                    user_id: user?.id
+                    user_id: user.id
                 });
 
             if (dbError) throw dbError;

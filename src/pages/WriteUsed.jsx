@@ -89,6 +89,11 @@ const WriteUsed = () => {
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -133,7 +138,7 @@ const WriteUsed = () => {
                     views: 0,
                     likes: 0,
                     color: '#F5F5F5',
-                    user_id: user?.id // Add user_id
+                    user_id: user.id
                 });
 
             if (dbError) throw dbError;

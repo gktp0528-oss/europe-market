@@ -61,35 +61,37 @@ const AppContent = () => {
   return (
     <div className="mobile-container" style={{ paddingBottom: hideNavigation ? 0 : '90px' }}>
       {!hideHeader && <Header />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/category/clothes" element={<CategoryClothes />} />
-        <Route path="/category/jobs" element={<CategoryJobs />} />
-        <Route path="/category/tutoring" element={<CategoryTutoring />} />
-        <Route path="/category/meetups" element={<CategoryMeetups />} />
-        {/* Detail Pages */}
-        <Route path="/detail/:id" element={<ProductDetail />} />
-        <Route path="/job/:id" element={<JobDetail />} />
-        <Route path="/tutoring/:id" element={<TutoringDetail />} />
-        <Route path="/meetup/:id" element={<MeetupDetail />} />
-        {/* Write Selection & Forms (Protected) */}
-        <Route path="/write/select/:type" element={<ProtectedRoute><SelectCountry /></ProtectedRoute>} />
-        <Route path="/write/used" element={<ProtectedRoute><WriteUsed /></ProtectedRoute>} />
-        <Route path="/write/job" element={<ProtectedRoute><WriteJob /></ProtectedRoute>} />
-        <Route path="/write/tutoring" element={<ProtectedRoute><WriteTutoring /></ProtectedRoute>} />
-        <Route path="/write/meetup" element={<ProtectedRoute><WriteMeetup /></ProtectedRoute>} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/category/clothes" element={<CategoryClothes />} />
+          <Route path="/category/jobs" element={<CategoryJobs />} />
+          <Route path="/category/tutoring" element={<CategoryTutoring />} />
+          <Route path="/category/meetups" element={<CategoryMeetups />} />
+          {/* Detail Pages */}
+          <Route path="/detail/:id" element={<ProductDetail />} />
+          <Route path="/job/:id" element={<JobDetail />} />
+          <Route path="/tutoring/:id" element={<TutoringDetail />} />
+          <Route path="/meetup/:id" element={<MeetupDetail />} />
+          {/* Write Selection & Forms (Protected) */}
+          <Route path="/write/select/:type" element={<ProtectedRoute><SelectCountry /></ProtectedRoute>} />
+          <Route path="/write/used" element={<ProtectedRoute><WriteUsed /></ProtectedRoute>} />
+          <Route path="/write/job" element={<ProtectedRoute><WriteJob /></ProtectedRoute>} />
+          <Route path="/write/tutoring" element={<ProtectedRoute><WriteTutoring /></ProtectedRoute>} />
+          <Route path="/write/meetup" element={<ProtectedRoute><WriteMeetup /></ProtectedRoute>} />
 
-        {/* Chat Routes (Protected) */}
-        <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
-        <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
-        <Route path="/my-posts" element={<ProtectedRoute><MyPosts /></ProtectedRoute>} />
+          {/* Chat Routes (Protected) */}
+          <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
+          <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+          <Route path="/my-posts" element={<ProtectedRoute><MyPosts /></ProtectedRoute>} />
 
-        <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
-        <Route path="/mypage" element={<MyPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Routes>
+          <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
+          <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </Suspense>
       {/* 상세페이지가 아닐 때만 네비게이션 표시 */}
       {!hideNavigation && <Navigation />}
     </div>
