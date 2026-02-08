@@ -62,14 +62,9 @@ const Header = () => {
             <Search size={22} />
           </button>
           {user ? (
-            <button className="icon-btn" onClick={() => {
-              if (window.confirm('로그아웃 하시겠습니까?')) {
-                signOut();
-                navigate('/');
-              }
-            }}>
+            <button className="icon-btn" onClick={() => navigate('/alarm')}>
               <div style={{ position: 'relative' }}>
-                <User size={22} color="#E91E63" />
+                <Bell size={22} color="#E91E63" />
                 <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: '#4CAF50', border: '1px solid white' }}></span>
               </div>
             </button>

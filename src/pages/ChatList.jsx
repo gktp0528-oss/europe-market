@@ -106,7 +106,7 @@ const ChatList = () => {
                         <p>상품이나 알바에 문의를 남겨보세요! 💬</p>
                     </div>
                 ) : (
-                    <div className="chat-list">
+                    <div className="chat-list" style={{ paddingBottom: '80px' }}>
                         {conversations.map(chat => (
                             <div
                                 key={chat.id}

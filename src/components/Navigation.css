@@ -63,6 +63,32 @@
     margin-top: 2px;
 }
 
+/* Center Write Button Prominence */
+.write-nav-item {
+    position: relative;
+    top: -10px;
+}
+
+.plus-btn-wrapper {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    transition: all 0.2s ease;
+}
+
+.write-nav-item:active .plus-btn-wrapper {
+    transform: scale(0.9) translateY(2px);
+}
+
+.write-nav-item span {
+    margin-top: 14px;
+}
+
 /* Country Select Button specific */
 .country-select-btn {
     background: none;

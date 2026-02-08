@@ -38,8 +38,7 @@ const AppContent = () => {
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
-    location.pathname.startsWith('/write/') ||
-    /^\/chat($|\/)/.test(location.pathname);
+    location.pathname.startsWith('/write/');
 
   return (
     <div className="mobile-container" style={{ paddingBottom: isDetailPage ? 0 : '90px' }}>
