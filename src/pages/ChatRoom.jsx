@@ -35,15 +35,21 @@ const ChatRoom = () => {
                 .select(`
                     id,
                     post_id,
-                    post:post_id (title, price, image_urls, category),
-                    participant1:participant1_id (id, username, avatar_url),
-                    participant2:participant2_id (id, username, avatar_url)
+                    post:posts(title, price, image_urls, category),
+                    participant1:profiles!participant1_id(id, username, avatar_url),
+                    participant2:profiles!participant2_id(id, username, avatar_url)
                 `)
                 .eq('id', id)
                 .single();
 
             if (data) {
-                const other = data.participant1.id === user.id ? data.participant2 : data.participant1;
+                const p1 = data.participant1;
+                const p2 = data.participant2;
+                if (!p1 || !p2) {
+                    console.error('Participant data missing');
+                    return;
+                }
+                const other = p1.id === user.id ? p2 : p1;
                 setOtherUser(other);
                 setPost(data.post);
             }

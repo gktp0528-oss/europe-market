@@ -166,21 +166,25 @@ const ProductDetail = () => {
                     <p className="product-price" style={{ color: '#333', fontSize: '22px', fontWeight: '800', margin: 0 }}>{item.price}</p>
                 </div>
 
-                {/* Quick Info Cards (Location & Trade Time) */}
-                <div className="job-info-cards">
+                {/* Unified Info Card (Location & Trade Time) */}
+                <div className="unified-info-card">
                     <div
-                        className="info-card clickable"
+                        className="info-row clickable"
                         onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`, '_blank')}
                     >
-                        <MapPin size={18} />
-                        <div>
+                        <div className="icon-box">
+                            <MapPin size={18} />
+                        </div>
+                        <div className="info-text">
                             <span className="label">거래 희망 장소</span>
                             <span className="value">{item.location}</span>
                         </div>
                     </div>
-                    <div className="info-card">
-                        <Clock size={18} />
-                        <div>
+                    <div className="info-row">
+                        <div className="icon-box">
+                            <Clock size={18} />
+                        </div>
+                        <div className="info-text">
                             <span className="label">희망 거래 시간</span>
                             <span className="value">{item.trade_time || '시간 협의'}</span>
                         </div>
