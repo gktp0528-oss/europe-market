@@ -149,20 +149,16 @@ const ChatRoom = () => {
                 const postId = params.get('post_id');
                 const sellerId = params.get('seller_id');
 
-                const { data: newConv, error: convError } = await supabase
-                    .from('conversations')
-                    .insert({
-                        participant1_id: user.id,
-                        participant2_id: sellerId,
-                        post_id: postId,
-                        updated_at: new Date().toISOString(),
-                        last_message: content
-                    })
-                    .select()
-                    .single();
+                // Use atomic get_or_create_conversation RPC to prevent duplicates
+                const { data: convId, error: convError } = await supabase
+                    .rpc('get_or_create_conversation', {
+                        p_participant1_id: user.id,
+                        p_participant2_id: sellerId,
+                        p_post_id: parseInt(postId)
+                    });
 
                 if (convError) throw convError;
-                conversationId = newConv.id;
+                conversationId = convId;
 
                 // Silent URL update
                 window.history.replaceState(null, '', `/chat/${conversationId}`);
