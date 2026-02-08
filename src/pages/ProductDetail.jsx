@@ -52,12 +52,6 @@ const ProductDetail = () => {
             if (error) throw error;
             setItem(data);
 
-            // Increment views
-            await supabase
-                .from('posts')
-                .update({ views: (data.views || 0) + 1 })
-                .eq('id', id);
-
         } catch (error) {
             console.error('Error fetching post:', error);
         } finally {
@@ -65,8 +59,17 @@ const ProductDetail = () => {
         }
     };
 
+    const incrementViewCount = async () => {
+        try {
+            await supabase.rpc('increment_views', { post_id: id });
+        } catch (error) {
+            console.error('Error incrementing view count:', error);
+        }
+    };
+
     useEffect(() => {
         fetchPost();
+        incrementViewCount();
     }, [id]);
 
     const handleScroll = (e) => {
