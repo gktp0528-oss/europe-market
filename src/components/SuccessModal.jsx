@@ -29,7 +29,14 @@ const SuccessModal = ({
                     <Icon size={30} color={iconColor} />
                 </div>
                 <h3 className="modal-title">{title}</h3>
-                <p className="modal-desc" dangerouslySetInnerHTML={{ __html: message }}></p>
+                <p className="modal-desc">
+                    {message.split('<br/>').map((line, i) => (
+                        <React.Fragment key={i}>
+                            {line}
+                            {i < message.split('<br/>').length - 1 && <br />}
+                        </React.Fragment>
+                    ))}
+                </p>
                 <div className="modal-buttons">
                     <button
                         className="modal-btn confirm"
