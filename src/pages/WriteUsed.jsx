@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Camera, MapPin, Clock, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import LocationPicker from '../components/LocationPicker';
+import SuccessModal from '../components/SuccessModal';
+import { ShoppingBag } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteUsed = () => {
@@ -11,11 +14,13 @@ const WriteUsed = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const initialCountryCode = queryParams.get('country') || 'FR';
+    const { user } = useAuth();
 
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Get country info for currency
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
@@ -120,13 +125,13 @@ const WriteUsed = () => {
                     time_ago: '방금 전',
                     views: 0,
                     likes: 0,
-                    color: '#F5F5F5'
+                    color: '#F5F5F5',
+                    user_id: user?.id // Add user_id
                 });
 
             if (dbError) throw dbError;
 
-            alert('게시글이 성공적으로 등록되었습니다! ✨');
-            navigate('/category/clothes');
+            setShowSuccess(true);
 
         } catch (error) {
             console.error('Submission failed:', error);
@@ -257,6 +262,15 @@ const WriteUsed = () => {
                     </button>
                 </div>
             </div>
+
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => navigate('/category/clothes')}
+                title="등록 완료! 🎀"
+                message={`하은님의 소중한 물건이 <br/>성공적으로 등록되었습니다! ✨`}
+                icon={ShoppingBag}
+                buttonText="목록으로 이동"
+            />
         </div>
     );
 };

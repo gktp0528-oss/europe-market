@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, GraduationCap, BookOpen, Award, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 과외/레슨 상세 페이지
@@ -10,6 +12,33 @@ const TutoringDetail = () => {
     const { id } = useParams();
     const [tutoring, setTutoring] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
+
+    const handleChatClick = async () => {
+        if (!user) {
+            if (window.confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        if (user.id === tutoring.user_id) {
+            alert('본인이 작성한 게시글입니다.');
+            return;
+        }
+
+        if (!tutoring.user_id) {
+            alert('작성자 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        try {
+            const conversationId = await startChat(user.id, tutoring.user_id, tutoring.id);
+            navigate(`/chat/${conversationId}`);
+        } catch (error) {
+            alert('채팅방 생성 중 오류가 발생했습니다.');
+        }
+    };
 
     useEffect(() => {
         fetchTutoringDetail();
@@ -161,13 +190,13 @@ const TutoringDetail = () => {
                 <button className="like-btn">
                     <Heart size={24} />
                 </button>
-                <button className="chat-btn">
+                <button className="chat-btn" onClick={handleChatClick}>
                     <MessageCircle size={20} />
-                    문의하기
+                    문의하기 (채팅)
                 </button>
                 <button className="inquiry-btn">
-                    <MessageCircle size={20} />
-                    문의하기
+                    <BookOpen size={20} />
+                    수업 신청
                 </button>
             </div>
         </div>

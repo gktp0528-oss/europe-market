@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 중고거래 상세 페이지 (Style 1 - Classic Card)
@@ -12,6 +14,33 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [currentImage, setCurrentImage] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { user } = useAuth();
+
+    const handleChatClick = async () => {
+        if (!user) {
+            if (window.confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        if (user.id === item.user_id) {
+            alert('본인이 작성한 게시글입니다.');
+            return;
+        }
+
+        if (!item.user_id) {
+            alert('작성자 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        try {
+            const conversationId = await startChat(user.id, item.user_id, item.id);
+            navigate(`/chat/${conversationId}`);
+        } catch (error) {
+            alert('채팅방 생성 중 오류가 발생했습니다.');
+        }
+    };
 
     const fetchPost = async () => {
         setLoading(true);
@@ -187,7 +216,7 @@ const ProductDetail = () => {
                 <button className="like-btn">
                     <Heart size={24} />
                 </button>
-                <button className="chat-btn">
+                <button className="chat-btn" onClick={handleChatClick}>
                     <MessageCircle size={20} />
                     채팅하기
                 </button>

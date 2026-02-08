@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, MapPin, Camera, X, Calendar, Clock, Users, Star, Tag, CheckCircle, Globe, Monitor } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import LocationPicker from '../components/LocationPicker';
+import SuccessModal from '../components/SuccessModal';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import '../styles/WriteForm.css';
 
@@ -13,12 +15,14 @@ const WriteMeetup = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
+    const { user } = useAuth();
 
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
     const [step, setStep] = useState(1);
+    const [showSuccess, setShowSuccess] = useState(false);
     const totalSteps = 3;
 
     // Get country info for currency
@@ -147,6 +151,7 @@ const WriteMeetup = () => {
                     views: 0,
                     likes: 0,
                     color: '#E0F7FA',
+                    user_id: user?.id,
                     metadata: {
                         tags: formData.tags,
                         onOffline: formData.onOffline,
@@ -163,8 +168,7 @@ const WriteMeetup = () => {
 
             if (dbError) throw dbError;
 
-            alert('모임글이 성공적으로 등록되었습니다! ✨');
-            navigate('/category/meetups');
+            setShowSuccess(true);
 
         } catch (error) {
             console.error('Submission failed:', error);
@@ -523,6 +527,14 @@ const WriteMeetup = () => {
                     onClose={() => setShowLocationPicker(false)}
                 />
             )}
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => navigate('/category/meetups')}
+                title="모임 생성 완료! 👥"
+                message={`새로운 모임이 <br/>성공적으로 만들어졌습니다! ✨`}
+                icon={Users}
+                buttonText="목록으로 이동"
+            />
         </div>
     );
 };

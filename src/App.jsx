@@ -19,6 +19,10 @@ import WriteMeetup from './pages/WriteMeetup';
 import SelectCountry from './pages/SelectCountry';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ChatList from './pages/ChatList';
+import ChatRoom from './pages/ChatRoom';
+import MyPage from './pages/MyPage';
+import MyPosts from './pages/MyPosts';
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
 import { CountryProvider } from './contexts/CountryContext';
@@ -34,7 +38,8 @@ const AppContent = () => {
     location.pathname.startsWith('/job/') ||
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
-    location.pathname.startsWith('/write/');
+    location.pathname.startsWith('/write/') ||
+    location.pathname.startsWith('/chat');
 
   return (
     <div className="mobile-container">
@@ -56,10 +61,15 @@ const AppContent = () => {
         <Route path="/write/job" element={<WriteJob />} />
         <Route path="/write/tutoring" element={<WriteTutoring />} />
         <Route path="/write/meetup" element={<WriteMeetup />} />
-        {/* Placeholder routes for now */}
-        <Route path="/chat" element={<div className="flex-center full-screen">채팅 화면 준비중 💬</div>} />
+        <Route path="/write/meetup" element={<WriteMeetup />} />
+
+        {/* Chat Routes */}
+        <Route path="/chat" element={<ChatList />} />
+        <Route path="/chat/:id" element={<ChatRoom />} />
+        <Route path="/my-posts" element={<MyPosts />} />
+
         <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
-        <Route path="/mypage" element={<div className="flex-center full-screen">마이페이지 준비중 👤</div>} />
+        <Route path="/mypage" element={<MyPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
       </Routes>

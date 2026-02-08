@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
+import SuccessModal from '../components/SuccessModal';
 import '../styles/WriteForm.css';
 
 const Signup = () => {
@@ -12,6 +13,7 @@ const Signup = () => {
         password: '',
         nickname: ''
     });
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const handleSignup = async (e) => {
         e.preventDefault();
@@ -32,8 +34,8 @@ const Signup = () => {
 
             if (error) throw error;
 
-            alert('회원가입이 완료되었습니다! 로그인해주세요.');
-            navigate('/login');
+            setShowSuccessModal(true);
+            // Don't navigate automatically anymore
 
         } catch (error) {
             alert('회원가입 중 오류가 발생했습니다: ' + error.message);
@@ -113,6 +115,29 @@ const Signup = () => {
                     </div>
                 </form>
             </div>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ animation: 'slideUp 0.3s ease-out' }}>
+                        <div style={{ backgroundColor: '#fff0f6', width: 60, height: 60, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                            <Mail size={30} color="#eb2f96" />
+                        </div>
+                        <h3 className="modal-title">회원가입 신청 완료! 💖</h3>
+                        <p className="modal-desc">
+                            입력하신 메일로 **인증 링크**를 보냈어요.<br />
+                            메일함에서 인증을 완료해주셔야 로그인이 가능해요! ✨
+                        </p>
+                        <button
+                            className="modal-btn confirm"
+                            onClick={() => navigate('/login')}
+                            style={{ width: '100%' }}
+                        >
+                            로그인하러 가기
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

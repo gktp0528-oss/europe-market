@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 모임 상세 페이지
@@ -11,6 +13,33 @@ const MeetupDetail = () => {
     const [meetup, setMeetup] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const { user } = useAuth();
+
+    const handleChatClick = async () => {
+        if (!user) {
+            if (window.confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        if (user.id === meetup.user_id) {
+            alert('본인이 작성한 게시글입니다.');
+            return;
+        }
+
+        if (!meetup.user_id) {
+            alert('작성자 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        try {
+            const conversationId = await startChat(user.id, meetup.user_id, meetup.id);
+            navigate(`/chat/${conversationId}`);
+        } catch (error) {
+            alert('채팅방 생성 중 오류가 발생했습니다.');
+        }
+    };
 
     useEffect(() => {
         fetchMeetupDetail();
@@ -269,6 +298,12 @@ const MeetupDetail = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                     <Heart size={24} />
+                </button>
+                <button className="like-btn" onClick={handleChatClick} style={{
+                    width: '48px', height: '48px', border: '1px solid #ddd', borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00BCD4'
+                }}>
+                    <MessageCircle size={24} />
                 </button>
                 <button className="join-btn" style={{
                     flex: 1, padding: '16px', background: 'linear-gradient(135deg, #00BCD4, #0097A7)',

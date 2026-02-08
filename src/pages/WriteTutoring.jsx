@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import { supabase } from '../lib/supabase';
 import LocationPicker from '../components/LocationPicker';
+import SuccessModal from '../components/SuccessModal';
+import { BookOpen } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteTutoring = () => {
@@ -11,9 +14,11 @@ const WriteTutoring = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
+    const { user } = useAuth();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Get country info for currency
     const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
@@ -84,13 +89,13 @@ const WriteTutoring = () => {
                     views: 0,
                     likes: 0,
                     image_urls: [defaultImage],
-                    color: '#F5F5F5'
+                    color: '#F5F5F5',
+                    user_id: user?.id
                 });
 
             if (dbError) throw dbError;
 
-            alert(`${tutoringType === 'tutoring' ? '과외' : '레슨'}글이 성공적으로 등록되었습니다! ✨`);
-            navigate('/category/tutoring');
+            setShowSuccess(true);
 
         } catch (error) {
             console.error('Submission failed:', error);
@@ -225,6 +230,14 @@ const WriteTutoring = () => {
                     onClose={() => setShowLocationPicker(false)}
                 />
             )}
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => navigate('/category/tutoring')}
+                title={`${tutoringType === 'tutoring' ? '과외' : '레슨'} 등록 완료! 📚`}
+                message={`하은님의 ${tutoringType === 'tutoring' ? '과외' : '레슨'} 공고가 <br/>성공적으로 등록되었습니다! ✨`}
+                icon={BookOpen}
+                buttonText="목록으로 이동"
+            />
         </div>
     );
 };

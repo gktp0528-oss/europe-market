@@ -2,12 +2,16 @@ import React, { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MapPin, Camera, X, Clock } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import LocationPicker from '../components/LocationPicker';
+import SuccessModal from '../components/SuccessModal';
+import { Briefcase } from 'lucide-react';
 import '../styles/WriteForm.css';
 
 const WriteJob = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
@@ -16,6 +20,7 @@ const WriteJob = () => {
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Get country info for currency
     const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
@@ -140,13 +145,13 @@ const WriteJob = () => {
                     time_ago: '방금 전',
                     views: 0,
                     likes: 0,
-                    color: '#FFF9C4' // Light yellow for jobs
+                    color: '#FFF9C4', // Light yellow for jobs
+                    user_id: user?.id
                 });
 
             if (dbError) throw dbError;
 
-            alert('구인글이 성공적으로 등록되었습니다! ✨');
-            navigate('/category/jobs');
+            setShowSuccess(true);
 
         } catch (error) {
             console.error('Submission failed:', error);
@@ -295,6 +300,14 @@ const WriteJob = () => {
                     onClose={() => setShowLocationPicker(false)}
                 />
             )}
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => navigate('/category/jobs')}
+                title="등록 완료! 💼"
+                message={`하은님의 구인 공고가 <br/>성공적으로 등록되었습니다! ✨`}
+                icon={Briefcase}
+                buttonText="목록으로 이동"
+            />
         </div>
     );
 };

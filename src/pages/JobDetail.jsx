@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Briefcase, Calendar, DollarSign, Eye, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 알바 상세 페이지
@@ -11,6 +13,33 @@ const JobDetail = () => {
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const { user } = useAuth();
+
+    const handleChatClick = async () => {
+        if (!user) {
+            if (window.confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        if (user.id === job.user_id) {
+            alert('본인 게시글입니다.');
+            return;
+        }
+
+        if (!job.user_id) {
+            alert('작성자 정보를 찾을 수 없습니다.');
+            return;
+        }
+
+        try {
+            const conversationId = await startChat(user.id, job.user_id, job.id);
+            navigate(`/chat/${conversationId}`);
+        } catch (error) {
+            alert('채팅 연결 실패');
+        }
+    };
 
     useEffect(() => {
         fetchJobDetail();
@@ -189,9 +218,9 @@ const JobDetail = () => {
                 <button className="like-btn">
                     <Heart size={24} />
                 </button>
-                <button className="apply-btn">
+                <button className="apply-btn" onClick={handleChatClick}>
                     <MessageCircle size={20} />
-                    지원하기
+                    지원하기 (채팅)
                 </button>
             </div>
         </div>
