@@ -14,13 +14,20 @@ const WriteUsed = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const initialCountryCode = queryParams.get('country') || 'FR';
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
 
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!loading && !user) {
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/login');
+        }
+    }, [user, loading, navigate]);
 
     // Get country info for currency
     const selectedCountryInfo = SUPPORTED_COUNTRIES.find(c => c.code === initialCountryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
