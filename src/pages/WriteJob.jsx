@@ -49,13 +49,31 @@ const WriteJob = () => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
+
+        // Validation: Max 10 images
         if (images.length + files.length > 10) {
             alert('사진은 최대 10장까지 업로드할 수 있어요.');
             return;
         }
 
-        const newImages = files.map(file => ({
-            id: Math.random().toString(36).substr(2, 9),
+        // Validation: Size and Type
+        const validFiles = [];
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name}은(는) 5MB를 초과하여 제외되었습니다.`);
+                continue;
+            }
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (validFiles.length === 0) return;
+
+        const newImages = validFiles.map(file => ({
+            id: crypto.randomUUID(),
             url: URL.createObjectURL(file),
             file
         }));
@@ -111,7 +129,7 @@ const WriteJob = () => {
             const uploadedUrls = [];
             for (const img of images) {
                 const fileExt = img.file.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
+                const fileName = `${crypto.randomUUID()}.${fileExt}`;
                 const filePath = `jobs/${fileName}`;
 
                 const { error: uploadError } = await supabase.storage
@@ -211,6 +229,7 @@ const WriteJob = () => {
                         placeholder="가게명 + 구인 포지션 (예: 서울식당 주방보조)"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        maxLength={100}
                     />
                 </div>
 
@@ -275,6 +294,7 @@ const WriteJob = () => {
                         placeholder="예: 한국어 능통, 경력 6개월 이상, 비자 소지자"
                         value={formData.requirements}
                         onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                        maxLength={500}
                     />
                 </div>
 
@@ -286,6 +306,7 @@ const WriteJob = () => {
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         style={{ height: '150px' }}
+                        maxLength={2000}
                     />
                 </div>
 
