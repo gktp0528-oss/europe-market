@@ -53,20 +53,19 @@ create table if not exists public.posts (
 
 alter table public.posts enable row level security;
 
-create policy "Public posts are viewable by everyone."
+create policy "Anyone can view posts"
   on public.posts for select
   using (true);
 
-create policy "Authenticated users can insert their own posts."
+create policy "Authenticated users can create posts"
   on public.posts for insert
-  with check (auth.authenticated() and auth.uid() = user_id);
-
-create policy "Users can update their own posts."
-  on public.posts for update
-  using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
-create policy "Users can delete their own posts."
+create policy "Users can update own posts"
+  on public.posts for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own posts"
   on public.posts for delete
   using (auth.uid() = user_id);
 
@@ -96,7 +95,7 @@ create policy "Users can create conversations"
   on public.conversations for insert
   with check (auth.uid() = participant1_id or auth.uid() = participant2_id);
 
-create policy "Users can update their own conversations"
+create policy "Users can update own conversations"
   on public.conversations for update
   using (auth.uid() = participant1_id or auth.uid() = participant2_id);
 
@@ -143,6 +142,12 @@ create table if not exists public.popular_snapshots (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+alter table public.popular_snapshots enable row level security;
+
+create policy "Anyone can view popular snapshots"
+  on public.popular_snapshots for select
+  using (true);
 
 -- ==========================================
 -- Functions & Triggers
