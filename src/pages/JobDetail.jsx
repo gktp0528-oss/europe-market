@@ -40,11 +40,6 @@ const JobDetail = () => {
         }
     };
 
-    useEffect(() => {
-        fetchJobDetail();
-        incrementViewCount();
-    }, [id, fetchJobDetail, incrementViewCount]);
-
     const fetchJobDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
@@ -69,6 +64,11 @@ const JobDetail = () => {
             console.error('Error incrementing view count:', error);
         }
     }, [id]);
+
+    useEffect(() => {
+        fetchJobDetail();
+        incrementViewCount();
+    }, [id, fetchJobDetail, incrementViewCount]);
 
     const nextImage = (e) => {
         e.stopPropagation();
@@ -116,12 +116,11 @@ const JobDetail = () => {
 
             {/* Hero Section (Image Slider or Color) */}
             {hasImages ? (
-                <div className="hero-slider-container" style={{ height: '300px', position: 'relative' }}>
+                <div className="hero-slider-container" style={{ position: 'relative' }}>
                     <img
                         src={job.image_urls[currentImageIndex]}
                         alt="Job Preview"
                         className="hero-image"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     {job.image_urls.length > 1 && (
                         <>
@@ -139,7 +138,7 @@ const JobDetail = () => {
                     )}
                 </div>
             ) : (
-                <div className="job-hero" style={{ backgroundColor: job.color || '#FFF9C4', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="job-hero" style={{ backgroundColor: job.color || '#FFF9C4' }}>
                     <Briefcase size={48} color="#666" style={{ opacity: 0.3 }} />
                 </div>
             )}

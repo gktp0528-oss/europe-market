@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import './DetailPage.css';
@@ -40,11 +40,6 @@ const MeetupDetail = () => {
         }
     };
 
-    useEffect(() => {
-        fetchMeetupDetail();
-        incrementViewCount();
-    }, [id, fetchMeetupDetail, incrementViewCount]);
-
     const fetchMeetupDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
@@ -69,6 +64,11 @@ const MeetupDetail = () => {
             console.error('Error incrementing view count:', error);
         }
     }, [id]);
+
+    useEffect(() => {
+        fetchMeetupDetail();
+        incrementViewCount();
+    }, [id, fetchMeetupDetail, incrementViewCount]);
 
     const nextImage = (e) => {
         e.stopPropagation();
@@ -138,12 +138,11 @@ const MeetupDetail = () => {
 
             {/* Hero Section (Image Slider or Color) */}
             {hasImages ? (
-                <div className="hero-slider-container" style={{ height: '300px', position: 'relative' }}>
+                <div className="hero-slider-container" style={{ position: 'relative' }}>
                     <img
                         src={meetup.image_urls[currentImageIndex]}
                         alt="Meetup Preview"
                         className="hero-image"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     {meetup.image_urls.length > 1 && (
                         <>
@@ -161,7 +160,7 @@ const MeetupDetail = () => {
                     )}
                 </div>
             ) : (
-                <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#E0F7FA', height: '230px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="meetup-hero" style={{ backgroundColor: meetup.color || '#E0F7FA' }}>
                     <Users size={48} color="#666" style={{ opacity: 0.3 }} />
                 </div>
             )}

@@ -11,8 +11,15 @@ const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedCountry } = useCountry();
   const { user } = useAuth();
+  const categoryTabs = [
+    { path: '/category/clothes', label: '중고거래' },
+    { path: '/category/jobs', label: '알바' },
+    { path: '/category/tutoring', label: '과외/레슨' },
+    { path: '/category/meetups', label: '모임' },
+  ];
 
   const isHome = location.pathname === '/';
+  const isCategoryPage = categoryTabs.some((tab) => location.pathname.startsWith(tab.path));
 
   const getPageTitle = () => {
     if (location.pathname.includes('/category/clothes')) return '중고거래';
@@ -26,6 +33,100 @@ const Header = () => {
   };
 
   const pageTitle = getPageTitle();
+
+  if (isCategoryPage) {
+    return (
+      <>
+        <header className="header category-header-shell">
+          <div className="category-top-row">
+            <button className="icon-btn back-btn category-only-back" onClick={() => navigate(-1)} aria-label="뒤로 가기">
+              <ArrowLeft size={24} />
+            </button>
+          </div>
+          <nav className="category-tabs-bar" aria-label="카테고리 탭">
+            {categoryTabs.map((tab) => {
+              const isActive = location.pathname.startsWith(tab.path);
+              return (
+                <button
+                  key={tab.path}
+                  className={`category-tab ${isActive ? 'active' : ''}`}
+                  onClick={() => navigate(tab.path)}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
+
+          <style jsx>{`
+            .header.category-header-shell {
+              position: relative;
+              top: auto;
+              z-index: 500;
+              height: auto;
+              display: block;
+              padding: 0;
+              background: white;
+              border-bottom: none;
+              backdrop-filter: none;
+            }
+
+            .category-top-row {
+              height: 56px;
+              display: flex;
+              align-items: center;
+              padding: 0 10px;
+              border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+              background: white;
+            }
+
+            .icon-btn {
+              background: none;
+              border: none;
+              padding: 8px;
+              border-radius: 50%;
+              color: #2D3436;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .category-only-back {
+              margin-left: -2px;
+            }
+
+            .category-tabs-bar {
+              position: sticky;
+              top: 0;
+              z-index: 501;
+              display: grid;
+              grid-template-columns: repeat(4, minmax(0, 1fr));
+              background: rgba(255, 255, 255, 0.96);
+              backdrop-filter: blur(10px);
+              border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            }
+
+            .category-tab {
+              height: 48px;
+              border: none;
+              background: transparent;
+              color: #6a6a6a;
+              font-size: 13px;
+              font-weight: 600;
+              cursor: pointer;
+              border-bottom: 2px solid transparent;
+            }
+
+            .category-tab.active {
+              color: #2D3436;
+              border-bottom-color: #2D3436;
+            }
+          `}</style>
+        </header>
+      </>
+    );
+  }
 
   return (
     <>
