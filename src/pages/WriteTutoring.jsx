@@ -180,6 +180,7 @@ const WriteTutoring = () => {
                         placeholder={labels.placeholder.title}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        maxLength={100}
                     />
                 </div>
 
@@ -191,6 +192,7 @@ const WriteTutoring = () => {
                         placeholder={labels.placeholder.subject}
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        maxLength={50}
                     />
                 </div>
 
@@ -217,6 +219,7 @@ const WriteTutoring = () => {
                         placeholder={labels.placeholder.description}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        maxLength={2000}
                     />
                 </div>
 
