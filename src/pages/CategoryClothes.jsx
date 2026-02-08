@@ -119,6 +119,32 @@ const CategoryClothes = () => {
                 )}
             </div>
 
+            {hasMore && (
+                <div className="load-more-container" style={{ textAlign: 'center', margin: '20px 0 40px' }}>
+                    <button
+                        className="load-more-btn"
+                        onClick={handleLoadMore}
+                        disabled={isMoreLoading}
+                        style={{
+                            padding: '12px 24px',
+                            borderRadius: '25px',
+                            border: '1px solid #eee',
+                            backgroundColor: 'white',
+                            color: '#e91e63',
+                            fontWeight: 'bold',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        {isMoreLoading ? '로딩 중... 🔄' : '더 보기 ⬇️'}
+                    </button>
+                </div>
+            )}
+
             <FloatingActionButton />
         </div>
     );

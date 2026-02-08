@@ -13,28 +13,20 @@
 
 ### P0 — 즉시 수정 필수
 
-1. `P0` 채팅방 중복 생성 위험(무결성)
-- 근거: `src/pages/ChatRoom.jsx:147-162`에서 `new` 채팅 시 바로 `insert`하고, 중복 체크 유틸 `src/lib/chat.js:3`은 미사용 상태.
-- 근거: `schema.sql:2`에 참여자 쌍 + `post_id` 유니크 제약 부재. `post_id` 컬럼 자체도 schema.sql에 정의되어 있지 않음.
-- 영향: 동일 상대/게시글에 대화방 분산, 메시지 히스토리 파편화.
-- 조치: DB 유니크 인덱스 + 서버 함수(RPC)로 "찾거나 생성" 원자화.
+1. ~~`P0` 채팅방 중복 생성 위험(무결성)~~ ✅ 수정 완료
+- 수정: `ChatRoom.jsx`에서 `supabase.rpc('get_or_create_conversation', ...)` 원자적 RPC로 교체됨.
 
-2. `P0` 클라이언트에서 집계 작업 수행 + 무인가 노출(운영 위험)
-- 근거: `src/pages/Home.jsx:77`의 `handleForceAggregation`, `src/lib/aggregation.js:7`의 `updateTop10Snapshot`.
-- 근거: `src/pages/Home.jsx:155-172`에서 "집계 Trigger" 버튼이 `zIndex: 9999`로 모든 방문자에게 노출됨. 인증/관리자 체크 없음.
-- 영향: 임의 방문자가 전체 `posts` 테이블 스캔 + 9개국 upsert 트리거 가능. DoS/비용 남용 위험.
-- 조치: 서버 크론/배치로 이전, 클라이언트 트리거 완전 제거. 최소한 즉시 버튼 숨김 처리.
+2. ~~`P0` 클라이언트에서 집계 작업 수행 + 무인가 노출(운영 위험)~~ ✅ 수정 완료
+- 수정: `Home.jsx`에서 집계 트리거 버튼 및 `aggregation.js` import 제거됨. (`src/lib/aggregation.js` 파일은 죽은 코드로 잔존 — 리팩토링 시 정리)
 
-3. `P0` `posts` 테이블 RLS 정책 부재(보안)
-- 근거: `schema.sql`에 `conversations`/`messages` RLS만 정의. `posts` 테이블에는 RLS 정책이 없음.
-- 근거: Write 4개 페이지에서 `.insert()`, `ProductDetail.jsx:56-59`에서 `.update()` 직접 수행.
-- 영향: 아무 인증 사용자가 타인 게시글을 UPDATE/DELETE 가능. 게시글 위변조 위험.
-- 조치: `posts` 테이블에 소유자 기반 RLS 정책 추가 (SELECT: 모두 허용, INSERT/UPDATE/DELETE: `user_id = auth.uid()` 조건).
+3. ~~`P0` `posts` 테이블 RLS 정책 부재(보안)~~ ✅ 수정 완료
+- 수정: `schema.sql`에 `posts` 테이블 RLS 정책 추가 (SELECT: 전체 허용, INSERT/UPDATE/DELETE: `user_id = auth.uid()`).
+- 수정: `conversations` UPDATE 정책도 함께 추가 (P1-11 선행 해결).
+- ⚠️ Supabase 대시보드에서 해당 SQL을 실행해야 실제 적용됩니다.
 
-4. `P0` 비로그인 상태에서 게시글 작성 가능(인증 가드 부재)
-- 근거: Write 4개 페이지에서 `user_id: user?.id`로 삽입 — `WriteUsed.jsx:129`, `WriteJob.jsx:149`, `WriteTutoring.jsx:93`, `WriteMeetup.jsx:154`.
-- 영향: 세션 만료 시 `user?.id`가 `undefined` → `user_id: NULL`로 저장되어 소유자 없는 고아 게시글 생성.
-- 조치: 라우트 레벨 인증 가드 추가 + 폼 제출 시 `user` null 체크.
+4. ~~`P0` 비로그인 상태에서 게시글 작성 가능(인증 가드 부재)~~ ✅ 수정 완료
+- 수정: `ProtectedRoute` 컴포넌트 생성 → Write/Chat/MyPosts 라우트에 인증 가드 적용.
+- 수정: Write 4개 페이지 `handleSubmit`에 `user` null 체크 추가, `user?.id` → `user.id`로 변경.
 
 ### P1 — 출시 전 수정 권장
 
