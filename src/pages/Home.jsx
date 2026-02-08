@@ -73,18 +73,6 @@ const Home = () => {
     fetchTop10();
   }, [selectedCountry]);
 
-  // [테스트용] 강제 집계 실행 함수
-  const handleForceAggregation = async () => {
-    if (confirm('현재 데이터를 기반으로 TOP 10 스냅샷을 강제로 생성하시겠습니까? (테스트용)')) {
-      const result = await updateTop10Snapshot();
-      if (result.success) {
-        alert('집계 완료! 데이터를 새로고침합니다.');
-        fetchTop10();
-      } else {
-        alert('집계 실패: 콘솔 확인 필요');
-      }
-    }
-  };
 
   return (
     <div className="home-container" style={{ paddingTop: '20px' }}>
@@ -152,24 +140,6 @@ const Home = () => {
         )}
       </section>
 
-      <button
-        onClick={handleForceAggregation}
-        style={{
-          position: 'fixed',
-          bottom: '90px',
-          right: '20px',
-          zIndex: 9999,
-          padding: '8px 12px',
-          background: 'rgba(0,0,0,0.6)',
-          color: 'white',
-          border: 'none',
-          borderRadius: '20px',
-          fontSize: '10px',
-          cursor: 'pointer'
-        }}
-      >
-        ⚡ 집계 Trigger
-      </button>
       <FloatingActionButton />
     </div>
   );
