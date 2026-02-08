@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Clock, Users, Heart, Eye } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
@@ -12,7 +12,7 @@ const CategoryMeetups = () => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async () => {
         setLoading(true);
         try {
             let query = supabase
@@ -33,11 +33,11 @@ const CategoryMeetups = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCountry.code]);
 
     useEffect(() => {
         fetchPosts();
-    }, [selectedCountry]);
+    }, [fetchPosts]);
 
     return (
         <div className="category-page" style={{ paddingTop: 0 }}>

@@ -22,7 +22,7 @@ const Signup = () => {
         setLoading(true);
         try {
             // 1. Sign up with Supabase Auth
-            const { data, error } = await supabase.auth.signUp({
+            const { error } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
                 options: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Home.css';
 import { ShoppingBag, Briefcase, GraduationCap, Users, User, MapPin, Clock, Heart, Eye } from 'lucide-react';
@@ -8,21 +8,20 @@ import Header from '../components/Header';
 import AdBanner from '../components/AdBanner';
 
 import { supabase } from '../lib/supabase';
-import { updateTop10Snapshot } from '../lib/aggregation';
 
 const Home = () => {
   const navigate = useNavigate();
 
   const { selectedCountry } = useCountry(); // Context 변수명 일치 (selectedCountry)
-  const [viewMode, setViewMode] = useState('grid');
   const [popularItems, setPopularItems] = useState([]); // 인기글 상태 추가
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
 
   // 날짜 포맷 (YYYY-MM-DD)
   const getFormatDate = (date) => date.toISOString().split('T')[0];
 
   // TOP 10 데이터 가져오기 (Swap Logic 포함)
-  const fetchTop10 = async () => {
+  const fetchTop10 = useCallback(async () => {
     setLoading(true);
     try {
       const today = new Date();
@@ -34,7 +33,7 @@ const Home = () => {
       const targetCountry = selectedCountry?.code || 'ALL'; // 국가 필터
 
       // 1. 오늘 날짜 데이터 조회
-      let { data: todayData, error: todayError } = await supabase
+      let { data: todayData } = await supabase
         .from('popular_snapshots')
         .select('top_items')
         .eq('snapshot_date', todayStr)
@@ -66,12 +65,12 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCountry?.code]);
 
   // 국가 변경 시 다시 로드
   useEffect(() => {
     fetchTop10();
-  }, [selectedCountry]);
+  }, [selectedCountry, fetchTop10]);
 
 
   return (
@@ -146,7 +145,9 @@ const Home = () => {
 };
 
 // Reusable Category Card Component
-const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
+// eslint-disable-next-line no-unused-vars
+const CategoryCard = ({ title, icon: IconComponent, delay, onClick }) => {
+  console.log('[CategoryCard] Rendering:', title);
   return (
     <button
       className="category-card"
@@ -154,7 +155,7 @@ const CategoryCard = ({ title, icon: Icon, delay, onClick }) => {
       onClick={onClick}
     >
       <div className="card-icon-wrapper">
-        <Icon size={24} strokeWidth={2} color="var(--color-primary-pink)" />
+        <IconComponent size={24} strokeWidth={2} color="var(--color-primary-pink)" />
       </div>
       <span className="card-title" style={{ color: 'var(--text-main)', textShadow: 'none' }}>{title}</span>
     </button>

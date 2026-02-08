@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Briefcase, Calendar, DollarSign, Eye, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -35,6 +35,7 @@ const JobDetail = () => {
         try {
             navigate(`/chat/new?post_id=${job.id}&seller_id=${job.user_id}`);
         } catch (error) {
+            console.error('Chat connection failed:', error);
             alert('채팅 연결 실패');
         }
     };
@@ -42,9 +43,9 @@ const JobDetail = () => {
     useEffect(() => {
         fetchJobDetail();
         incrementViewCount();
-    }, [id]);
+    }, [id, fetchJobDetail, incrementViewCount]);
 
-    const fetchJobDetail = async () => {
+    const fetchJobDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('posts')
@@ -59,15 +60,15 @@ const JobDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    const incrementViewCount = async () => {
+    const incrementViewCount = useCallback(async () => {
         try {
             await supabase.rpc('increment_views', { post_id: id });
         } catch (error) {
             console.error('Error incrementing view count:', error);
         }
-    };
+    }, [id]);
 
     const nextImage = (e) => {
         e.stopPropagation();

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -36,11 +36,12 @@ const ProductDetail = () => {
         try {
             navigate(`/chat/new?post_id=${item.id}&seller_id=${item.user_id}`);
         } catch (error) {
+            console.error('Chat navigation error:', error);
             alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
 
-    const fetchPost = async () => {
+    const fetchPost = useCallback(async () => {
         setLoading(true);
         try {
             const { data, error } = await supabase
@@ -57,20 +58,20 @@ const ProductDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    const incrementViewCount = async () => {
+    const incrementViewCount = useCallback(async () => {
         try {
             await supabase.rpc('increment_views', { post_id: id });
         } catch (error) {
             console.error('Error incrementing view count:', error);
         }
-    };
+    }, [id]);
 
     useEffect(() => {
         fetchPost();
         incrementViewCount();
-    }, [id]);
+    }, [fetchPost, incrementViewCount]);
 
     const handleScroll = (e) => {
         const scrollLeft = e.target.scrollLeft;
@@ -85,7 +86,7 @@ const ProductDetail = () => {
         if (isModalOpen && modalSliderRef.current) {
             modalSliderRef.current.scrollLeft = currentImage * modalSliderRef.current.offsetWidth;
         }
-    }, [isModalOpen]);
+    }, [isModalOpen, currentImage]);
 
     if (loading) return <div className="flex-center full-screen">로딩 중... 🔄</div>;
     if (!item) return <div className="flex-center full-screen">게시글을 찾을 수 없습니다 🥲</div>;

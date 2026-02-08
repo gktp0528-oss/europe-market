@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -35,6 +35,7 @@ const MeetupDetail = () => {
         try {
             navigate(`/chat/new?post_id=${meetup.id}&seller_id=${meetup.user_id}`);
         } catch (error) {
+            console.error('Chat navigation error:', error);
             alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
@@ -42,9 +43,9 @@ const MeetupDetail = () => {
     useEffect(() => {
         fetchMeetupDetail();
         incrementViewCount();
-    }, [id]);
+    }, [id, fetchMeetupDetail, incrementViewCount]);
 
-    const fetchMeetupDetail = async () => {
+    const fetchMeetupDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('posts')
@@ -59,15 +60,15 @@ const MeetupDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    const incrementViewCount = async () => {
+    const incrementViewCount = useCallback(async () => {
         try {
             await supabase.rpc('increment_views', { post_id: id });
         } catch (error) {
             console.error('Error incrementing view count:', error);
         }
-    };
+    }, [id]);
 
     const nextImage = (e) => {
         e.stopPropagation();

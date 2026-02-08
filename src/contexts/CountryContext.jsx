@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const CountryContext = createContext();
 
 // 11 Countries with Korean communities
+// eslint-disable-next-line react-refresh/only-export-components
 export const SUPPORTED_COUNTRIES = [
     { code: 'ALL', name: '전체', flag: '🌍', lat: 48.8566, lng: 2.3522, currencySymbol: '€' }, // Default/All
     { code: 'DE', name: '독일', flag: '🇩🇪', lat: 51.1657, lng: 10.4515, currencySymbol: '€' },
@@ -56,4 +57,5 @@ export const CountryProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCountry = () => useContext(CountryContext);

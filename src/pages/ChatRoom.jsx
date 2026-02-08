@@ -133,7 +133,7 @@ const ChatRoom = () => {
                 supabase.removeChannel(channel);
             };
         }
-    }, [id, user]);
+    }, [id, user, navigate]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();

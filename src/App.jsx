@@ -1,33 +1,44 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Home from './pages/Home';
 import Navigation from './components/Navigation';
 import './App.css';
 
-import CategoryClothes from './pages/CategoryClothes';
-import CategoryJobs from './pages/CategoryJobs';
-import CategoryTutoring from './pages/CategoryTutoring';
-import CategoryMeetups from './pages/CategoryMeetups';
-import ProductDetail from './pages/ProductDetail';
-import JobDetail from './pages/JobDetail';
-import TutoringDetail from './pages/TutoringDetail';
-import MeetupDetail from './pages/MeetupDetail';
-import WriteUsed from './pages/WriteUsed';
-import WriteJob from './pages/WriteJob';
-import WriteTutoring from './pages/WriteTutoring';
-import WriteMeetup from './pages/WriteMeetup';
-import SelectCountry from './pages/SelectCountry';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import ChatList from './pages/ChatList';
-import ChatRoom from './pages/ChatRoom';
-import MyPage from './pages/MyPage';
-import MyPosts from './pages/MyPosts';
-import Search from './pages/Search';
+// Lazy load pages
+const Home = lazy(() => import('./pages/Home'));
+const CategoryClothes = lazy(() => import('./pages/CategoryClothes'));
+const CategoryJobs = lazy(() => import('./pages/CategoryJobs'));
+const CategoryTutoring = lazy(() => import('./pages/CategoryTutoring'));
+const CategoryMeetups = lazy(() => import('./pages/CategoryMeetups'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const JobDetail = lazy(() => import('./pages/JobDetail'));
+const TutoringDetail = lazy(() => import('./pages/TutoringDetail'));
+const MeetupDetail = lazy(() => import('./pages/MeetupDetail'));
+const WriteUsed = lazy(() => import('./pages/WriteUsed'));
+const WriteJob = lazy(() => import('./pages/WriteJob'));
+const WriteTutoring = lazy(() => import('./pages/WriteTutoring'));
+const WriteMeetup = lazy(() => import('./pages/WriteMeetup'));
+const SelectCountry = lazy(() => import('./pages/SelectCountry'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const ChatList = lazy(() => import('./pages/ChatList'));
+const ChatRoom = lazy(() => import('./pages/ChatRoom'));
+const MyPage = lazy(() => import('./pages/MyPage'));
+const MyPosts = lazy(() => import('./pages/MyPosts'));
+const Search = lazy(() => import('./pages/Search'));
+
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
 import { CountryProvider } from './contexts/CountryContext';
 import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Loading Fallback Component
+const PageLoader = () => (
+  <div className="flex-center full-screen" style={{ flexDirection: 'column', gap: '12px' }}>
+    <div className="loading-spinner" />
+    <p style={{ color: '#666', fontSize: '14px' }}>잠시만 기다려주세요...</p>
+  </div>
+);
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
 const AppContent = () => {
@@ -62,17 +73,17 @@ const AppContent = () => {
         <Route path="/job/:id" element={<JobDetail />} />
         <Route path="/tutoring/:id" element={<TutoringDetail />} />
         <Route path="/meetup/:id" element={<MeetupDetail />} />
-        {/* Write Selection & Forms */}
-        <Route path="/write/select/:type" element={<SelectCountry />} />
-        <Route path="/write/used" element={<WriteUsed />} />
-        <Route path="/write/job" element={<WriteJob />} />
-        <Route path="/write/tutoring" element={<WriteTutoring />} />
-        <Route path="/write/meetup" element={<WriteMeetup />} />
+        {/* Write Selection & Forms (Protected) */}
+        <Route path="/write/select/:type" element={<ProtectedRoute><SelectCountry /></ProtectedRoute>} />
+        <Route path="/write/used" element={<ProtectedRoute><WriteUsed /></ProtectedRoute>} />
+        <Route path="/write/job" element={<ProtectedRoute><WriteJob /></ProtectedRoute>} />
+        <Route path="/write/tutoring" element={<ProtectedRoute><WriteTutoring /></ProtectedRoute>} />
+        <Route path="/write/meetup" element={<ProtectedRoute><WriteMeetup /></ProtectedRoute>} />
 
-        {/* Chat Routes */}
-        <Route path="/chat" element={<ChatList />} />
-        <Route path="/chat/:id" element={<ChatRoom />} />
-        <Route path="/my-posts" element={<MyPosts />} />
+        {/* Chat Routes (Protected) */}
+        <Route path="/chat" element={<ProtectedRoute><ChatList /></ProtectedRoute>} />
+        <Route path="/chat/:id" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
+        <Route path="/my-posts" element={<ProtectedRoute><MyPosts /></ProtectedRoute>} />
 
         <Route path="/alarm" element={<div className="flex-center full-screen">알림 화면 준비중 🔔</div>} />
         <Route path="/mypage" element={<MyPage />} />

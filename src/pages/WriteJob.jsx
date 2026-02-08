@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, MapPin, Camera, X, Clock } from 'lucide-react';
 import { SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
@@ -30,8 +30,7 @@ const WriteJob = () => {
     }, [user, loading, navigate]);
 
     // Get country info for currency
-    const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
-    const currency = countryInfo.currencySymbol;
+    SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -47,7 +46,6 @@ const WriteJob = () => {
     });
 
     const workDaysOptions = ['월', '화', '수', '목', '금', '토', '일', '무관'];
-    const payTypeOptions = ['시급', '일급', '월급', '건당'];
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -97,10 +95,7 @@ const WriteJob = () => {
         });
     };
 
-    const handlePayChange = (e) => {
-        const value = e.target.value.replace(/[^0-9]/g, '');
-        setFormData({ ...formData, payAmount: value ? Number(value).toLocaleString() : '' });
-    };
+
 
     const handleSubmit = async () => {
         if (!isFormValid || isSubmitting) return;

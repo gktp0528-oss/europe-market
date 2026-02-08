@@ -7,11 +7,13 @@ const SuccessModal = ({
     title,
     message,
     buttonText = '확인',
-    icon: Icon = CheckCircle,
+    icon = CheckCircle,
     iconColor = '#eb2f96',
     iconBg = '#fff0f6'
 }) => {
     if (!isOpen) return null;
+
+    const IconComponent = icon;
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -26,7 +28,7 @@ const SuccessModal = ({
                     justifyContent: 'center',
                     margin: '0 auto 20px'
                 }}>
-                    <Icon size={30} color={iconColor} />
+                    <IconComponent size={30} color={iconColor} />
                 </div>
                 <h3 className="modal-title">{title}</h3>
                 <p className="modal-desc">

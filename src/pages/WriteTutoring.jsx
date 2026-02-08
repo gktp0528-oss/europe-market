@@ -28,8 +28,7 @@ const WriteTutoring = () => {
     }, [user, loading, navigate]);
 
     // Get country info for currency
-    const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
-    const currency = countryInfo.currencySymbol;
+    SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');
 
     const [formData, setFormData] = useState({
         title: '',
@@ -62,10 +61,7 @@ const WriteTutoring = () => {
         setShowLocationPicker(false);
     };
 
-    const handlePayChange = (e) => {
-        const value = e.target.value.replace(/[^0-9]/g, '');
-        setFormData({ ...formData, payAmount: value ? Number(value).toLocaleString() : '' });
-    };
+
 
     const isFormValid = formData.title && formData.subject && formData.description && formData.location;
 
@@ -128,7 +124,7 @@ const WriteTutoring = () => {
         }
     };
 
-    const payTypeOptions = ['시급', '회당'];
+
 
     return (
         <div className="write-page">

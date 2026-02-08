@@ -10,7 +10,7 @@ const Header = () => {
   const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedCountry } = useCountry();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const isHome = location.pathname === '/';
 

@@ -60,6 +60,34 @@ create policy "Users can send messages"
     )
   );
 
+-- Enable RLS on posts
+alter table public.posts enable row level security;
+
+-- Policy: Anyone can read posts
+create policy "Anyone can view posts"
+  on public.posts for select
+  using (true);
+
+-- Policy: Authenticated users can create posts (must own the row)
+create policy "Authenticated users can create posts"
+  on public.posts for insert
+  with check (auth.uid() = user_id);
+
+-- Policy: Users can update their own posts
+create policy "Users can update own posts"
+  on public.posts for update
+  using (auth.uid() = user_id);
+
+-- Policy: Users can delete their own posts
+create policy "Users can delete own posts"
+  on public.posts for delete
+  using (auth.uid() = user_id);
+
+-- Policy: Users can update their own conversations (for last_message)
+create policy "Users can update own conversations"
+  on public.conversations for update
+  using (auth.uid() = participant1_id or auth.uid() = participant2_id);
+
 -- Function to handle new user profile creation (Idempotent)
 create or replace function public.handle_new_user()
 returns trigger as $$

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, GraduationCap, BookOpen, Award, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -34,6 +34,7 @@ const TutoringDetail = () => {
         try {
             navigate(`/chat/new?post_id=${tutoring.id}&seller_id=${tutoring.user_id}`);
         } catch (error) {
+            console.error('Chat navigation error:', error);
             alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
@@ -41,9 +42,9 @@ const TutoringDetail = () => {
     useEffect(() => {
         fetchTutoringDetail();
         incrementViewCount();
-    }, [id]);
+    }, [id, fetchTutoringDetail, incrementViewCount]);
 
-    const fetchTutoringDetail = async () => {
+    const fetchTutoringDetail = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('posts')
@@ -58,15 +59,15 @@ const TutoringDetail = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
 
-    const incrementViewCount = async () => {
+    const incrementViewCount = useCallback(async () => {
         try {
             await supabase.rpc('increment_views', { post_id: id });
         } catch (error) {
             console.error('Error incrementing view count:', error);
         }
-    };
+    }, [id]);
 
     if (loading) return <div className="loading-spinner">Loading...</div>;
     if (!tutoring) return <div className="error-message">존재하지 않는 게시글입니다.</div>;

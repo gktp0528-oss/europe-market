@@ -69,7 +69,7 @@ const ChatList = () => {
                 event: '*',
                 schema: 'public',
                 table: 'conversations'
-            }, (payload) => {
+            }, () => {
                 // Fetch again whenever any conversation changes
                 // RLS will ensure we only see relevant ones
                 // We could optimize this by manually updating the state
