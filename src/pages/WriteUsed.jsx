@@ -45,13 +45,31 @@ const WriteUsed = () => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
+
+        // Validation: Max 10 images
         if (images.length + files.length > 10) {
             alert('사진은 최대 10장까지 업로드할 수 있어요.');
             return;
         }
 
-        const newImages = files.map(file => ({
-            id: Math.random().toString(36).substr(2, 9),
+        // Validation: Size and Type
+        const validFiles = [];
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name}은(는) 5MB를 초과하여 제외되었습니다.`);
+                continue;
+            }
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert(`${file.name}은(는) 지원하지 않는 파일 형식입니다. (JPG, PNG, WEBP만 가능)`);
+                continue;
+            }
+            validFiles.push(file);
+        }
+
+        if (validFiles.length === 0) return;
+
+        const newImages = validFiles.map(file => ({
+            id: crypto.randomUUID(),
             url: URL.createObjectURL(file),
             file
         }));
@@ -101,7 +119,7 @@ const WriteUsed = () => {
             const uploadedUrls = [];
             for (const img of images) {
                 const fileExt = img.file.name.split('.').pop();
-                const fileName = `${Math.random()}.${fileExt}`;
+                const fileName = `${crypto.randomUUID()}.${fileExt}`;
                 const filePath = `used/${fileName}`;
 
                 const { error: uploadError } = await supabase.storage
@@ -195,6 +213,7 @@ const WriteUsed = () => {
                         placeholder="글 제목을 입력해주세요"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        maxLength={100}
                     />
                 </div>
 
@@ -207,6 +226,7 @@ const WriteUsed = () => {
                             placeholder="가격을 입력해주세요"
                             value={formData.displayPrice}
                             onChange={handlePriceChange}
+                            maxLength={20}
                         />
                         <span className="currency-label">{currency}</span>
                     </div>
@@ -261,6 +281,7 @@ const WriteUsed = () => {
                         placeholder="게시글 내용을 작성해주세요. (판매 금지 물품은 게시가 제한될 수 있어요)"
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        maxLength={2000}
                     />
                 </div>
 
