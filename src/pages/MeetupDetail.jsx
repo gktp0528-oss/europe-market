@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Calendar, UserPlus, Eye, Star, Users, User, ChevronLeft, ChevronRight, Clock, Tag, Monitor, Globe, CheckCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 모임 상세 페이지
@@ -34,10 +33,9 @@ const MeetupDetail = () => {
         }
 
         try {
-            const conversationId = await startChat(user.id, meetup.user_id, meetup.id);
-            navigate(`/chat/${conversationId}`);
+            navigate(`/chat/new?post_id=${meetup.id}&seller_id=${meetup.user_id}`);
         } catch (error) {
-            alert('채팅방 생성 중 오류가 발생했습니다.');
+            alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
 

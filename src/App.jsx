@@ -24,6 +24,10 @@ import ChatRoom from './pages/ChatRoom';
 import MyPage from './pages/MyPage';
 import MyPosts from './pages/MyPosts';
 import Search from './pages/Search';
+import Header from './components/Header';
+import ScrollToTop from './components/ScrollToTop';
+import { CountryProvider } from './contexts/CountryContext';
+import { AuthProvider } from './contexts/AuthContext';
 
 // 상세페이지에서 네비게이션 숨기기 위한 래퍼 컴포넌트
 const AppContent = () => {

@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, GraduationCap, BookOpen, Award, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 과외/레슨 상세 페이지
@@ -33,10 +32,9 @@ const TutoringDetail = () => {
         }
 
         try {
-            const conversationId = await startChat(user.id, tutoring.user_id, tutoring.id);
-            navigate(`/chat/${conversationId}`);
+            navigate(`/chat/new?post_id=${tutoring.id}&seller_id=${tutoring.user_id}`);
         } catch (error) {
-            alert('채팅방 생성 중 오류가 발생했습니다.');
+            alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
 

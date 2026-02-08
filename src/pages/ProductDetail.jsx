@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 중고거래 상세 페이지 (Style 1 - Classic Card)
@@ -35,10 +34,9 @@ const ProductDetail = () => {
         }
 
         try {
-            const conversationId = await startChat(user.id, item.user_id, item.id);
-            navigate(`/chat/${conversationId}`);
+            navigate(`/chat/new?post_id=${item.id}&seller_id=${item.user_id}`);
         } catch (error) {
-            alert('채팅방 생성 중 오류가 발생했습니다.');
+            alert('채팅방 이동 중 오류가 발생했습니다.');
         }
     };
 

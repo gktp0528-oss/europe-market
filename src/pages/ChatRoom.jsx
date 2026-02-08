@@ -25,99 +25,190 @@ const ChatRoom = () => {
         scrollToBottom();
     }, [messages]);
 
+    // Use an effect to handle URL parameters for new chats
     useEffect(() => {
-        if (!user || !id) return;
+        if (!user) return;
 
-        // 1. Fetch conversation details to get other user info
-        const fetchConversation = async () => {
-            const { data, error } = await supabase
-                .from('conversations')
-                .select(`
-                    id,
-                    post_id,
-                    post:posts(title, price, image_urls, category),
-                    participant1:profiles!participant1_id(id, username, avatar_url),
-                    participant2:profiles!participant2_id(id, username, avatar_url)
-                `)
-                .eq('id', id)
-                .single();
+        const params = new URLSearchParams(window.location.search);
+        const postId = params.get('post_id');
+        const sellerId = params.get('seller_id');
 
-            if (data) {
-                const p1 = data.participant1;
-                const p2 = data.participant2;
-                if (!p1 || !p2) {
-                    console.error('Participant data missing');
-                    return;
+        if (id === 'new') {
+            if (!postId || !sellerId) {
+                navigate('/chat');
+                return;
+            }
+
+            // Fetch metadata for the new chat header
+            const fetchMetadata = async () => {
+                try {
+                    // Fetch post info
+                    const { data: postData } = await supabase
+                        .from('posts')
+                        .select('title, price, image_urls, category')
+                        .eq('id', postId)
+                        .single();
+
+                    if (postData) setPost(postData);
+
+                    // Fetch seller info
+                    const { data: sellerData } = await supabase
+                        .from('profiles')
+                        .select('id, username, avatar_url')
+                        .eq('id', sellerId)
+                        .single();
+
+                    if (sellerData) setOtherUser(sellerData);
+                } catch (err) {
+                    console.error('Error fetching chat metadata:', err);
                 }
-                const other = p1.id === user.id ? p2 : p1;
-                setOtherUser(other);
-                setPost(data.post);
-            }
-        };
+            };
+            fetchMetadata();
+            setMessages([]);
+        } else {
+            // Normal existing chat flow
+            const fetchConversation = async () => {
+                const { data } = await supabase
+                    .from('conversations')
+                    .select(`
+                        id,
+                        post_id,
+                        post:posts(title, price, image_urls, category),
+                        participant1:profiles!participant1_id(id, username, avatar_url),
+                        participant2:profiles!participant2_id(id, username, avatar_url)
+                    `)
+                    .eq('id', id)
+                    .single();
 
-        // 2. Fetch existing messages
-        const fetchMessages = async () => {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('conversation_id', id)
-                .order('created_at', { ascending: true }); // Oldest first for chat log
+                if (data) {
+                    const p1 = data.participant1;
+                    const p2 = data.participant2;
+                    if (p1 && p2) {
+                        const other = p1.id === user.id ? p2 : p1;
+                        setOtherUser(other);
+                        setPost(data.post);
+                    }
+                }
+            };
 
-            if (data) {
-                setMessages(data);
-            }
-        };
+            const fetchMessages = async () => {
+                const { data } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('conversation_id', id)
+                    .order('created_at', { ascending: true });
 
-        fetchConversation();
-        fetchMessages();
+                if (data) {
+                    setMessages(data);
+                }
+            };
 
-        // 3. Subscribe to new messages
-        const channel = supabase
-            .channel(`room:${id}`)
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'messages',
-                filter: `conversation_id=eq.${id}`
-            }, (payload) => {
-                setMessages((prev) => [...prev, payload.new]);
-            })
-            .subscribe();
+            fetchConversation();
+            fetchMessages();
 
-        return () => {
-            supabase.removeChannel(channel);
-        };
+            // Subscribe to new messages
+            const channel = supabase
+                .channel(`room:${id}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `conversation_id=eq.${id}`
+                }, (payload) => {
+                    // Handle subscription updates
+                    setMessages((prev) => {
+                        // Check if message already exists (optimistic update handle)
+                        if (prev.find(m => m.id === payload.new.id)) return prev;
+                        return [...prev, payload.new];
+                    });
+                })
+                .subscribe();
 
+            return () => {
+                supabase.removeChannel(channel);
+            };
+        }
     }, [id, user]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !user) return;
+        const content = newMessage.trim();
+        if (!content || !user) return;
 
         try {
-            const { error } = await supabase
-                .from('messages')
-                .insert({
-                    conversation_id: id,
-                    sender_id: user.id,
-                    content: newMessage
-                });
+            let conversationId = id;
 
-            if (error) throw error;
+            // 1. Lazy creation if new
+            if (id === 'new') {
+                const params = new URLSearchParams(window.location.search);
+                const postId = params.get('post_id');
+                const sellerId = params.get('seller_id');
 
+                const { data: newConv, error: convError } = await supabase
+                    .from('conversations')
+                    .insert({
+                        participant1_id: user.id,
+                        participant2_id: sellerId,
+                        post_id: postId,
+                        updated_at: new Date().toISOString(),
+                        last_message: content
+                    })
+                    .select()
+                    .single();
+
+                if (convError) throw convError;
+                conversationId = newConv.id;
+
+                // Silent URL update
+                window.history.replaceState(null, '', `/chat/${conversationId}`);
+                // Note: We don't navigate() to avoid remounting, but we need to update 'id' if possible
+                // Actually, replaceState doesn't update 'id' from useParams(). 
+                // A better way might be to just force navigate or manage state carefully.
+                // For now, let's use navigate(..., { replace: true }) which is cleaner for React Router.
+                navigate(`/chat/${conversationId}`, { replace: true });
+            }
+
+            // 2. Optimistic Update
+            const tempId = Date.now();
+            const tempMsg = {
+                id: tempId,
+                conversation_id: conversationId,
+                sender_id: user.id,
+                content: content,
+                created_at: new Date().toISOString(),
+                status: 'sending'
+            };
+            setMessages(prev => [...prev, tempMsg]);
             setNewMessage('');
 
-            // Optionally update last_message in conversation
+            // 3. DB Save
+            const { data: savedMsg, error: msgError } = await supabase
+                .from('messages')
+                .insert({
+                    conversation_id: conversationId,
+                    sender_id: user.id,
+                    content: content
+                })
+                .select()
+                .single();
+
+            if (msgError) throw msgError;
+
+            // Update optimistic message with real one
+            setMessages(prev => prev.map(m => m.id === tempId ? savedMsg : m));
+
+            // 4. Update conversation last message
             await supabase
                 .from('conversations')
                 .update({
-                    last_message: newMessage,
+                    last_message: content,
                     updated_at: new Date().toISOString()
                 })
-                .eq('id', id);
+                .eq('id', conversationId);
 
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error in send flow:', error);
+            alert('메시지 전송 실패');
         }
     };
 

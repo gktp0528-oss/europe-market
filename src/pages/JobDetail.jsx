@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Briefcase, Calendar, DollarSign, Eye, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { startChat } from '../lib/chat';
 import './DetailPage.css';
 
 // 알바 상세 페이지
@@ -34,8 +33,7 @@ const JobDetail = () => {
         }
 
         try {
-            const conversationId = await startChat(user.id, job.user_id, job.id);
-            navigate(`/chat/${conversationId}`);
+            navigate(`/chat/new?post_id=${job.id}&seller_id=${job.user_id}`);
         } catch (error) {
             alert('채팅 연결 실패');
         }
