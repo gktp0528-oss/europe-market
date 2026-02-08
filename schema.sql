@@ -85,6 +85,14 @@ create table if not exists public.conversations (
   constraint participants_distinct check (participant1_id != participant2_id)
 );
 
+-- 중복 채팅방 방지 유니크 인덱스
+create unique index if not exists conversations_participants_post_unique_idx 
+on public.conversations (
+  least(participant1_id, participant2_id), 
+  greatest(participant1_id, participant2_id), 
+  coalesce(post_id, -1)
+);
+
 alter table public.conversations enable row level security;
 
 create policy "Users can view their own conversations"
@@ -189,7 +197,11 @@ end;
 $$ language plpgsql security definer;
 
 -- 채팅방 중복 생성 방지 및 조회 함수
-create or replace function public.get_or_create_conversation(p1_id uuid, p2_id uuid, target_post_id bigint default null)
+create or replace function public.get_or_create_conversation(
+  p_participant1_id uuid, 
+  p_participant2_id uuid, 
+  p_post_id bigint default null
+)
 returns uuid as $$
 declare
   conv_id uuid;
@@ -198,13 +210,14 @@ begin
   select id into conv_id
   from public.conversations
   where 
-    (participant1_id = p1_id and participant2_id = p2_id)
-    or 
-    (participant1_id = p2_id and participant2_id = p1_id);
+    ((participant1_id = p_participant1_id and participant2_id = p_participant2_id)
+     or 
+     (participant1_id = p_participant2_id and participant2_id = p_participant1_id))
+    and (post_id is not distinct from p_post_id);
 
   if conv_id is null then
     insert into public.conversations (participant1_id, participant2_id, post_id)
-    values (p1_id, p2_id, target_post_id)
+    values (p_participant1_id, p_participant2_id, p_post_id)
     returning id into conv_id;
   end if;
 
