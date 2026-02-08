@@ -39,10 +39,10 @@ const AppContent = () => {
     location.pathname.startsWith('/tutoring/') ||
     location.pathname.startsWith('/meetup/') ||
     location.pathname.startsWith('/write/') ||
-    location.pathname.startsWith('/chat');
+    /^\/chat($|\/)/.test(location.pathname);
 
   return (
-    <div className="mobile-container">
+    <div className="mobile-container" style={{ paddingBottom: isDetailPage ? 0 : '90px' }}>
       {!isDetailPage && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />

@@ -91,10 +91,16 @@
 
 /* Chat Room Specific */
 .chat-room-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: #fff;
+    z-index: 100;
 }
 
 .chat-messages {
@@ -102,6 +108,7 @@
     overflow-y: auto;
     padding: 20px 16px;
     background-color: #fdfdfd;
+    -webkit-overflow-scrolling: touch;
 }
 
 .message-bubble-wrapper {
