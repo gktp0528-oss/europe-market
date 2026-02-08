@@ -109,6 +109,11 @@ const WriteMeetup = () => {
 
     const handleSubmit = async () => {
         if (!isSubmitValid || isSubmitting) return;
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            navigate('/login');
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -158,7 +163,7 @@ const WriteMeetup = () => {
                     views: 0,
                     likes: 0,
                     color: '#E0F7FA',
-                    user_id: user?.id,
+                    user_id: user.id,
                     metadata: {
                         tags: formData.tags,
                         onOffline: formData.onOffline,

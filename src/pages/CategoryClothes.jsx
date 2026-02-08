@@ -7,20 +7,28 @@ import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import './CategoryClothes.css';
 
+const ITEMS_PER_PAGE = 10;
+
 const CategoryClothes = () => {
     const navigate = useNavigate();
     const { selectedCountry } = useCountry();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isMoreLoading, setIsMoreLoading] = useState(false);
 
-    const fetchPosts = useCallback(async () => {
-        setLoading(true);
+    const fetchPosts = useCallback(async (pageNum = 0) => {
+        if (pageNum === 0) setLoading(true);
+        else setIsMoreLoading(true);
+
         try {
             let query = supabase
                 .from('posts')
                 .select('*')
                 .eq('category', 'used')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .range(pageNum * ITEMS_PER_PAGE, (pageNum + 1) * ITEMS_PER_PAGE - 1);
 
             if (selectedCountry.code !== 'ALL') {
                 query = query.eq('country_code', selectedCountry.code);
@@ -29,17 +37,32 @@ const CategoryClothes = () => {
             const { data, error } = await query;
 
             if (error) throw error;
-            setItems(data || []);
+
+            if (pageNum === 0) {
+                setItems(data || []);
+            } else {
+                setItems(prev => [...prev, ...(data || [])]);
+            }
+
+            setHasMore(data && data.length === ITEMS_PER_PAGE);
         } catch (error) {
             console.error('Error fetching posts:', error);
         } finally {
             setLoading(false);
+            setIsMoreLoading(false);
         }
     }, [selectedCountry.code]);
 
     useEffect(() => {
-        fetchPosts();
+        setPage(0);
+        fetchPosts(0);
     }, [fetchPosts]);
+
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchPosts(nextPage);
+    };
 
     const filteredItems = items;
 
