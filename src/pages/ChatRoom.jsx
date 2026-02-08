@@ -117,8 +117,13 @@ const ChatRoom = () => {
                 }, (payload) => {
                     // Handle subscription updates
                     setMessages((prev) => {
-                        // Check if message already exists (optimistic update handle)
+                        // 1. Check if real ID already exists (from optimistic update DB save)
                         if (prev.find(m => m.id === payload.new.id)) return prev;
+
+                        // 2. Optimization: If we have an optimistic message (status: sending) 
+                        // with same content and sender, we could potentially replace it.
+                        // But since we already have the map logic in handleSendMessage,
+                        // this check is just a safeguard to prevent double appending.
                         return [...prev, payload.new];
                     });
                 })

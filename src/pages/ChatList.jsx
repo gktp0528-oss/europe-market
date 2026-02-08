@@ -62,10 +62,20 @@ const ChatList = () => {
         fetchConversations();
 
         // Ideally subscribe to changes in 'conversations' table as well
+        // Subscribe to changes in 'conversations' table
         const subscription = supabase
             .channel('public:conversations')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations', filter: `participant1_id=eq.${user.id}` }, fetchConversations)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations', filter: `participant2_id=eq.${user.id}` }, fetchConversations)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'conversations'
+            }, (payload) => {
+                // Fetch again whenever any conversation changes
+                // RLS will ensure we only see relevant ones
+                // We could optimize this by manually updating the state
+                // but fetchConversations is safer for complex joins.
+                fetchConversations();
+            })
             .subscribe();
 
         return () => {
