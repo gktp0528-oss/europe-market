@@ -88,7 +88,7 @@ const MyPage = () => {
                     )}
                 </div>
                 <div className="profile-info">
-                    <h2 className="profile-nickname">{profile?.username || '하은님'}</h2>
+                    <h2 className="profile-nickname">{profile?.username || user?.email?.split('@')[0] || '사용자님'}</h2>
                     <p className="profile-email">{user.email}</p>
                 </div>
             </div>
@@ -146,7 +146,7 @@ const MyPage = () => {
                 <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3 className="modal-title">로그아웃 하시겠습니까?</h3>
-                        <p className="modal-desc">언제든 다시 오셔서 하은님의 예쁜 물건들을 보여주세요! 💖</p>
+                        <p className="modal-desc">언제든 다시 오셔서 {profile?.username || '대표님'}의 예쁜 물건들을 보여주세요! 💖</p>
                         <div className="modal-buttons">
                             <button className="modal-btn cancel" onClick={() => setShowLogoutModal(false)}>취소</button>
                             <button className="modal-btn confirm" onClick={handleLogout}>로그아웃</button>

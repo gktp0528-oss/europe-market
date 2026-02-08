@@ -332,7 +332,7 @@ const WriteJob = () => {
                 isOpen={showSuccess}
                 onClose={() => navigate('/category/jobs')}
                 title="등록 완료! 💼"
-                message={`하은님의 구인 공고가 <br/>성공적으로 등록되었습니다! ✨`}
+                message={`${user?.user_metadata?.nickname || '대표님'}의 구인 공고가 <br/>성공적으로 등록되었습니다! ✨`}
                 icon={Briefcase}
                 buttonText="목록으로 이동"
             />
