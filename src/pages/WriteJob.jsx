@@ -11,7 +11,7 @@ import '../styles/WriteForm.css';
 
 const WriteJob = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
@@ -21,6 +21,13 @@ const WriteJob = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showLocationPicker, setShowLocationPicker] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!loading && !user) {
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/login');
+        }
+    }, [user, loading, navigate]);
 
     // Get country info for currency
     const countryInfo = SUPPORTED_COUNTRIES.find(c => c.code === countryCode) || SUPPORTED_COUNTRIES.find(c => c.code === 'FR');

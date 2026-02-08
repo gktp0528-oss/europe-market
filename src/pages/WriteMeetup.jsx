@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, MapPin, Camera, X, Calendar, Clock, Users, Star, Tag, CheckCircle, Globe, Monitor } from 'lucide-react';
@@ -15,7 +15,7 @@ const WriteMeetup = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const countryCode = queryParams.get('country') || 'FR';
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
 
     const fileInputRef = useRef(null);
     const [images, setImages] = useState([]);
@@ -23,6 +23,13 @@ const WriteMeetup = () => {
     const [showLocationPicker, setShowLocationPicker] = useState(false);
     const [step, setStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!loading && !user) {
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/login');
+        }
+    }, [user, loading, navigate]);
     const totalSteps = 3;
 
     // Get country info for currency
