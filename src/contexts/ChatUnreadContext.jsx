@@ -37,9 +37,14 @@ export const ChatUnreadProvider = ({ children }) => {
         if (!user || !conversationId) return;
 
         try {
-            await supabase.rpc('mark_conversation_read', {
+            const { error } = await supabase.rpc('mark_conversation_read', {
                 p_conversation_id: conversationId
             });
+
+            if (error) {
+                console.error('Error marking as read via RPC:', error);
+                return;
+            }
 
             setUnreadByConversation(prev => {
                 const newCounts = { ...prev };
@@ -63,26 +68,36 @@ export const ChatUnreadProvider = ({ children }) => {
         const channel = supabase
             .channel('global_unread_notifications')
             .on('postgres_changes', {
-                event: 'INSERT',
+                event: '*', // Listen to INSERT and UPDATE (for multi-device sync)
                 schema: 'public',
                 table: 'messages'
             }, (payload) => {
-                const newMsg = payload.new;
+                if (payload.eventType === 'INSERT') {
+                    const newMsg = payload.new;
 
-                // 내 메시지면 무시
-                if (newMsg.sender_id === user.id) return;
+                    // 내 메시지면 무시
+                    if (newMsg.sender_id === user.id) return;
 
-                // 현재 내가 보고 있는 방이면 즉시 읽음 처리 및 카운트 제외
-                if (newMsg.conversation_id === activeConversationId) {
-                    markAsRead(newMsg.conversation_id);
-                    return;
+                    // 현재 내가 보고 있는 방이면 즉시 읽음 처리 및 카운트 제외
+                    if (newMsg.conversation_id === activeConversationId) {
+                        markAsRead(newMsg.conversation_id);
+                        return;
+                    }
+
+                    // 그 외의 경우 카운트 증가
+                    setUnreadByConversation(prev => ({
+                        ...prev,
+                        [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
+                    }));
+                } else if (payload.eventType === 'UPDATE') {
+                    const updatedMsg = payload.new;
+
+                    // 만약 다른 기기에서 읽음 처리가 되었다면 (is_read: false -> true)
+                    if (updatedMsg.is_read && !payload.old.is_read) {
+                        // 해당 방의 미읽음 카운트를 다시 조회하여 정확하게 갱신
+                        refreshUnreadCounts();
+                    }
                 }
-
-                // 그 외의 경우 카운트 증가
-                setUnreadByConversation(prev => ({
-                    ...prev,
-                    [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
-                }));
             })
             .subscribe();
 
