@@ -2,17 +2,29 @@
  * 날짜 및 시간 관련 유틸리티 함수
  */
 
+const toValidDate = (value) => {
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
 /**
  * 날짜를 '방금 전', 'n분 전', 'n시간 전', 'n일 전' 형식으로 변환
  * @param {string | Date} dateValue - 변환할 날짜
+ * @param {string | Date | number} nowValue - 기준 시각(기본값: 현재 시각)
  * @returns {string} 변환된 상대 시간 문자열
  */
-export const formatTimeAgo = (dateValue) => {
-    if (!dateValue) return '방금 전';
+export const formatTimeAgo = (dateValue, nowValue = new Date()) => {
+    if (!dateValue) {
+        return '방금 전';
+    }
 
-    const now = new Date();
-    const date = new Date(dateValue);
-    const diffInSeconds = Math.floor((now - date) / 1000);
+    const date = toValidDate(dateValue);
+    const now = toValidDate(nowValue) || new Date();
+    if (!date) {
+        return '방금 전';
+    }
+
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) return '방금 전';
 
@@ -31,4 +43,16 @@ export const formatTimeAgo = (dateValue) => {
         month: 'long',
         day: 'numeric'
     });
+};
+
+export const getPostTimeLabel = (post, nowValue = new Date()) => {
+    if (!post) {
+        return '방금 전';
+    }
+
+    if (post.created_at) {
+        return formatTimeAgo(post.created_at, nowValue);
+    }
+
+    return post.time_ago || '방금 전';
 };

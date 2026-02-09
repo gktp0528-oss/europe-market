@@ -4,6 +4,8 @@ import { MapPin, Clock, Briefcase, Heart, Eye } from 'lucide-react';
 import { useCountry } from '../contexts/CountryContext';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { supabase } from '../lib/supabase';
+import { getPostTimeLabel } from '../utils/dateUtils';
+import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import './CategoryClothes.css';
 
 const ITEMS_PER_PAGE = 10;
@@ -16,6 +18,7 @@ const CategoryJobs = () => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isMoreLoading, setIsMoreLoading] = useState(false);
+    const nowTick = useMinuteTicker();
 
     const fetchPosts = useCallback(async (pageNum = 0) => {
         if (pageNum === 0) setLoading(true);
@@ -84,9 +87,10 @@ const CategoryJobs = () => {
                                 <h3 className="product-title">{item.title}</h3>
                                 <div className="product-meta">
                                     <span><MapPin size={12} /> {item.location}</span>
-                                    <span><Clock size={12} /> {item.time_ago || '방금 전'}</span>
+                                    <span><Clock size={12} /> {getPostTimeLabel(item, nowTick)}</span>
                                 </div>
                                 <div className="product-bottom">
+                                    <p className="product-price">{item.price || '급여 협의'}</p>
                                     <div className="product-interactions">
                                         <span className="interaction-item">
                                             <Eye size={12} /> {item.views || 0}
@@ -138,4 +142,3 @@ const CategoryJobs = () => {
 };
 
 export default CategoryJobs;
-

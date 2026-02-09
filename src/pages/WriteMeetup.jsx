@@ -177,7 +177,6 @@ const WriteMeetup = () => {
                     description: formData.description,
                     country_code: countryCode,
                     image_urls: uploadedUrls,
-                    time_ago: '방금 전',
                     views: 0,
                     likes: 0,
                     color: '#E0F7FA',

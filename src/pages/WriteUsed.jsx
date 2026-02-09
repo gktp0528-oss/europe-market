@@ -152,7 +152,6 @@ const WriteUsed = () => {
                     trade_time: formData.tradeTime,
                     country_code: countryCode,
                     image_urls: uploadedUrls,
-                    time_ago: '방금 전',
                     views: 0,
                     likes: 0,
                     color: '#F5F5F5',

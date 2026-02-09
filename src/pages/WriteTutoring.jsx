@@ -93,7 +93,6 @@ const WriteTutoring = () => {
                     longitude: formData.locationData?.lng,
                     description: `[${tutoringType === 'tutoring' ? '과외' : '레슨'}] ${tutoringType === 'tutoring' ? '과목' : '분야'}: ${formData.subject}\n\n${formData.description}`,
                     country_code: countryCode,
-                    time_ago: '방금 전',
                     views: 0,
                     likes: 0,
                     image_urls: [defaultImage],

@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, MapPin, Clock, MessageCircle, User, Eye, Star } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { getPostTimeLabel } from '../utils/dateUtils';
+import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import './DetailPage.css';
 
 // 중고거래 상세 페이지 (Style 1 - Classic Card)
@@ -13,7 +15,10 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [currentImage, setCurrentImage] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
     const { user } = useAuth();
+    const nowTick = useMinuteTicker();
 
     const handleChatClick = async () => {
         if (!user) {
@@ -41,17 +46,107 @@ const ProductDetail = () => {
         }
     };
 
+    const handleLikeClick = async () => {
+        if (!user) {
+            if (window.confirm('로그인이 필요한 서비스입니다. 로그인 하시겠습니까?')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase.rpc('toggle_like', { p_post_id: id });
+
+            if (error) throw error;
+
+            setIsLiked(data.liked);
+            setLikeCount(data.like_count);
+        } catch (error) {
+            console.error('Like toggle error:', error);
+            alert('좋아요 처리 중 오류가 발생했습니다.');
+        }
+    };
+
+    const fetchLikeStatus = useCallback(async () => {
+        if (!user) return;
+
+        try {
+            const { data, error } = await supabase.rpc('check_user_like', { p_post_id: id });
+
+            if (error) throw error;
+            setIsLiked(data);
+        } catch (error) {
+            console.error('Error checking like status:', error);
+        }
+    }, [id, user]);
+
+    const handleShareClick = async () => {
+        const url = window.location.href;
+        const shareData = {
+            title: item?.title || '중고거래',
+            text: `${item?.title} - ${item?.price}`,
+            url: url
+        };
+
+        try {
+            // Web Share API 지원 확인 (iOS Safari, Android Chrome 등)
+            if (navigator.share) {
+                await navigator.share(shareData);
+                return;
+            }
+        } catch (error) {
+            // 사용자가 공유 취소한 경우
+            if (error.name === 'AbortError') {
+                return;
+            }
+            console.error('Share error:', error);
+        }
+
+        // Web Share 실패 또는 미지원 - Clipboard 시도
+        try {
+            await navigator.clipboard.writeText(url);
+            alert('링크가 클립보드에 복사되었습니다! 📋\n\n' + url);
+        } catch (clipError) {
+            console.error('Clipboard error:', clipError);
+            // 최종 Fallback - 텍스트 영역 생성하여 복사
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                alert('링크가 복사되었습니다! 📋\n\n' + url);
+            } catch {
+                // 완전 실패 - URL 표시
+                alert('링크를 복사하세요:\n\n' + url);
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+    };
+
     const fetchPost = useCallback(async () => {
         setLoading(true);
         try {
             const { data, error } = await supabase
                 .from('posts')
-                .select('*')
+                .select(`
+                    *,
+                    profiles:user_id (
+                        id,
+                        username,
+                        full_name,
+                        avatar_url
+                    )
+                `)
                 .eq('id', id)
                 .single();
 
             if (error) throw error;
             setItem(data);
+            setLikeCount(data.likes || 0);
 
         } catch (error) {
             console.error('Error fetching post:', error);
@@ -71,7 +166,8 @@ const ProductDetail = () => {
     useEffect(() => {
         fetchPost();
         incrementViewCount();
-    }, [fetchPost, incrementViewCount]);
+        fetchLikeStatus();
+    }, [fetchPost, incrementViewCount, fetchLikeStatus]);
 
     const handleScroll = (e) => {
         const scrollLeft = e.target.scrollLeft;
@@ -103,8 +199,16 @@ const ProductDetail = () => {
                     <ArrowLeft size={24} />
                 </button>
                 <div className="header-actions">
-                    <button className="action-btn"><Share2 size={20} /></button>
-                    <button className="action-btn"><Heart size={20} /></button>
+                    <button className="action-btn" onClick={handleShareClick}>
+                        <Share2 size={20} />
+                    </button>
+                    <button
+                        className="action-btn"
+                        onClick={handleLikeClick}
+                        style={{ color: isLiked ? '#ff4d4f' : 'inherit' }}
+                    >
+                        <Heart size={20} fill={isLiked ? '#ff4d4f' : 'none'} />
+                    </button>
                 </div>
             </header>
 
@@ -154,16 +258,26 @@ const ProductDetail = () => {
             )}
 
             {/* Content */}
-            <div className="detail-content">
+            <div
+                className="detail-content"
+                style={{
+                    marginTop: 0,
+                    borderRadius: '24px 24px 0 0',
+                    background: 'white',
+                    position: 'relative',
+                    zIndex: 10,
+                    padding: '24px'
+                }}
+            >
 
 
                 {/* Product Info */}
                 <div className="product-section">
                     <h1 className="product-title">{item.title}</h1>
                     <div className="product-meta">
-                        <span><Clock size={14} /> {item.time}</span>
+                        <span><Clock size={14} /> {getPostTimeLabel(item, nowTick)}</span>
                         <span><Eye size={14} /> {item.views}</span>
-                        <span><Heart size={14} /> {item.likes}</span>
+                        <span><Heart size={14} /> {likeCount}</span>
                     </div>
                     <p className="product-price" style={{ color: '#333', fontSize: '22px', fontWeight: '800', margin: 0 }}>{item.price}</p>
                 </div>
@@ -197,17 +311,26 @@ const ProductDetail = () => {
                 <div className="unified-seller-card">
                     <div className="unified-seller-left">
                         <div className="unified-avatar">
-                            <User size={28} />
+                            {item.profiles?.avatar_url ? (
+                                <img src={item.profiles.avatar_url} alt="판매자" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                                <User size={28} />
+                            )}
                         </div>
                         <div className="unified-info">
-                            <h4>{item.seller?.name || '익명'}</h4>
+                            <h4>{item.profiles?.username || item.profiles?.full_name || '익명'}</h4>
                             <div className="rating-badge">
                                 <Star size={14} />
-                                <span>{item.seller?.rating || '5.0'}</span>
+                                <span>5.0</span>
                             </div>
                         </div>
                     </div>
-                    <button className="unified-profile-btn">프로필</button>
+                    <button
+                        className="unified-profile-btn"
+                        onClick={() => navigate(`/profile/${item.user_id}`)}
+                    >
+                        프로필
+                    </button>
                 </div>
 
                 {/* Description - Last */}
@@ -219,8 +342,15 @@ const ProductDetail = () => {
 
             {/* Bottom Action Bar */}
             <div className="bottom-bar">
-                <button className="like-btn">
-                    <Heart size={24} />
+                <button
+                    className="like-btn"
+                    onClick={handleLikeClick}
+                    style={{
+                        color: isLiked ? '#ff4d4f' : 'inherit',
+                        borderColor: isLiked ? '#ff4d4f' : '#ddd'
+                    }}
+                >
+                    <Heart size={24} fill={isLiked ? '#ff4d4f' : 'none'} />
                 </button>
                 <button className="chat-btn" onClick={handleChatClick}>
                     <MessageCircle size={20} />

@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Clock, MapPin, Search as SearchIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCountry } from '../contexts/CountryContext';
+import { getPostTimeLabel } from '../utils/dateUtils';
+import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import '../styles/WriteForm.css';
 
 const CATEGORY_OPTIONS = [
@@ -34,6 +36,7 @@ const Search = () => {
     const [selectedCountryCode] = useState(initialCountry);
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const nowTick = useMinuteTicker();
 
     const countryLabel = useMemo(() => {
         if (selectedCountryCode === 'ALL') return '전체 국가';
@@ -190,7 +193,7 @@ const Search = () => {
                                         <MapPin size={12} /> {item.location || '위치 미정'}
                                     </span>
                                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                                        <Clock size={12} /> {item.time_ago || '방금 전'}
+                                        <Clock size={12} /> {getPostTimeLabel(item, nowTick)}
                                     </span>
                                 </div>
                             </button>

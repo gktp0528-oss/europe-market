@@ -146,7 +146,10 @@ const WriteJob = () => {
             }
 
             // 2. Format Data for DB
-            const formattedPay = "급여 협의";
+            const formattedPay = formData.payAmount
+                ? `${formData.payType} ${formData.payAmount}€`
+                : "급여 협의";
+
             const formattedTime = formData.workDays.includes('무관')
                 ? '요일/시간 협의'
                 : `${formData.workDays.join(',')} ${formData.workTimeStart}~${formData.workTimeEnd}`;
@@ -167,7 +170,6 @@ const WriteJob = () => {
                     trade_time: formattedTime,
                     country_code: countryCode,
                     image_urls: uploadedUrls,
-                    time_ago: '방금 전',
                     views: 0,
                     likes: 0,
                     color: '#FFF9C4', // Light yellow for jobs
@@ -231,6 +233,31 @@ const WriteJob = () => {
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         maxLength={100}
                     />
+                </div>
+
+                <div className="form-group">
+                    <label>급여 정보</label>
+                    <div className="price-input-wrapper">
+                        <select
+                            className="pay-type-select"
+                            value={formData.payType}
+                            onChange={(e) => setFormData({ ...formData, payType: e.target.value })}
+                        >
+                            <option value="시급">시급</option>
+                            <option value="일급">일급</option>
+                            <option value="월급">월급</option>
+                            <option value="협의">협의</option>
+                        </select>
+                        <input
+                            type="number"
+                            className="input-field"
+                            placeholder={formData.payType === '협의' ? '협의 가능' : '금액 입력'}
+                            disabled={formData.payType === '협의'}
+                            value={formData.payAmount}
+                            onChange={(e) => setFormData({ ...formData, payAmount: e.target.value })}
+                        />
+                        {formData.payType !== '협의' && <span className="currency-label">€</span>}
+                    </div>
                 </div>
 
 

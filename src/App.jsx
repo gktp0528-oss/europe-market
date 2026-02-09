@@ -25,6 +25,7 @@ const ChatRoom = lazy(() => import('./pages/ChatRoom'));
 const MyPage = lazy(() => import('./pages/MyPage'));
 const MyPosts = lazy(() => import('./pages/MyPosts'));
 const Search = lazy(() => import('./pages/Search'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
 
 import Header from './components/Header';
 import ScrollToTop from './components/ScrollToTop';
@@ -52,6 +53,7 @@ const AppContent = () => {
     location.pathname.startsWith('/meetup/') ||
     location.pathname.startsWith('/chat/') ||
     location.pathname.startsWith('/write/') ||
+    location.pathname.startsWith('/profile/') ||
     location.pathname === '/login' ||
     location.pathname === '/signup';
 
@@ -79,6 +81,7 @@ const AppContent = () => {
           <Route path="/job/:id" element={<JobDetail />} />
           <Route path="/tutoring/:id" element={<TutoringDetail />} />
           <Route path="/meetup/:id" element={<MeetupDetail />} />
+          <Route path="/profile/:userId" element={<UserProfile />} />
           {/* Write Selection & Forms (Protected) */}
           <Route path="/write/select/:type" element={<ProtectedRoute><SelectCountry /></ProtectedRoute>} />
           <Route path="/write/used" element={<ProtectedRoute><WriteUsed /></ProtectedRoute>} />

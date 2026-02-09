@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, MessageCircle, Heart, Eye, MapPin, Clock, Briefcase } from 'lucide-react';
+import { getPostTimeLabel } from '../utils/dateUtils';
+import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import './CategoryClothes.css'; // Reusing common list styles
 
 const MyPosts = () => {
@@ -10,6 +12,7 @@ const MyPosts = () => {
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const nowTick = useMinuteTicker();
 
     useEffect(() => {
         if (!user) return;
@@ -82,7 +85,7 @@ const MyPosts = () => {
                                 <h3 className="product-title">{item.title}</h3>
                                 <div className="product-meta">
                                     <span><MapPin size={12} /> {item.location}</span>
-                                    <span><Clock size={12} /> {item.time_ago || '방금 전'}</span>
+                                    <span><Clock size={12} /> {getPostTimeLabel(item, nowTick)}</span>
                                 </div>
                                 <div className="product-bottom">
                                     <span className="product-price">{item.price || '가격 협의'}</span>
