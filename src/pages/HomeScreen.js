@@ -14,7 +14,6 @@ import { useCountry } from '../contexts/CountryContext';
 import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import AdBanner from '../components/AdBanner';
-import FloatingActionButton from '../components/FloatingActionButton';
 import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import { getPostTimeLabel } from '../utils/dateUtils';
 
@@ -198,8 +197,6 @@ const HomeScreen = ({ navigation }) => {
                     )}
                 </View>
             </ScrollView>
-
-            <FloatingActionButton />
         </View>
     );
 };
@@ -207,7 +204,7 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     scroll: {
         flex: 1,
@@ -244,17 +241,17 @@ const styles = StyleSheet.create({
     categoryGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        justifyContent: 'space-between',
     },
     categoryCard: {
-        width: '23%',
-        minWidth: 74,
+        width: '23.5%',
         backgroundColor: '#fff',
         borderRadius: 14,
         alignItems: 'center',
         paddingVertical: 14,
         borderWidth: 1,
         borderColor: '#F1F1F1',
+        marginBottom: 10,
     },
     categoryIcon: {
         width: 38,

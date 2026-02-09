@@ -199,7 +199,7 @@ const SearchScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     searchHeader: {
         flexDirection: 'row',
         alignItems: 'center',

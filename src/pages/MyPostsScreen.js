@@ -146,7 +146,7 @@ const MyPostsScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     header: {
         height: 54,

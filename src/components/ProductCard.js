@@ -6,8 +6,8 @@ import { getPostTimeLabel } from '../utils/dateUtils';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48 - 16) / 2; // 2열 배치 기준
 
-const ProductCard = ({ item, onPress, variant = 'grid' }) => {
-    const priceLabel = item.price ? String(item.price) : '가격 협의';
+const ProductCard = ({ item, onPress, variant = 'grid', priceFallback = '가격 협의', placeholderColor = '#F5F5F5', placeholderIcon = null }) => {
+    const priceLabel = item.price ? String(item.price) : priceFallback;
     const isList = variant === 'list';
 
     return (
@@ -17,13 +17,15 @@ const ProductCard = ({ item, onPress, variant = 'grid' }) => {
                 {item.image_urls && item.image_urls.length > 0 ? (
                     <Image source={{ uri: item.image_urls[0] }} style={styles.image} />
                 ) : (
-                    <View style={[styles.imagePlaceholder, { backgroundColor: item.color || '#F5F5F5' }]} />
+                    <View style={[styles.imagePlaceholder, { backgroundColor: item.color || placeholderColor }, isList && styles.imagePlaceholderList]}>
+                        {placeholderIcon}
+                    </View>
                 )}
             </View>
 
             {/* Product Info */}
-            <View style={styles.info}>
-                <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
+            <View style={[styles.info, isList && styles.infoList]}>
+                <Text style={[styles.title, !isList && styles.titleGrid, isList && styles.titleList]} numberOfLines={isList ? 1 : 2}>{item.title}</Text>
 
                 <View style={styles.metaRow}>
                     <View style={styles.metaItem}>
@@ -74,6 +76,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 12,
         gap: 16,
+        marginBottom: 0,
+        shadowOpacity: 0.04,
+        shadowRadius: 15,
     },
     imageWrapper: {
         width: '100%',
@@ -95,16 +100,30 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+    imagePlaceholderList: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     info: {
         padding: 12,
         flex: 1,
+    },
+    infoList: {
+        padding: 4,
     },
     title: {
         fontSize: 14,
         fontWeight: '700',
         color: '#4A4A4A',
         marginBottom: 8,
+    },
+    titleGrid: {
         height: 38,
+    },
+    titleList: {
+        fontSize: 16,
+        marginBottom: 2,
+        color: '#2D3436',
     },
     metaRow: {
         flexDirection: 'row',
@@ -118,7 +137,7 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     metaText: {
-        fontSize: 10,
+        fontSize: 11,
         color: '#9B9B9B',
         marginLeft: 4,
     },
@@ -135,13 +154,14 @@ const styles = StyleSheet.create({
     interactions: {
         flexDirection: 'row',
         gap: 8,
+        alignItems: 'center',
     },
     interactionItem: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     interactionText: {
-        fontSize: 10,
+        fontSize: 11,
         color: '#9B9B9B',
         marginLeft: 4,
     },

@@ -1,21 +1,22 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AlarmScreen = () => {
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <Text style={styles.title}>알림 🔔</Text>
             <View style={styles.placeholderCard}>
                 <Text style={styles.placeholderText}>알림 서비스 이사 중입니다... 🚚🔔</Text>
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
         padding: 24,
     },
     title: {

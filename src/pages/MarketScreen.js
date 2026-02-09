@@ -119,7 +119,7 @@ const MarketScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         padding: 24,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     loadingText: {
         marginTop: 12,

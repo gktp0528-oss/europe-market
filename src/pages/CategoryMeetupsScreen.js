@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Users } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useCountry } from '../contexts/CountryContext';
 import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import Header from '../components/Header';
-import MeetupCard from '../components/MeetupCard';
-import FloatingActionButton from '../components/FloatingActionButton';
+import ProductCard from '../components/ProductCard';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -89,8 +89,11 @@ const CategoryMeetupsScreen = ({ navigation }) => {
             <FlatList
                 data={items}
                 renderItem={({ item }) => (
-                    <MeetupCard
+                    <ProductCard
                         item={item}
+                        variant="list"
+                        placeholderColor="#F5F5F5"
+                        placeholderIcon={<Users size={40} color="#666" style={{ opacity: 0.3 }} />}
                         onPress={() => navigation.navigate('MeetupDetail', { postId: item.id })}
                     />
                 )}
@@ -101,6 +104,7 @@ const CategoryMeetupsScreen = ({ navigation }) => {
                 ListFooterComponent={hasMore ? (
                     <View style={styles.footerLoader}><ActivityIndicator color="#FFB7B2" /></View>
                 ) : null}
+                ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFB7B2" />
                 }
@@ -111,16 +115,16 @@ const CategoryMeetupsScreen = ({ navigation }) => {
                 }
                 extraData={nowTick}
             />
-            <FloatingActionButton />
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 12, fontSize: 14, color: '#9B9B9B' },
-    listContent: { padding: 16, paddingBottom: 100 },
+    listContent: { padding: 20, paddingBottom: 100 },
+    itemSeparator: { height: 16 },
     footerLoader: { marginVertical: 20, alignItems: 'center' },
     emptyContainer: { paddingTop: 100, alignItems: 'center' },
     emptyText: { fontSize: 16, color: '#9B9B9B' },

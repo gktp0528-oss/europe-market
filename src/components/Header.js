@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, Search, ChevronDown } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useCountry } from '../contexts/CountryContext';
+import { useCountry, SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import CountryModal from './CountryModal';
 
 const CATEGORY_TABS = [
@@ -20,15 +20,54 @@ const SEARCH_CATEGORY_MAP = {
     CategoryMeetups: 'meetup',
 };
 
-const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs = false, activeCategory }) => {
+const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs = false, activeCategory, onCategoryTabPress }) => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { selectedCountry } = useCountry();
+    const fallbackCountry = SUPPORTED_COUNTRIES.find((item) => item.code === selectedCountry?.code);
+    const countryName = (selectedCountry?.name || fallbackCountry?.name || '전체').trim() || '전체';
+    const countryCode = selectedCountry?.code || fallbackCountry?.code || 'ALL';
     const [showCountryModal, setShowCountryModal] = useState(false);
+    const tabLayoutsRef = useRef({});
+    const indicatorX = useRef(new Animated.Value(0)).current;
+    const indicatorW = useRef(new Animated.Value(0)).current;
+    const hasInit = useRef(false);
+
+    const moveIndicator = useCallback((category, instant) => {
+        const layout = tabLayoutsRef.current[category];
+        if (!layout) return;
+
+        if (instant) {
+            indicatorX.setValue(layout.x);
+            indicatorW.setValue(layout.width);
+            return;
+        }
+
+        Animated.parallel([
+            Animated.spring(indicatorX, {
+                toValue: layout.x,
+                useNativeDriver: false,
+                tension: 120,
+                friction: 14,
+            }),
+            Animated.spring(indicatorW, {
+                toValue: layout.width,
+                useNativeDriver: false,
+                tension: 120,
+                friction: 14,
+            }),
+        ]).start();
+    }, [indicatorX, indicatorW]);
+
+    useEffect(() => {
+        if (!showCategoryTabs || !activeCategory) return;
+        if (!hasInit.current) return;
+        moveIndicator(activeCategory, false);
+    }, [activeCategory, showCategoryTabs, moveIndicator]);
 
     if (showCategoryTabs) {
         return (
-            <View style={[styles.categoryContainer, { paddingTop: insets.top }]}>
+            <View style={styles.categoryContainer}>
                 <View style={styles.categoryTopRow}>
                     <TouchableOpacity
                         style={styles.backBtn}
@@ -41,7 +80,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                         style={styles.countryBtn}
                         onPress={() => setShowCountryModal(true)}
                     >
-                        <Text style={styles.countryName}>{selectedCountry.name}</Text>
+                        <Text style={styles.countryName}>{countryName}</Text>
                         <ChevronDown size={12} color="#2D3436" />
                     </TouchableOpacity>
 
@@ -50,7 +89,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                             style={styles.searchBtn}
                             onPress={() => navigation.navigate('Search', {
                                 category: SEARCH_CATEGORY_MAP[activeCategory] || 'all',
-                                country: selectedCountry.code,
+                                country: countryCode,
                             })}
                         >
                             <Search size={22} color="#2D3436" />
@@ -69,8 +108,28 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                         return (
                             <TouchableOpacity
                                 key={tab.key}
-                                style={[styles.tab, isActive && styles.tabActive]}
-                                onPress={() => navigation.navigate(tab.key)}
+                                style={styles.tab}
+                                onLayout={(event) => {
+                                    const { x, width } = event.nativeEvent.layout;
+                                    tabLayoutsRef.current[tab.key] = { x, width };
+                                    if (tab.key === activeCategory) {
+                                        const instant = !hasInit.current;
+                                        hasInit.current = true;
+                                        moveIndicator(activeCategory, instant);
+                                    }
+                                }}
+                                onPress={() => {
+                                    if (isActive) return;
+                                    if (typeof onCategoryTabPress === 'function') {
+                                        onCategoryTabPress(tab.key);
+                                        return;
+                                    }
+                                    if (typeof navigation.replace === 'function') {
+                                        navigation.replace(tab.key);
+                                        return;
+                                    }
+                                    navigation.navigate(tab.key);
+                                }}
                             >
                                 <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
                                     {tab.label}
@@ -78,6 +137,16 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                             </TouchableOpacity>
                         );
                     })}
+                    <Animated.View
+                        pointerEvents="none"
+                        style={[
+                            styles.tabIndicator,
+                            {
+                                transform: [{ translateX: indicatorX }],
+                                width: indicatorW,
+                            },
+                        ]}
+                    />
                 </ScrollView>
 
                 <CountryModal visible={showCountryModal} onClose={() => setShowCountryModal(false)} />
@@ -86,7 +155,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
     }
 
     return (
-        <View style={[styles.header, { paddingTop: insets.top }]}>
+        <View style={[styles.header, { paddingTop: insets.top, height: 60 + insets.top }]}>
             <View style={styles.headerLeft}>
                 {showBack ? (
                     <View style={styles.backGroup}>
@@ -103,7 +172,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                         style={styles.logoBtn}
                         onPress={() => setShowCountryModal(true)}
                     >
-                        <Text style={styles.logoText}>{selectedCountry.name}</Text>
+                        <Text style={styles.logoText}>{countryName}</Text>
                         <ChevronDown size={14} color="#2D3436" />
                     </TouchableOpacity>
                 )}
@@ -156,11 +225,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+        borderRadius: 10,
+        maxWidth: '92%',
     },
     logoText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: '800',
         color: '#2D3436',
+        includeFontPadding: false,
+        maxWidth: 170,
     },
     headerRight: {
         flexDirection: 'row',
@@ -212,19 +287,14 @@ const styles = StyleSheet.create({
     },
     tabsContent: {
         flexDirection: 'row',
+        position: 'relative',
     },
     tab: {
-        flex: 1,
         minWidth: 80,
         height: 48,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 16,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    tabActive: {
-        borderBottomColor: '#2D3436',
     },
     tabText: {
         fontSize: 13,
@@ -233,6 +303,14 @@ const styles = StyleSheet.create({
     },
     tabTextActive: {
         color: '#2D3436',
+    },
+    tabIndicator: {
+        position: 'absolute',
+        left: 0,
+        bottom: 0,
+        height: 2,
+        backgroundColor: '#2D3436',
+        borderRadius: 1,
     },
 });
 

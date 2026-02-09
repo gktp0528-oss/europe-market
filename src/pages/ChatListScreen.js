@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { User, MessageCircle } from 'lucide-react-native';
@@ -229,14 +230,14 @@ const ChatListScreen = ({ navigation }) => {
 
     if (loading) {
         return (
-            <View style={styles.centerContainer}>
+            <SafeAreaView style={styles.centerContainer} edges={['top']}>
                 <ActivityIndicator color="#FFB7B2" size="large" />
-            </View>
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
                 <Text style={styles.title}>채팅 💬</Text>
             </View>
@@ -255,14 +256,14 @@ const ChatListScreen = ({ navigation }) => {
                     </View>
                 }
             />
-        </View>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         padding: 24,
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     listContent: {
         backgroundColor: '#fff',

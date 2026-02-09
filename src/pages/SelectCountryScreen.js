@@ -84,7 +84,7 @@ const SelectCountryScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     header: {
         height: 54,

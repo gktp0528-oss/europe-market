@@ -10,6 +10,7 @@ import {
     Alert,
     ActivityIndicator
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, Sparkles, ArrowLeft } from 'lucide-react-native';
 
@@ -43,9 +44,10 @@ const Login = ({ navigation }) => {
     };
 
     return (
+        <SafeAreaView style={styles.container} edges={['top']}>
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
+            style={{ flex: 1 }}
         >
             <View style={styles.inner}>
                 {/* Header */}
@@ -118,13 +120,14 @@ const Login = ({ navigation }) => {
                 </View>
             </View>
         </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     inner: {
         flex: 1,

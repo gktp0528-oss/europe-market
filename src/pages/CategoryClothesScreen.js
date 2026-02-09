@@ -6,7 +6,6 @@ import { useCountry } from '../contexts/CountryContext';
 import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
-import FloatingActionButton from '../components/FloatingActionButton';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -109,6 +108,7 @@ const CategoryClothesScreen = ({ navigation }) => {
                 onEndReached={loadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={renderFooter}
+                ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFB7B2" />
                 }
@@ -119,7 +119,6 @@ const CategoryClothesScreen = ({ navigation }) => {
                 }
                 extraData={nowTick}
             />
-            <FloatingActionButton />
         </SafeAreaView>
     );
 };
@@ -127,11 +126,11 @@ const CategoryClothesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     centerContainer: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#FFFFFF',
     },
     loadingWrap: {
         flex: 1,
@@ -147,6 +146,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 100,
+    },
+    itemSeparator: {
+        height: 16,
     },
     footerLoader: {
         marginVertical: 20,

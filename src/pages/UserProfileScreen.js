@@ -25,6 +25,7 @@ const UserProfileScreen = ({ navigation, route }) => {
     const { userId } = route.params || {};
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,10 +36,10 @@ const UserProfileScreen = ({ navigation, route }) => {
 
         const fetchUserProfile = async () => {
             try {
-                const [{ data: profileData, error: profileError }, { data: postsData, error: postsError }] = await Promise.all([
+                const results = await Promise.all([
                     supabase
                         .from('profiles')
-                        .select('id, username, avatar_url')
+                        .select('id, username, avatar_url, rating_avg, rating_count')
                         .eq('id', userId)
                         .single(),
                     supabase
@@ -47,13 +48,27 @@ const UserProfileScreen = ({ navigation, route }) => {
                         .eq('user_id', userId)
                         .order('created_at', { ascending: false })
                         .limit(20),
+                    supabase
+                        .from('profile_ratings')
+                        .select(`
+                            id, score, comment, created_at,
+                            rater:profiles!rater_id(username, avatar_url)
+                        `)
+                        .eq('ratee_id', userId)
+                        .order('created_at', { ascending: false })
+                        .limit(5),
                 ]);
 
-                if (profileError) throw profileError;
-                if (postsError) throw postsError;
+                const profileResult = results[0];
+                const postsResult = results[1];
+                const reviewsResult = results[2];
 
-                setProfile(profileData);
-                setPosts(postsData || []);
+                if (profileResult.error) throw profileResult.error;
+                if (postsResult.error) throw postsResult.error;
+
+                setProfile(profileResult.data);
+                setPosts(postsResult.data || []);
+                setReviews(reviewsResult.data || []);
             } catch (error) {
                 console.error('Error fetching user profile:', error);
             } finally {
@@ -121,15 +136,40 @@ const UserProfileScreen = ({ navigation, route }) => {
                             </View>
                             <Text style={styles.username}>{profile.username || '익명'}</Text>
                             <View style={styles.rating}>
-                                <Star size={14} color="#F4B400" fill="#F4B400" />
-                                <Text style={styles.ratingText}>5.0</Text>
+                                <Star size={14} color="#FFB7B2" fill="#FFB7B2" />
+                                <Text style={styles.ratingText}>
+                                    {profile.rating_avg?.toFixed(1) || '0.0'} ({profile.rating_count || 0})
+                                </Text>
                             </View>
                             <Text style={styles.postCount}>게시글 {posts.length}개</Text>
-                            {user?.id === userId ? (
-                                <TouchableOpacity style={styles.editBtn}>
-                                    <Text style={styles.editBtnText}>내 프로필</Text>
-                                </TouchableOpacity>
-                            ) : null}
+
+                            {/* Reviews Section */}
+                            {reviews.length > 0 && (
+                                <View style={styles.reviewSection}>
+                                    <View style={styles.reviewHeader}>
+                                        <Text style={styles.reviewTitle}>최근 후기</Text>
+                                    </View>
+                                    {reviews.map((review) => (
+                                        <View key={review.id} style={styles.reviewItem}>
+                                            <View style={styles.reviewTop}>
+                                                <Text style={styles.raterName}>{review.rater?.username}</Text>
+                                                <View style={styles.raterRating}>
+                                                    <Star size={10} color="#FFB7B2" fill="#FFB7B2" />
+                                                    <Text style={styles.raterScore}>{review.score}</Text>
+                                                </View>
+                                            </View>
+                                            {review.comment && (
+                                                <Text style={styles.reviewText}>{review.comment}</Text>
+                                            )}
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+
+                            <View style={styles.divider} />
+                            <View style={styles.listHeaderTitleRow}>
+                                <Text style={styles.listHeaderTitle}>등록한 게시글</Text>
+                            </View>
                         </View>
                     }
                     renderItem={({ item }) => (
@@ -168,7 +208,7 @@ const UserProfileScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     header: {
         height: 54,
         flexDirection: 'row',
@@ -176,17 +216,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 12,
     },
-    backBtn: { width: 28, height: 28, justifyContent: 'center', alignItems: 'center' },
+    backBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     headerTitle: { fontSize: 17, fontWeight: '800', color: '#4A4A4A' },
     centerWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    listContent: { padding: 16, paddingBottom: 30 },
+    listContent: { paddingHorizontal: 16, paddingBottom: 30 },
     profileCard: {
         width: '100%',
         backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 18,
+        paddingVertical: 18,
         alignItems: 'center',
-        marginBottom: 14,
     },
     avatarWrap: { marginBottom: 10 },
     avatar: { width: 82, height: 82, borderRadius: 41 },
@@ -201,19 +239,19 @@ const styles = StyleSheet.create({
     username: { fontSize: 18, fontWeight: '800', color: '#4A4A4A' },
     rating: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
     ratingText: { fontSize: 13, fontWeight: '700', color: '#4A4A4A' },
-    postCount: { marginTop: 6, fontSize: 13, color: '#9B9B9B' },
-    editBtn: {
-        marginTop: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 7,
-        borderRadius: 999,
-        backgroundColor: '#F6F6F6',
-    },
-    editBtnText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#6A6A6A',
-    },
+    postCount: { marginTop: 6, fontSize: 13, color: '#9B9B9B', marginBottom: 12 },
+    divider: { width: '100%', height: 1, backgroundColor: '#F0F0F0', marginVertical: 15 },
+    listHeaderTitleRow: { width: '100%', paddingHorizontal: 4, marginBottom: 10 },
+    listHeaderTitle: { fontSize: 15, fontWeight: '800', color: '#4A4A4A' },
+    reviewSection: { width: '100%', paddingHorizontal: 4, marginTop: 10 },
+    reviewHeader: { marginBottom: 12 },
+    reviewTitle: { fontSize: 14, fontWeight: '800', color: '#4A4A4A' },
+    reviewItem: { backgroundColor: '#F9F9F9', borderRadius: 12, padding: 12, marginBottom: 8 },
+    reviewTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+    raterName: { fontSize: 12, fontWeight: '700', color: '#6A6A6A' },
+    raterRating: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+    raterScore: { fontSize: 11, fontWeight: '700', color: '#FFB7B2' },
+    reviewText: { fontSize: 13, color: '#4A4A4A', lineHeight: 18 },
     columnWrapper: {
         justifyContent: 'space-between',
         marginBottom: 10,
@@ -262,7 +300,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: '#9B9B9B',
     },
-    emptyWrap: { paddingTop: 70, alignItems: 'center', gap: 10 },
+    emptyWrap: { paddingTop: 70, alignItems: 'center', gap: 10, width: '100%' },
     emptyText: { fontSize: 14, color: '#9B9B9B' },
 });
 

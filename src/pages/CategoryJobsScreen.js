@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Briefcase } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useCountry } from '../contexts/CountryContext';
 import { useMinuteTicker } from '../hooks/useMinuteTicker';
 import Header from '../components/Header';
-import JobCard from '../components/JobCard';
-import FloatingActionButton from '../components/FloatingActionButton';
+import ProductCard from '../components/ProductCard';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -89,8 +89,12 @@ const CategoryJobsScreen = ({ navigation }) => {
             <FlatList
                 data={items}
                 renderItem={({ item }) => (
-                    <JobCard
+                    <ProductCard
                         item={item}
+                        variant="list"
+                        priceFallback="급여 협의"
+                        placeholderColor="#F5F5F5"
+                        placeholderIcon={<Briefcase size={40} color="#666" style={{ opacity: 0.3 }} />}
                         onPress={() => navigation.navigate('JobDetail', { postId: item.id })}
                     />
                 )}
@@ -101,6 +105,7 @@ const CategoryJobsScreen = ({ navigation }) => {
                 ListFooterComponent={hasMore ? (
                     <View style={styles.footerLoader}><ActivityIndicator color="#FFB7B2" /></View>
                 ) : null}
+                ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFB7B2" />
                 }
@@ -111,16 +116,16 @@ const CategoryJobsScreen = ({ navigation }) => {
                 }
                 extraData={nowTick}
             />
-            <FloatingActionButton />
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 12, fontSize: 14, color: '#9B9B9B' },
-    listContent: { padding: 16, paddingBottom: 100 },
+    listContent: { padding: 20, paddingBottom: 100 },
+    itemSeparator: { height: 16 },
     footerLoader: { marginVertical: 20, alignItems: 'center' },
     emptyContainer: { paddingTop: 100, alignItems: 'center' },
     emptyText: { fontSize: 16, color: '#9B9B9B' },

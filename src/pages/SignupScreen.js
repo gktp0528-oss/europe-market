@@ -10,6 +10,7 @@ import {
     Alert,
     ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, User, Mail, Lock } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 
@@ -62,9 +63,10 @@ const SignupScreen = ({ navigation }) => {
     };
 
     return (
+        <SafeAreaView style={styles.container} edges={['top']}>
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
+            style={{ flex: 1 }}
         >
             <View style={styles.inner}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -145,11 +147,12 @@ const SignupScreen = ({ navigation }) => {
                 </View>
             </View>
         </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#FEFDF5' },
+    container: { flex: 1, backgroundColor: '#FFFFFF' },
     inner: { flex: 1, padding: 24 },
     backBtn: { marginTop: 10, marginBottom: 20 },
     title: { fontSize: 28, fontWeight: '800', color: '#4A4A4A' },
