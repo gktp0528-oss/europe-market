@@ -12,17 +12,69 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { User, MessageCircle } from 'lucide-react-native';
-import { getPostTimeLabel } from '../utils/dateUtils';
+import { useChatUnread } from '../contexts/ChatUnreadContext';
 
 const ChatListScreen = ({ navigation }) => {
     const { user } = useAuth();
+    const { unreadByConversation } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const conversationsRef = useRef([]);
 
+    const formatChatTime = useCallback((isoString) => {
+        if (!isoString) return '';
+
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const targetStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dayDiff = Math.floor((todayStart - targetStart) / (1000 * 60 * 60 * 24));
+
+        if (dayDiff === 0) {
+            return date.toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            });
+        }
+        if (dayDiff === 1) return '어제';
+        if (dayDiff > 1 && dayDiff < 7) {
+            return date.toLocaleDateString('ko-KR', { weekday: 'short' });
+        }
+        if (date.getFullYear() === now.getFullYear()) {
+            return date.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
+        }
+        return date.toLocaleDateString('ko-KR', {
+            year: '2-digit',
+            month: 'numeric',
+            day: 'numeric',
+        });
+    }, []);
+
     useEffect(() => {
         conversationsRef.current = conversations;
     }, [conversations]);
+
+    const handleDeleteConversation = useCallback(async (conversationId) => {
+        const snapshot = conversationsRef.current;
+
+        setConversations(prev => prev.filter(chat => chat.id !== conversationId));
+
+        try {
+            const { error } = await supabase
+                .from('conversations')
+                .delete()
+                .eq('id', conversationId);
+
+            if (error) throw error;
+        } catch (err) {
+            console.error('Error deleting conversation:', err);
+            setConversations(snapshot);
+            Alert.alert('오류', '대화방 삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+    }, []);
 
     const fetchConversations = useCallback(async () => {
         if (!user) return;
@@ -120,11 +172,15 @@ const ChatListScreen = ({ navigation }) => {
     const renderChatItem = ({ item }) => (
         <TouchableOpacity
             style={styles.chatItem}
-            onPress={() => console.log('Navigate to ChatRoom:', item.id)}
+            onPress={() => navigation.navigate('ChatRoom', { conversationId: item.id })}
             onLongPress={() => {
                 Alert.alert('채팅방 삭제', '이 대화방을 삭제하시겠습니까?', [
                     { text: '취소', style: 'cancel' },
-                    { text: '삭제', style: 'destructive', onPress: () => console.log('Delete chat:', item.id) }
+                    {
+                        text: '삭제',
+                        style: 'destructive',
+                        onPress: () => handleDeleteConversation(item.id)
+                    }
                 ]);
             }}
         >
@@ -140,19 +196,29 @@ const ChatListScreen = ({ navigation }) => {
                 )}
             </View>
 
-            <View style={styles.chatInfo}>
-                <View style={styles.chatHeader}>
-                    <Text style={styles.username} numberOfLines={1}>
-                        {item.otherUser?.username || '알 수 없음'}
-                    </Text>
-                    <Text style={styles.time}>{getPostTimeLabel({ created_at: item.updated_at })}</Text>
-                </View>
-
-                {item.post && (
-                    <Text style={styles.postTitle} numberOfLines={1}>
-                        {item.post.title}
-                    </Text>
-                )}
+                <View style={styles.chatInfo}>
+                    <View style={styles.chatHeader}>
+                        <View style={styles.chatUserGroup}>
+                            <Text style={styles.username} numberOfLines={1}>
+                                {item.otherUser?.username || '알 수 없음'}
+                            </Text>
+                            {item.post?.title ? (
+                                <Text style={styles.postTitleInline} numberOfLines={1}>
+                                    {item.post.title}
+                                </Text>
+                            ) : null}
+                        </View>
+                        <View style={styles.chatMeta}>
+                            <Text style={styles.time}>{formatChatTime(item.updated_at)}</Text>
+                            {(unreadByConversation[item.id] || 0) > 0 ? (
+                                <View style={styles.unreadBadge}>
+                                    <Text style={styles.unreadBadgeText}>
+                                        {unreadByConversation[item.id]}
+                                    </Text>
+                                </View>
+                            ) : null}
+                        </View>
+                    </View>
 
                 <Text style={styles.lastMessage} numberOfLines={1}>
                     {item.lastMessage || '새로운 대화가 시작되었습니다.'}
@@ -180,6 +246,7 @@ const ChatListScreen = ({ navigation }) => {
                 renderItem={renderChatItem}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}
+                ItemSeparatorComponent={() => null}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <MessageCircle size={48} color="#FFB7B2" style={{ opacity: 0.3 }} />
@@ -213,26 +280,23 @@ const styles = StyleSheet.create({
         backgroundColor: '#FEFDF5',
     },
     listContent: {
-        paddingHorizontal: 16,
+        backgroundColor: '#fff',
     },
     chatItem: {
         flexDirection: 'row',
-        padding: 16,
+        paddingVertical: 18,
+        paddingHorizontal: 16,
         backgroundColor: '#fff',
-        borderRadius: 24,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 2,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F5F5F5',
     },
     avatarContainer: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 52,
+        height: 52,
+        borderRadius: 18,
         overflow: 'hidden',
-        marginRight: 16,
+        marginRight: 14,
+        backgroundColor: '#F0F0F0',
     },
     avatar: {
         width: '100%',
@@ -252,28 +316,49 @@ const styles = StyleSheet.create({
     chatHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: 4,
+        gap: 10,
+    },
+    chatUserGroup: {
+        flex: 1,
     },
     username: {
         fontSize: 16,
         fontWeight: '700',
-        color: '#4A4A4A',
-        flex: 1,
+        color: '#333',
+    },
+    postTitleInline: {
+        marginTop: 2,
+        fontSize: 13,
+        color: '#EB2F96',
+        fontWeight: '600',
+    },
+    chatMeta: {
+        alignItems: 'flex-end',
     },
     time: {
         fontSize: 12,
-        color: '#9B9B9B',
+        color: '#8A8A8A',
     },
-    postTitle: {
-        fontSize: 12,
-        color: '#FFB7B2',
-        fontWeight: '600',
-        marginBottom: 4,
+    unreadBadge: {
+        marginTop: 4,
+        minWidth: 18,
+        height: 18,
+        paddingHorizontal: 6,
+        borderRadius: 9,
+        backgroundColor: '#FF8F87',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    unreadBadgeText: {
+        fontSize: 11,
+        color: '#fff',
+        fontWeight: '700',
     },
     lastMessage: {
         fontSize: 14,
-        color: '#9B9B9B',
+        color: '#5F5F5F',
     },
     emptyContainer: {
         marginTop: 100,

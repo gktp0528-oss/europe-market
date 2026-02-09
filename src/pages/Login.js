@@ -13,7 +13,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, Sparkles, ArrowLeft } from 'lucide-react-native';
 
-const Login = ({ onBack, onLoginSuccess }) => {
+const Login = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -33,8 +33,7 @@ const Login = ({ onBack, onLoginSuccess }) => {
 
             if (error) throw error;
 
-            // 로그인 성공 시 처리 (내비게이션 등)
-            if (onLoginSuccess) onLoginSuccess();
+            // 로그인 성공 시 AuthContext가 자동으로 상태 변경
         } catch (error) {
             Alert.alert('로그인 실패', '이메일이나 비밀번호를 다시 확인해주세요. 😭');
             console.error('Login error:', error);
@@ -50,9 +49,11 @@ const Login = ({ onBack, onLoginSuccess }) => {
         >
             <View style={styles.inner}>
                 {/* Header */}
-                <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-                    <ArrowLeft size={24} color="#4A4A4A" />
-                </TouchableOpacity>
+                {navigation.canGoBack() && (
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                        <ArrowLeft size={24} color="#4A4A4A" />
+                    </TouchableOpacity>
+                )}
 
                 {/* Hero Section */}
                 <View style={styles.hero}>
@@ -109,7 +110,7 @@ const Login = ({ onBack, onLoginSuccess }) => {
                         )}
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.footerLink}>
+                    <TouchableOpacity style={styles.footerLink} onPress={() => navigation.navigate('Signup')}>
                         <Text style={styles.footerText}>
                             계정이 없으신가요? <Text style={styles.linkText}>회원가입</Text>
                         </Text>

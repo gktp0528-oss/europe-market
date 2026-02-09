@@ -1,35 +1,40 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    FlatList,
-    ActivityIndicator,
-    RefreshControl
-} from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
+import { useCountry } from '../contexts/CountryContext';
+import { useMinuteTicker } from '../hooks/useMinuteTicker';
+import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 const ITEMS_PER_PAGE = 10;
 
-const MarketScreen = ({ navigation }) => {
+const CategoryClothesScreen = ({ navigation }) => {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const { selectedCountry } = useCountry();
+    const nowTick = useMinuteTicker();
 
     const fetchPosts = useCallback(async (pageNum = 0, isRefreshing = false) => {
         try {
             if (pageNum === 0 && !isRefreshing) setLoading(true);
 
-            const { data, error } = await supabase
+            let query = supabase
                 .from('posts')
                 .select('*')
                 .eq('category', 'used')
                 .order('created_at', { ascending: false })
                 .range(pageNum * ITEMS_PER_PAGE, (pageNum + 1) * ITEMS_PER_PAGE - 1);
 
+            if (selectedCountry.code !== 'ALL') {
+                query = query.eq('country_code', selectedCountry.code);
+            }
+
+            const { data, error } = await query;
             if (error) throw error;
 
             if (pageNum === 0) {
@@ -40,14 +45,15 @@ const MarketScreen = ({ navigation }) => {
 
             setHasMore(data && data.length === ITEMS_PER_PAGE);
         } catch (error) {
-            console.error('Error fetching market posts:', error);
+            console.error('Error fetching posts:', error);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [selectedCountry]);
 
     useEffect(() => {
+        setPage(0);
         fetchPosts(0);
     }, [fetchPosts]);
 
@@ -76,19 +82,19 @@ const MarketScreen = ({ navigation }) => {
 
     if (loading && items.length === 0) {
         return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#FFB7B2" />
-                <Text style={styles.loadingText}>상품을 불러오는 중... 🎨✨</Text>
-            </View>
+            <SafeAreaView style={styles.centerContainer} edges={['top']}>
+                <Header showCategoryTabs activeCategory="CategoryClothes" />
+                <View style={styles.loadingWrap}>
+                    <ActivityIndicator size="large" color="#FFB7B2" />
+                    <Text style={styles.loadingText}>상품을 불러오는 중...</Text>
+                </View>
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>중고거래 🛍️</Text>
-            </View>
-
+        <SafeAreaView style={styles.container} edges={['top']}>
+            <Header showCategoryTabs activeCategory="CategoryClothes" />
             <FlatList
                 data={items}
                 renderItem={({ item }) => (
@@ -108,11 +114,13 @@ const MarketScreen = ({ navigation }) => {
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>등록된 상품이 없어요 🥲</Text>
+                        <Text style={styles.emptyText}>등록된 상품이 없어요</Text>
                     </View>
                 }
+                extraData={nowTick}
             />
-        </View>
+            <FloatingActionButton />
+        </SafeAreaView>
     );
 };
 
@@ -121,37 +129,30 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#FEFDF5',
     },
-    header: {
-        padding: 24,
-        paddingBottom: 16,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: '800',
-        color: '#4A4A4A',
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingTop: 8,
-        paddingBottom: 24,
-    },
     centerContainer: {
+        flex: 1,
+        backgroundColor: '#FEFDF5',
+    },
+    loadingWrap: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FEFDF5',
     },
     loadingText: {
         marginTop: 12,
         fontSize: 14,
         color: '#9B9B9B',
     },
+    listContent: {
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 100,
+    },
     footerLoader: {
         marginVertical: 20,
         alignItems: 'center',
     },
     emptyContainer: {
-        flex: 1,
         paddingTop: 100,
         alignItems: 'center',
     },
@@ -161,4 +162,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default MarketScreen;
+export default CategoryClothesScreen;

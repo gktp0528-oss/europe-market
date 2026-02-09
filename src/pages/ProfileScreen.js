@@ -7,24 +7,23 @@ import {
     Image,
     ScrollView,
     ActivityIndicator,
-    Alert
+    Alert,
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import {
     User,
     ChevronRight,
-    ShoppingBag,
     Bell,
     Settings,
     LogOut,
-    Heart,
-    FileText
+    FileText,
 } from 'lucide-react-native';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
     const { user, signOut } = useAuth();
     const [profile, setProfile] = useState(null);
+    const [postCount, setPostCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,14 +34,23 @@ const ProfileScreen = () => {
 
         const fetchProfile = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
+                const [{ data, error }, { count, error: countError }] = await Promise.all([
+                    supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single(),
+                    supabase
+                        .from('posts')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', user.id),
+                ]);
 
                 if (error) throw error;
+                if (countError) throw countError;
+
                 setProfile(data);
+                setPostCount(count || 0);
             } catch (err) {
                 console.error('Error fetching profile:', err);
             } finally {
@@ -54,14 +62,10 @@ const ProfileScreen = () => {
     }, [user]);
 
     const handleLogout = () => {
-        Alert.alert(
-            '로그아웃',
-            '정말 로그아웃 하시겠습니까? 😍',
-            [
-                { text: '취소', style: 'cancel' },
-                { text: '로그아웃', style: 'destructive', onPress: async () => await signOut() }
-            ]
-        );
+        Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
+            { text: '취소', style: 'cancel' },
+            { text: '로그아웃', style: 'destructive', onPress: async () => await signOut() },
+        ]);
     };
 
     if (loading) {
@@ -74,9 +78,8 @@ const ProfileScreen = () => {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.headerTitle}>내 프로필 👤</Text>
+            <Text style={styles.headerTitle}>마이페이지</Text>
 
-            {/* Profile Header Card */}
             <View style={styles.profileCard}>
                 <View style={styles.avatarContainer}>
                     {profile?.avatar_url ? (
@@ -93,74 +96,55 @@ const ProfileScreen = () => {
                     </Text>
                     <Text style={styles.email}>{user?.email}</Text>
                 </View>
-                <TouchableOpacity style={styles.editBtn}>
-                    <Text style={styles.editBtnText}>편집</Text>
-                </TouchableOpacity>
             </View>
 
-            {/* Activity Stats */}
-            <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>12</Text>
-                    <Text style={styles.statLabel}>판매중</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>45</Text>
-                    <Text style={styles.statLabel}>관심목록</Text>
-                </View>
-                <View style={styles.divider} />
-                <View style={styles.statItem}>
-                    <Text style={styles.statValue}>5</Text>
-                    <Text style={styles.statLabel}>받은후기</Text>
-                </View>
+            <View style={styles.metaCard}>
+                <Text style={styles.metaText}>작성한 게시글 {postCount}개</Text>
             </View>
 
-            {/* Menu Sections */}
             <View style={styles.menuSection}>
                 <Text style={styles.sectionTitle}>나의 활동</Text>
-                <TouchableOpacity style={styles.menuItem}>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyPosts')}>
                     <View style={[styles.menuIcon, { backgroundColor: '#FFB7B222' }]}>
                         <FileText size={20} color="#FFB7B2" />
                     </View>
-                    <Text style={styles.menuLabel}>내가 쓴 게시글</Text>
-                    <ChevronRight size={18} color="#ccc" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                    <View style={[styles.menuIcon, { backgroundColor: '#C7CEEA22' }]}>
-                        <Heart size={20} color="#C7CEEA" />
-                    </View>
-                    <Text style={styles.menuLabel}>관심 목록</Text>
-                    <ChevronRight size={18} color="#ccc" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
-                    <View style={[styles.menuIcon, { backgroundColor: '#B5EAD722' }]}>
-                        <ShoppingBag size={20} color="#B5EAD7" />
-                    </Value>
-                    <Text style={styles.menuLabel}>구매 내역</Text>
+                    <Text style={styles.menuLabel}>내가 쓴 글</Text>
                     <ChevronRight size={18} color="#ccc" />
                 </TouchableOpacity>
             </View>
 
             <View style={styles.menuSection}>
-                <Text style={styles.sectionTitle}>설정 및 지원</Text>
-                <TouchableOpacity style={styles.menuItem}>
+                <Text style={styles.sectionTitle}>설정</Text>
+                <View style={[styles.menuItem, styles.disabledItem]}>
                     <View style={[styles.menuIcon, { backgroundColor: '#F0F0F0' }]}>
                         <Bell size={20} color="#9B9B9B" />
                     </View>
                     <Text style={styles.menuLabel}>알림 설정</Text>
+                    <Text style={styles.soon}>준비중</Text>
                     <ChevronRight size={18} color="#ccc" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.menuItem}>
+                </View>
+                <View style={[styles.menuItem, styles.disabledItem]}>
                     <View style={[styles.menuIcon, { backgroundColor: '#F0F0F0' }]}>
                         <Settings size={20} color="#9B9B9B" />
                     </View>
                     <Text style={styles.menuLabel}>앱 설정</Text>
+                    <Text style={styles.soon}>준비중</Text>
                     <ChevronRight size={18} color="#ccc" />
-                </TouchableOpacity>
+                </View>
             </View>
 
-            {/* Logout Button */}
+            <View style={styles.menuSection}>
+                <Text style={styles.sectionTitle}>고객센터</Text>
+                <View style={styles.menuItem}>
+                    <Text style={styles.menuLabel}>공지사항</Text>
+                    <ChevronRight size={18} color="#ccc" />
+                </View>
+                <View style={styles.menuItem}>
+                    <Text style={styles.menuLabel}>자주 묻는 질문</Text>
+                    <ChevronRight size={18} color="#ccc" />
+                </View>
+            </View>
+
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
                 <LogOut size={18} color="#9B9B9B" />
                 <Text style={styles.logoutText}>로그아웃</Text>
@@ -174,10 +158,11 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FEFDF5',
+        backgroundColor: '#F8F9FA',
     },
     content: {
-        padding: 24,
+        paddingHorizontal: 20,
+        paddingTop: 20,
         paddingBottom: 40,
     },
     headerTitle: {
@@ -193,17 +178,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#FEFDF5',
     },
     profileCard: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
         backgroundColor: '#fff',
-        padding: 20,
-        borderRadius: 30,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.05,
-        shadowRadius: 20,
-        elevation: 5,
-        marginBottom: 24,
+        paddingVertical: 30,
+        paddingHorizontal: 20,
+        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#EEEEEE',
     },
     avatarContainer: {
         width: 60,
@@ -222,8 +204,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     profileInfo: {
-        flex: 1,
-        marginLeft: 16,
+        marginTop: 12,
+        alignItems: 'center',
     },
     nickname: {
         fontSize: 18,
@@ -235,88 +217,70 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#9B9B9B',
     },
-    editBtn: {
-        backgroundColor: '#F8F8F8',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 12,
-    },
-    editBtnText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#9B9B9B',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+    metaCard: {
         backgroundColor: '#fff',
-        paddingVertical: 20,
-        borderRadius: 24,
-        marginBottom: 32,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.03,
-        shadowRadius: 10,
-        elevation: 2,
+        borderRadius: 0,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        marginBottom: 10,
     },
-    statItem: {
-        alignItems: 'center',
-    },
-    statValue: {
-        fontSize: 18,
-        fontWeight: '800',
+    metaText: {
+        fontSize: 14,
+        fontWeight: '700',
         color: '#4A4A4A',
-        marginBottom: 4,
-    },
-    statLabel: {
-        fontSize: 12,
-        color: '#9B9B9B',
-    },
-    divider: {
-        width: 1,
-        height: 30,
-        backgroundColor: '#F0F0F0',
     },
     menuSection: {
-        marginBottom: 32,
+        marginBottom: 10,
+        backgroundColor: '#fff',
     },
     sectionTitle: {
-        fontSize: 14,
-        fontWeight: '800',
-        color: '#4A4A4A',
-        marginBottom: 16,
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#9B9B9B',
+        marginBottom: 12,
         marginLeft: 4,
-        opacity: 0.5,
     },
     menuItem: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 20,
-        marginBottom: 12,
+        borderRadius: 18,
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        marginBottom: 0,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F5F5F5',
     },
     menuIcon: {
-        width: 40,
-        height: 40,
+        width: 38,
+        height: 38,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
     },
     menuLabel: {
         flex: 1,
         fontSize: 15,
-        fontWeight: '600',
         color: '#4A4A4A',
+        marginLeft: 12,
+    },
+    disabledItem: {
+        opacity: 0.7,
+    },
+    soon: {
+        marginRight: 8,
+        fontSize: 12,
+        color: '#9B9B9B',
     },
     logoutBtn: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 16,
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        paddingVertical: 14,
         marginTop: 8,
+        marginBottom: 24,
     },
     logoutText: {
         marginLeft: 8,
@@ -327,8 +291,7 @@ const styles = StyleSheet.create({
     versionText: {
         textAlign: 'center',
         fontSize: 12,
-        color: '#ccc',
-        marginTop: 24,
+        color: '#C0C0C0',
     },
 });
 

@@ -1,16 +1,38 @@
-# React + Vite
+# europe-market-app (Expo)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React Native + Expo 기반의 유럽 중고거래 앱 프로젝트입니다.
 
-Currently, two official plugins are available:
+## 실행
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+npm run start
+```
 
-## React Compiler
+앱 실행 단축 명령:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-## Expanding the ESLint configuration
+## 환경 변수
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`.env.local` 파일에서 아래 값을 설정합니다.
+
+```bash
+EXPO_PUBLIC_SUPABASE_URL=...
+EXPO_PUBLIC_SUPABASE_ANON_KEY=...
+EXPO_PUBLIC_PHOTON_API_URL=https://photon.komoot.io/api
+EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN=...
+```
+
+기존 웹 마이그레이션 호환을 위해 `VITE_*` 변수도 함께 읽지만, 신규 설정은 `EXPO_PUBLIC_*` 사용을 권장합니다.
+
+## 핵심 스택
+
+- Expo SDK 54
+- React Native 0.81
+- React Navigation (Bottom Tabs + Native Stack)
+- Supabase (Auth, DB, Realtime, Storage)

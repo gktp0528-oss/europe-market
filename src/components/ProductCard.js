@@ -6,11 +6,14 @@ import { getPostTimeLabel } from '../utils/dateUtils';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48 - 16) / 2; // 2열 배치 기준
 
-const ProductCard = ({ item, onPress }) => {
+const ProductCard = ({ item, onPress, variant = 'grid' }) => {
+    const priceLabel = item.price ? String(item.price) : '가격 협의';
+    const isList = variant === 'list';
+
     return (
-        <TouchableOpacity style={styles.card} onPress={onPress}>
+        <TouchableOpacity style={[styles.card, isList && styles.cardList]} onPress={onPress}>
             {/* Product Image */}
-            <View style={styles.imageWrapper}>
+            <View style={[styles.imageWrapper, isList && styles.imageWrapperList]}>
                 {item.image_urls && item.image_urls.length > 0 ? (
                     <Image source={{ uri: item.image_urls[0] }} style={styles.image} />
                 ) : (
@@ -25,7 +28,7 @@ const ProductCard = ({ item, onPress }) => {
                 <View style={styles.metaRow}>
                     <View style={styles.metaItem}>
                         <MapPin size={12} color="#9B9B9B" />
-                        <Text style={styles.metaText}>{item.location}</Text>
+                        <Text style={styles.metaText} numberOfLines={1}>{item.location || '위치 미정'}</Text>
                     </View>
                     <View style={styles.metaItem}>
                         <Clock size={12} color="#9B9B9B" />
@@ -34,8 +37,12 @@ const ProductCard = ({ item, onPress }) => {
                 </View>
 
                 <View style={styles.bottomRow}>
-                    <Text style={styles.price}>{item.price + ' €'}</Text>
+                    <Text style={styles.price}>{priceLabel}</Text>
                     <View style={styles.interactions}>
+                        <View style={styles.interactionItem}>
+                            <Eye size={12} color="#9B9B9B" />
+                            <Text style={styles.interactionText}>{item.views || 0}</Text>
+                        </View>
                         <View style={styles.interactionItem}>
                             <Heart size={12} color="#FFB7B2" />
                             <Text style={styles.interactionText}>{item.likes || 0}</Text>
@@ -51,8 +58,8 @@ const styles = StyleSheet.create({
     card: {
         width: CARD_WIDTH,
         backgroundColor: '#fff',
-        borderRadius: 24,
-        marginBottom: 16,
+        borderRadius: 20,
+        marginBottom: 12,
         overflow: 'hidden',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
@@ -60,9 +67,24 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         elevation: 3,
     },
+    cardList: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderRadius: 20,
+        padding: 12,
+        gap: 16,
+    },
     imageWrapper: {
         width: '100%',
         aspectRatio: 1,
+    },
+    imageWrapperList: {
+        width: 90,
+        height: 90,
+        borderRadius: 12,
+        overflow: 'hidden',
+        flexShrink: 0,
     },
     image: {
         width: '100%',
@@ -75,6 +97,7 @@ const styles = StyleSheet.create({
     },
     info: {
         padding: 12,
+        flex: 1,
     },
     title: {
         fontSize: 14,
@@ -86,7 +109,8 @@ const styles = StyleSheet.create({
     metaRow: {
         flexDirection: 'row',
         marginBottom: 8,
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
+        gap: 8,
     },
     metaItem: {
         flexDirection: 'row',
@@ -110,6 +134,7 @@ const styles = StyleSheet.create({
     },
     interactions: {
         flexDirection: 'row',
+        gap: 8,
     },
     interactionItem: {
         flexDirection: 'row',
