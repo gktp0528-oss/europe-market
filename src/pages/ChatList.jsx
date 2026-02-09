@@ -139,7 +139,44 @@ const ChatList = () => {
     }, [conversations]);
 
     const formatChatTime = useCallback((isoString) => {
-        return new Date(isoString).toLocaleDateString();
+        if (!isoString) return '';
+
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const targetStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dayDiff = Math.floor((todayStart - targetStart) / (1000 * 60 * 60 * 24));
+
+        if (dayDiff === 0) {
+            return date.toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        if (dayDiff === 1) {
+            return '어제';
+        }
+
+        if (dayDiff > 1 && dayDiff < 7) {
+            return date.toLocaleDateString('ko-KR', { weekday: 'short' });
+        }
+
+        if (date.getFullYear() === now.getFullYear()) {
+            return date.toLocaleDateString('ko-KR', {
+                month: 'numeric',
+                day: 'numeric'
+            });
+        }
+
+        return date.toLocaleDateString('ko-KR', {
+            year: '2-digit',
+            month: 'numeric',
+            day: 'numeric'
+        });
     }, []);
 
     const handleDeleteChat = async (conversationId) => {

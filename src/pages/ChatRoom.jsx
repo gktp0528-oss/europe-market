@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useChatUnread } from '../contexts/ChatUnreadContext';
-import { ArrowLeft, Send, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Send, Image as ImageIcon, User } from 'lucide-react';
 import '../styles/WriteForm.css';
 import '../styles/Chat.css';
 
@@ -16,6 +16,8 @@ const ChatRoom = () => {
     const [newMessage, setNewMessage] = useState('');
     const [otherUser, setOtherUser] = useState(null);
     const [post, setPost] = useState(null);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    const [messagesError, setMessagesError] = useState('');
     const messagesEndRef = useRef(null);
 
     const reconcileMessages = useCallback((prev, fetched) => {
@@ -30,14 +32,26 @@ const ChatRoom = () => {
     }, []);
 
     const fetchMessages = useCallback(async (conversationId) => {
-        const { data } = await supabase
-            .from('messages')
-            .select('*')
-            .eq('conversation_id', conversationId)
-            .order('created_at', { ascending: true });
+        setLoadingMessages(true);
+        setMessagesError('');
 
-        if (data) {
-            setMessages((prev) => reconcileMessages(prev, data));
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('conversation_id', conversationId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+
+            if (data) {
+                setMessages((prev) => reconcileMessages(prev, data));
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+            setMessagesError('메시지를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+            setLoadingMessages(false);
         }
     }, [reconcileMessages]);
 
@@ -90,6 +104,8 @@ const ChatRoom = () => {
             };
             fetchMetadata();
             setMessages([]);
+            setLoadingMessages(false);
+            setMessagesError('');
         } else {
             // Normal existing chat flow
             const fetchConversation = async () => {
@@ -281,7 +297,24 @@ const ChatRoom = () => {
             </header>
 
             <div className="chat-messages">
-                {messages.map((msg) => {
+                {loadingMessages && (
+                    <div className="chat-empty-state">
+                        <p className="chat-empty-title">메시지를 불러오는 중...</p>
+                    </div>
+                )}
+                {!loadingMessages && messagesError && (
+                    <div className="chat-empty-state">
+                        <p className="chat-empty-title">불러오기 오류</p>
+                        <p className="chat-empty-subtitle">{messagesError}</p>
+                    </div>
+                )}
+                {!loadingMessages && !messagesError && messages.length === 0 && (
+                    <div className="chat-empty-state">
+                        <p className="chat-empty-title">아직 대화가 없어요</p>
+                        <p className="chat-empty-subtitle">첫 메시지를 보내 대화를 시작해보세요.</p>
+                    </div>
+                )}
+                {!loadingMessages && !messagesError && messages.map((msg) => {
                     const isMyMessage = msg.sender_id === user.id;
                     const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -298,10 +331,10 @@ const ChatRoom = () => {
                                     flexShrink: 0
                                 }}>
                                     {otherUser?.avatar_url ? (
-                                        <img src={otherUser.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={otherUser.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
                                         <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <ArrowLeft size={16} color="#ccc" />
+                                            <User size={16} color="#bbb" />
                                         </div>
                                     )}
                                 </div>
