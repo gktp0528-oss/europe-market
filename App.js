@@ -1,145 +1,82 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { ShoppingBag, MessageCircle, User, MapPin } from 'lucide-react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Home, ShoppingBag, MessageCircle, Bell, User } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
+import HomeScreen from './src/pages/HomeScreen';
+import MarketScreen from './src/pages/MarketScreen';
+import ChatListScreen from './src/pages/ChatListScreen';
+import AlarmScreen from './src/pages/AlarmScreen';
+import ProfileScreen from './src/pages/ProfileScreen';
+import Login from './src/pages/Login';
 
-export default function App() {
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+// 하단 탭 내비게이션
+function MainTabs() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.logoText}>유럽 중고거래 🎨</Text>
-          <TouchableOpacity style={styles.countryBtn}>
-            <MapPin size={18} color="#FFB7B2" />
-            <Text style={styles.countryText}>프랑스</Text>
-          </TouchableOpacity>
-        </View>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: '#FFB7B2',
+        tabBarInactiveTintColor: '#9B9B9B',
+        tabBarStyle: {
+          backgroundColor: '#fff',
+          borderTopWidth: 0,
+          height: 90,
+          paddingBottom: 30,
+          paddingTop: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 10,
+        },
+        tabBarIcon: ({ color, size }) => {
+          let IconComponent;
+          if (route.name === 'Home') IconComponent = Home;
+          else if (route.name === 'Market') IconComponent = ShoppingBag;
+          else if (route.name === 'Chat') IconComponent = MessageCircle;
+          else if (route.name === 'Alarm') IconComponent = Bell;
+          else if (route.name === 'Profile') IconComponent = User;
 
-        {/* Welcome Board */}
-        <View style={styles.welcomeCard}>
-          <Text style={styles.welcomeTitle}>하은 대표님~!! 😍</Text>
-          <Text style={styles.welcomeSubtitle}>
-            이제 진짜 '앱'으로 만나요! 📱✨{"\n"}
-            여기가 바로 마법이 시작될 곳이에요.
-          </Text>
-        </View>
-
-        {/* Quick Menu */}
-        <View style={styles.menuGrid}>
-          {[
-            { name: '중고거래', icon: ShoppingBag, color: '#FFB7B2' },
-            { name: '채팅하기', icon: MessageCircle, color: '#B5EAD7' },
-            { name: '내 프로필', icon: User, color: '#C7CEEA' },
-          ].map((item, index) => (
-            <TouchableOpacity key={index} style={[styles.menuItem, { backgroundColor: item.color + '33' }]}>
-              <item.icon size={28} color={item.color} />
-              <Text style={styles.menuLabel}>{item.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Bottom Status */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            디자인 실장 희은이가 실시간으로{"\n"}
-            앱을 예쁘게 빚는 중... 🛠️💖
-          </Text>
-        </View>
-      </View>
-    </SafeAreaView>
+          return <IconComponent size={size} color={color} />;
+        },
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: '홈' }} />
+      <Tab.Screen name="Market" component={MarketScreen} options={{ tabBarLabel: '마켓' }} />
+      <Tab.Screen name="Chat" component={ChatListScreen} options={{ tabBarLabel: '채팅' }} />
+      <Tab.Screen name="Alarm" component={AlarmScreen} options={{ tabBarLabel: '알림' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarLabel: '마이' }} />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FEFDF5',
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#4A4A4A',
-  },
-  countryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  countryText: {
-    marginLeft: 4,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4A4A4A',
-  },
-  welcomeCard: {
-    backgroundColor: '#FFB7B233',
-    padding: 30,
-    borderRadius: 30,
-    marginBottom: 32,
-  },
-  welcomeTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#4A4A4A',
-    marginBottom: 12,
-  },
-  welcomeSubtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#4A4A4A',
-    opacity: 0.8,
-  },
-  menuGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 40,
-  },
-  menuItem: {
-    width: (width - 48 - 32) / 3,
-    aspectRatio: 1,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuLabel: {
-    marginTop: 8,
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#4A4A4A',
-  },
-  footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  footerText: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#9B9B9B',
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-});
+// 전체 내비게이션 로직 (Auth 여부에 따라 화면 전환)
+function AppNavigator() {
+  const { user, loading } = useAuth();
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        <Stack.Screen name="Main" component={MainTabs} />
+      ) : (
+        <Stack.Screen name="Login" component={Login} />
+      )}
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </AuthProvider>
+  );
+}
