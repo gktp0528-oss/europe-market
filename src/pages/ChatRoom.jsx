@@ -148,29 +148,29 @@ const ChatRoom = () => {
                 supabase.removeChannel(channel);
             };
         }
-        // Set active conversation for global unread management
-        useEffect(() => {
-            if (!user || !id || id === 'new') return;
-
-            setActiveConversationId(id);
-            markAsRead(id);
-
-            return () => {
-                setActiveConversationId(null);
-            };
-        }, [id, user, setActiveConversationId, markAsRead]);
-
-        // Re-mark as read when new messages arrive while in the room
-        useEffect(() => {
-            if (id && id !== 'new' && messages.length > 0) {
-                const lastMsg = messages[messages.length - 1];
-                if (lastMsg.sender_id !== user.id && !lastMsg.is_read) {
-                    markAsRead(id);
-                }
-            }
-        }, [messages, id, user, markAsRead]);
-
     }, [id, user, navigate, fetchMessages]);
+
+    // Set active conversation for global unread management
+    useEffect(() => {
+        if (!user || !id || id === 'new') return;
+
+        setActiveConversationId(id);
+        markAsRead(id);
+
+        return () => {
+            setActiveConversationId(null);
+        };
+    }, [id, user, setActiveConversationId, markAsRead]);
+
+    // Re-mark as read when new messages arrive while in the room
+    useEffect(() => {
+        if (!user || !id || id === 'new' || messages.length === 0) return;
+
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg.sender_id !== user.id && !lastMsg.is_read) {
+            markAsRead(id);
+        }
+    }, [messages, id, user, markAsRead]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();

@@ -1,11 +1,130 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeft, User, MessageCircle } from 'lucide-react';
+import { ArrowLeft, User, MessageCircle, Trash2 } from 'lucide-react';
 import { useChatUnread } from '../contexts/ChatUnreadContext';
 import '../styles/WriteForm.css';
 import '../styles/Chat.css'; // Reusing layout styles
+
+const SwipeableChatItem = ({ chat, navigate, unreadCount, onDelete }) => {
+    const [startX, setStartX] = useState(0);
+    const [currentX, setCurrentX] = useState(0);
+    const [swiped, setSwiped] = useState(false);
+    const [isPressing, setIsPressing] = useState(false);
+    const pressTimer = useRef(null);
+
+    const handleTouchStart = (e) => {
+        setStartX(e.touches[0].clientX);
+        setCurrentX(e.touches[0].clientX);
+
+        // Long press logic
+        setIsPressing(true);
+        pressTimer.current = setTimeout(() => {
+            if (window.confirm('이 대화방을 삭제하시겠습니까?')) {
+                onDelete();
+            }
+            setIsPressing(false);
+        }, 800);
+    };
+
+    const handleTouchMove = (e) => {
+        const diff = e.touches[0].clientX - startX;
+        setCurrentX(e.touches[0].clientX);
+
+        // If moving significantly, cancel long press
+        if (Math.abs(diff) > 10) {
+            if (pressTimer.current) {
+                clearTimeout(pressTimer.current);
+                pressTimer.current = null;
+            }
+            setIsPressing(false);
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (pressTimer.current) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+        setIsPressing(false);
+
+        const diff = currentX - startX;
+        if (diff < -50) {
+            setSwiped(true);
+        } else {
+            setSwiped(false);
+        }
+    };
+
+    const handleClick = () => {
+        if (swiped) {
+            setSwiped(false);
+        } else {
+            navigate(`/chat/${chat.id}`);
+        }
+    };
+
+    return (
+        <div
+            className={`chat-item ${swiped ? 'swiped' : ''} ${isPressing ? 'pressing' : ''}`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onClick={handleClick}
+        >
+            <div className="chat-item-content">
+                <div className="chat-avatar-container">
+                    {chat.post && chat.post.image_urls && chat.post.image_urls.length > 0 ? (
+                        <img src={chat.post.image_urls[0]} alt="product" />
+                    ) : chat.otherUser?.avatar_url ? (
+                        <img src={chat.otherUser.avatar_url} alt="avatar" />
+                    ) : (
+                        <User size={26} color="#ccc" />
+                    )}
+                </div>
+
+                <div className="chat-info">
+                    <div className="chat-info-header">
+                        <div className="chat-user-group">
+                            <span className="chat-username">
+                                {chat.otherUser?.username || '알 수 없음'}
+                            </span>
+                            {chat.post && (
+                                <span className="chat-post-title">
+                                    {chat.post.category === 'tutoring' ? (chat.post.subject || chat.post.title) : chat.post.title}
+                                </span>
+                            )}
+                        </div>
+                        <div className="chat-meta">
+                            <span className="chat-time">{chat.time}</span>
+                            {unreadCount > 0 && (
+                                <span className="unread-badge">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <p className="chat-last-message">
+                        {chat.lastMessage || '새로운 대화가 시작되었습니다.'}
+                    </p>
+                </div>
+            </div>
+
+            <button
+                className="chat-delete-btn"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm('이 대화방을 삭제하시겠습니까?')) {
+                        onDelete();
+                    }
+                }}
+            >
+                <Trash2 size={20} color="white" />
+            </button>
+        </div>
+    );
+};
 
 const ChatList = () => {
     const { user } = useAuth();
@@ -13,17 +132,40 @@ const ChatList = () => {
     const { unreadByConversation } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
+    const conversationsRef = useRef([]);
 
     useEffect(() => {
+        conversationsRef.current = conversations;
+    }, [conversations]);
+
+    const formatChatTime = useCallback((isoString) => {
+        return new Date(isoString).toLocaleDateString();
+    }, []);
+
+    const handleDeleteChat = async (conversationId) => {
+        try {
+            const { error } = await supabase
+                .from('conversations')
+                .delete()
+                .eq('id', conversationId);
+
+            if (error) throw error;
+
+            // Optimistic update
+            setConversations(prev => prev.filter(c => c.id !== conversationId));
+        } catch (err) {
+            console.error('Error deleting chat:', err);
+            alert('채팅방 삭제에 실패했습니다.');
+        }
+    };
+
+    const fetchConversations = useCallback(async () => {
         if (!user) return;
 
-        const fetchConversations = async () => {
-            try {
-                // Fetch conversations where I am participant 1 or 2
-                // We also want to join profile data
-                const { data, error } = await supabase
-                    .from('conversations')
-                    .select(`
+        try {
+            const { data, error } = await supabase
+                .from('conversations')
+                .select(`
             id,
             last_message,
             updated_at,
@@ -32,59 +174,94 @@ const ChatList = () => {
             participant1:participant1_id (id, username, avatar_url),
             participant2:participant2_id (id, username, avatar_url)
           `)
-                    .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
-                    .order('updated_at', { ascending: false });
+                .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
+                .order('updated_at', { ascending: false });
 
-                if (error) throw error;
+            if (error) throw error;
 
-                // Process data to identify "the other person"
-                const formatted = data.map(conv => {
-                    const otherUser = conv.participant1?.id === user.id ? conv.participant2 : conv.participant1;
+            const formatted = data.map(conv => {
+                const otherUser = conv.participant1?.id === user.id ? conv.participant2 : conv.participant1;
+                if (!otherUser) return null;
 
-                    // Safety check: if for some reason otherUser is null, skip or show fallback
-                    if (!otherUser) return null;
+                return {
+                    id: conv.id,
+                    otherUser,
+                    post: conv.post,
+                    lastMessage: conv.last_message,
+                    time: formatChatTime(conv.updated_at)
+                };
+            }).filter(c => c !== null);
 
-                    return {
-                        id: conv.id,
-                        otherUser,
-                        post: conv.post,
-                        lastMessage: conv.last_message,
-                        time: new Date(conv.updated_at).toLocaleDateString()
-                    };
-                }).filter(c => c !== null);
+            setConversations(formatted);
+        } catch (err) {
+            console.error('Error fetching chats:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [formatChatTime, user]);
 
-                setConversations(formatted);
-            } catch (err) {
-                console.error('Error fetching chats:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    useEffect(() => {
+        if (!user) return;
 
         fetchConversations();
 
-        // Ideally subscribe to changes in 'conversations' table as well
-        // Subscribe to changes in 'conversations' table
-        const subscription = supabase
+        const conversationSubscription = supabase
             .channel('public:conversations')
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'conversations'
             }, () => {
-                // Fetch again whenever any conversation changes
-                // RLS will ensure we only see relevant ones
-                // We could optimize this by manually updating the state
-                // but fetchConversations is safer for complex joins.
                 fetchConversations();
             })
             .subscribe();
 
+        const messageSubscription = supabase
+            .channel('public:chat_list_messages')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, (payload) => {
+                const msg = payload.new;
+
+                const existsInList = conversationsRef.current.some(
+                    (chat) => chat.id === msg.conversation_id
+                );
+
+                if (!existsInList) {
+                    fetchConversations();
+                    return;
+                }
+
+                setConversations((prev) => {
+                    const updated = prev.map((chat) => {
+                        if (chat.id !== msg.conversation_id) {
+                            return chat;
+                        }
+
+                        return {
+                            ...chat,
+                            lastMessage: msg.content,
+                            time: formatChatTime(msg.created_at)
+                        };
+                    });
+
+                    const changed = updated.find((chat) => chat.id === msg.conversation_id);
+                    return [
+                        changed,
+                        ...updated.filter((chat) => chat.id !== msg.conversation_id)
+                    ];
+                });
+            })
+            .subscribe();
+
         return () => {
-            supabase.removeChannel(subscription);
+            supabase.removeChannel(conversationSubscription);
+            supabase.removeChannel(messageSubscription);
         };
 
-    }, [user]);
+    }, [fetchConversations, formatChatTime, user]);
 
     if (!user) {
         return (
@@ -120,47 +297,13 @@ const ChatList = () => {
                 ) : (
                     <div className="chat-list" style={{ paddingBottom: '80px' }}>
                         {conversations.map(chat => (
-                            <div
+                            <SwipeableChatItem
                                 key={chat.id}
-                                className="chat-item"
-                                onClick={() => navigate(`/chat/${chat.id}`)}
-                            >
-                                <div className="chat-avatar-container">
-                                    {chat.post && chat.post.image_urls && chat.post.image_urls.length > 0 ? (
-                                        <img src={chat.post.image_urls[0]} alt="product" />
-                                    ) : chat.otherUser?.avatar_url ? (
-                                        <img src={chat.otherUser.avatar_url} alt="avatar" />
-                                    ) : (
-                                        <User size={26} color="#ccc" />
-                                    )}
-                                </div>
-
-                                <div className="chat-info">
-                                    <div className="chat-info-header">
-                                        <div className="chat-user-group">
-                                            <span className="chat-username">
-                                                {chat.otherUser?.username || '알 수 없음'}
-                                            </span>
-                                            {chat.post && (
-                                                <span className="chat-post-title">
-                                                    {chat.post.category === 'tutoring' ? (chat.post.subject || chat.post.title) : chat.post.title}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="chat-meta">
-                                            <span className="chat-time">{chat.time}</span>
-                                            {unreadByConversation[chat.id] > 0 && (
-                                                <span className="unread-badge">
-                                                    {unreadByConversation[chat.id]}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <p className="chat-last-message">
-                                        {chat.lastMessage || '새로운 대화가 시작되었습니다.'}
-                                    </p>
-                                </div>
-                            </div>
+                                chat={chat}
+                                navigate={navigate}
+                                unreadCount={unreadByConversation[chat.id]}
+                                onDelete={() => handleDeleteChat(chat.id)}
+                            />
                         ))}
                     </div>
                 )

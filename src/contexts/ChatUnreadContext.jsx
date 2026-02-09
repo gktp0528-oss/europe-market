@@ -43,75 +43,112 @@ export const ChatUnreadProvider = ({ children }) => {
 
             if (error) {
                 console.error('Error marking as read via RPC:', error);
-                return;
+                const { error: fallbackError } = await supabase
+                    .from('messages')
+                    .update({ is_read: true })
+                    .eq('conversation_id', conversationId)
+                    .neq('sender_id', user.id)
+                    .eq('is_read', false);
+
+                if (fallbackError) {
+                    console.error('Fallback mark-as-read failed:', fallbackError);
+                    return;
+                }
             }
 
-            setUnreadByConversation(prev => {
-                const newCounts = { ...prev };
-                delete newCounts[conversationId];
-                return newCounts;
-            });
+            await refreshUnreadCounts();
         } catch (err) {
             console.error('Error marking as read:', err);
         }
-    }, [user]);
+    }, [refreshUnreadCounts, user]);
 
     // 3. 실시간 메시지 구독 (Global)
     useEffect(() => {
-        if (!user) {
-            setUnreadByConversation({});
-            return;
-        }
+        if (!user) return;
 
-        refreshUnreadCounts();
+        const refresh = () => {
+            refreshUnreadCounts();
+        };
 
         const channel = supabase
             .channel('global_unread_notifications')
             .on('postgres_changes', {
-                event: '*', // Listen to INSERT and UPDATE (for multi-device sync)
+                event: 'INSERT',
                 schema: 'public',
                 table: 'messages'
             }, (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    const newMsg = payload.new;
+                const newMsg = payload.new;
 
-                    // 내 메시지면 무시
-                    if (newMsg.sender_id === user.id) return;
+                // 내 메시지면 무시
+                if (newMsg.sender_id === user.id) return;
 
-                    // 현재 내가 보고 있는 방이면 즉시 읽음 처리 및 카운트 제외
-                    if (newMsg.conversation_id === activeConversationId) {
-                        markAsRead(newMsg.conversation_id);
-                        return;
-                    }
+                // 현재 내가 보고 있는 방이면 즉시 읽음 처리 및 카운트 제외
+                if (newMsg.conversation_id === activeConversationId) {
+                    markAsRead(newMsg.conversation_id);
+                    return;
+                }
 
-                    // 그 외의 경우 카운트 증가
-                    setUnreadByConversation(prev => ({
-                        ...prev,
-                        [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
-                    }));
-                } else if (payload.eventType === 'UPDATE') {
-                    const updatedMsg = payload.new;
-
-                    // 만약 다른 기기에서 읽음 처리가 되었다면 (is_read: false -> true)
-                    if (updatedMsg.is_read && !payload.old.is_read) {
-                        // 해당 방의 미읽음 카운트를 다시 조회하여 정확하게 갱신
-                        refreshUnreadCounts();
-                    }
+                // 빠른 UI 반영 후 서버값으로 동기화
+                setUnreadByConversation(prev => ({
+                    ...prev,
+                    [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
+                }));
+                refresh();
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'messages'
+            }, (payload) => {
+                const updatedMsg = payload.new;
+                if (updatedMsg.is_read) {
+                    refresh();
                 }
             })
-            .subscribe();
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'conversations'
+            }, () => {
+                refresh();
+            })
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    refresh();
+                }
+            });
+
+        const intervalId = window.setInterval(() => {
+            refresh();
+        }, 8000);
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                refresh();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', refresh);
 
         return () => {
+            window.clearInterval(intervalId);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', refresh);
             supabase.removeChannel(channel);
         };
     }, [user, activeConversationId, refreshUnreadCounts, markAsRead]);
 
+    const visibleUnreadByConversation = useMemo(() => {
+        return user ? unreadByConversation : {};
+    }, [user, unreadByConversation]);
+
     const totalUnread = useMemo(() => {
-        return Object.values(unreadByConversation).reduce((sum, count) => sum + count, 0);
-    }, [unreadByConversation]);
+        return Object.values(visibleUnreadByConversation).reduce((sum, count) => sum + count, 0);
+    }, [visibleUnreadByConversation]);
 
     const value = {
-        unreadByConversation,
+        unreadByConversation: visibleUnreadByConversation,
         totalUnread,
         activeConversationId,
         setActiveConversationId,
@@ -126,6 +163,7 @@ export const ChatUnreadProvider = ({ children }) => {
     );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useChatUnread = () => {
     const context = useContext(ChatUnreadContext);
     if (!context) {
