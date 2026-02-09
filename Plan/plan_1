@@ -116,3 +116,31 @@
 - 동일 transaction에서 중복 평가가 차단되는가
 - 코멘트 100자 제한이 DB/클라이언트 모두에서 동작하는가
 - 프로필 평균/개수가 실시간 또는 재조회 시 정확한가
+
+## 10. 보완 필요 사항 (현 구현 점검 결과)
+### 10.1 보안/권한 (최우선)
+- `submit_profile_rating`에서 `completed` 여부만 보지 말고, `auth.uid()`가 해당 transaction의 `owner_id` 또는 `participant_id`인지 검증 필요
+- `p_ratee_id`가 상대 참여자인지 검증 필요 (임의 사용자 평가 방지)
+- `transactions` RLS에 `insert/update` 정책 또는 전용 RPC 추가 필요 (클라이언트 직접 insert 시 RLS 충돌 방지)
+
+### 10.2 상태 전이 완성도
+- 계획서에 정의한 `reject_transaction_completion` RPC 구현 필요
+- `completion_requested -> disputed` 전이를 실제로 처리하고, disputed 상태에서는 평가 불가를 DB/클라이언트 모두에서 보장 필요
+- 완료 요청자 본인은 확정할 수 없다는 규칙 유지 + 거절 권한도 반대 참여자에게만 부여 필요
+
+### 10.3 데이터 무결성
+- transaction 중복 생성 방지 제약 필요
+  - 예: `conversation_id` unique (nullable 처리 전략 포함) 또는 `(post_id, owner_id, participant_id)` 조합 유니크 정책
+- `submit_profile_rating`에서 transaction-category/post-owner-participant 관계 일관성 체크 필요
+- 트리거/정책/인덱스 생성 시 `if not exists` 또는 `drop ... if exists` 패턴으로 재실행 안정성 확보 필요
+
+### 10.4 UI/UX 보완
+- 이미 평가한 transaction에서는 `별점 남기기` 버튼 숨김 또는 `평가 완료` 상태로 전환
+- 완료 요청 수신자에게 `확정` + `거절` 버튼 동시 제공
+- 상태별 문구를 `거래` 대신 `이용`으로 통일 (중고/알바/과외·레슨/모임 공통)
+
+### 10.5 테스트 보완
+- 권한 우회 테스트: 비참여자가 RPC 호출 시 실패하는지 확인
+- 상태 전이 테스트: `open -> completion_requested -> completed/disputed`만 허용되는지 확인
+- 중복 평가 테스트: 동일 `(transaction_id, rater_id)` 재평가 차단 확인
+- 집계 정확도 테스트: insert/update/delete 시 `rating_sum/count/avg` 정합성 검증

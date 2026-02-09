@@ -51,7 +51,7 @@ const RatingScreen = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.infoBox}>
                     <Text style={styles.infoText}>
-                        <Text style={styles.username}>{username}</Text>님과의 거래는 어떠셨나요?
+                        <Text style={styles.username}>{username}</Text>님과의 이용은 어떠셨나요?
                     </Text>
                 </View>
 
@@ -72,7 +72,7 @@ const RatingScreen = ({ navigation, route }) => {
                     <Text style={styles.inputLabel}>후기 남기기 (선택)</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="거래 경험을 공유해주세요 (최대 100자)"
+                        placeholder="이용한 경험을 공유해주세요 (최대 100자)"
                         placeholderTextColor="#9B9B9B"
                         value={comment}
                         onChangeText={setComment}

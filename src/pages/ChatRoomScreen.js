@@ -22,6 +22,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
     const [transaction, setTransaction] = useState(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [hasRated, setHasRated] = useState(false);
     const flatListRef = useRef(null);
 
     const reconcileMessages = useCallback((prev, fetched) => {
@@ -179,6 +180,22 @@ const ChatRoomScreen = ({ navigation, route }) => {
         return () => supabase.removeChannel(channel);
     }, [transaction?.id]);
 
+    // Check if rated
+    useEffect(() => {
+        if (!transaction?.id || transaction.status !== 'completed' || !user) return;
+
+        const checkRated = async () => {
+            const { data } = await supabase
+                .from('profile_ratings')
+                .select('id')
+                .eq('transaction_id', transaction.id)
+                .eq('rater_id', user.id)
+                .single();
+            if (data) setHasRated(true);
+        };
+        checkRated();
+    }, [transaction?.id, transaction?.status, user]);
+
     const handleRequestCompletion = async () => {
         if (!transaction) return;
         setActionLoading(true);
@@ -204,6 +221,21 @@ const ChatRoomScreen = ({ navigation, route }) => {
             if (error) throw error;
         } catch (err) {
             console.error('Confirm completion error:', err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleRejectCompletion = async () => {
+        if (!transaction) return;
+        setActionLoading(true);
+        try {
+            const { error } = await supabase.rpc('reject_transaction_completion', {
+                p_transaction_id: transaction.id
+            });
+            if (error) throw error;
+        } catch (err) {
+            console.error('Reject completion error:', err);
         } finally {
             setActionLoading(false);
         }
@@ -314,7 +346,7 @@ const ChatRoomScreen = ({ navigation, route }) => {
                         {transaction.status === 'open' && (
                             <>
                                 <AlertCircle size={16} color="#9B9B9B" />
-                                <Text style={styles.txStatusText}>거래가 진행 중이에요</Text>
+                                <Text style={styles.txStatusText}>이용이 진행 중이에요</Text>
                                 <TouchableOpacity
                                     style={styles.txActionBtn}
                                     onPress={handleRequestCompletion}
@@ -331,26 +363,55 @@ const ChatRoomScreen = ({ navigation, route }) => {
                                     {transaction.completion_requested_by === user.id ? '완료 확인을 기다리고 있어요' : '상대방이 완료를 요청했어요'}
                                 </Text>
                                 {transaction.completion_requested_by !== user.id && (
-                                    <TouchableOpacity
-                                        style={styles.txActionBtnPrimary}
-                                        onPress={handleConfirmCompletion}
-                                        disabled={actionLoading}
-                                    >
-                                        <Text style={styles.txActionBtnTextPrimary}>완료 확정하기</Text>
-                                    </TouchableOpacity>
+                                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                                        <TouchableOpacity
+                                            style={styles.txActionBtn}
+                                            onPress={handleRejectCompletion}
+                                            disabled={actionLoading}
+                                        >
+                                            <Text style={styles.txActionBtnText}>거절</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.txActionBtnPrimary}
+                                            onPress={handleConfirmCompletion}
+                                            disabled={actionLoading}
+                                        >
+                                            <Text style={styles.txActionBtnTextPrimary}>완료 확정하기</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 )}
+                            </>
+                        )}
+                        {transaction.status === 'disputed' && (
+                            <>
+                                <AlertCircle size={16} color="#ff4d4f" />
+                                <Text style={styles.txStatusText}>완료 요청이 거절된 상태예요</Text>
+                                <TouchableOpacity
+                                    style={styles.txActionBtn}
+                                    onPress={handleRequestCompletion}
+                                    disabled={actionLoading}
+                                >
+                                    <Text style={styles.txActionBtnText}>재요청하기</Text>
+                                </TouchableOpacity>
                             </>
                         )}
                         {transaction.status === 'completed' && (
                             <>
                                 <Star size={16} color="#FFB7B2" />
-                                <Text style={styles.txStatusText}>거래가 완료되었습니다!</Text>
-                                <TouchableOpacity
-                                    style={styles.txActionBtnPrimary}
-                                    onPress={handleGoToRating}
-                                >
-                                    <Text style={styles.txActionBtnTextPrimary}>별점 남기기</Text>
-                                </TouchableOpacity>
+                                <Text style={styles.txStatusText}>이용이 완료되었습니다!</Text>
+                                {!hasRated && (
+                                    <TouchableOpacity
+                                        style={styles.txActionBtnPrimary}
+                                        onPress={handleGoToRating}
+                                    >
+                                        <Text style={styles.txActionBtnTextPrimary}>별점 남기기</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {hasRated && (
+                                    <View style={styles.txRatedBadge}>
+                                        <Text style={styles.txRatedText}>평가 완료</Text>
+                                    </View>
+                                )}
                             </>
                         )}
                     </View>
@@ -454,6 +515,17 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#fff',
         fontWeight: '700',
+    },
+    txRatedBadge: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        backgroundColor: '#F0F0F0',
+    },
+    txRatedText: {
+        fontSize: 11,
+        color: '#999',
+        fontWeight: '600',
     },
     messagesList: { padding: 16, paddingBottom: 8 },
     messageRow: { flexDirection: 'row', marginBottom: 12, alignItems: 'flex-end' },

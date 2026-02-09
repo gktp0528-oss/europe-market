@@ -239,7 +239,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                                     <MapPin size={18} color="#555" />
                                 </View>
                                 <View style={styles.infoTextWrap}>
-                                    <Text style={styles.infoLabel}>거래 희망 장소</Text>
+                                    <Text style={styles.infoLabel}>이용 희망 장소</Text>
                                     <Text style={styles.infoValue} numberOfLines={1}>{post.location || '위치 미정'}</Text>
                                 </View>
                             </TouchableOpacity>
@@ -249,7 +249,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                                     <Clock size={18} color="#555" />
                                 </View>
                                 <View style={styles.infoTextWrap}>
-                                    <Text style={styles.infoLabel}>희망 거래 시간</Text>
+                                    <Text style={styles.infoLabel}>희망 이용 시간</Text>
                                     <Text style={styles.infoValue} numberOfLines={1}>{post.trade_time || '시간 협의'}</Text>
                                 </View>
                             </View>
