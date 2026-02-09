@@ -9,6 +9,19 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useChatUnread } from '../contexts/ChatUnreadContext';
 
+const CATEGORY_META = {
+    used: { label: '중고거래', backgroundColor: '#FFF1EF', textColor: '#E8756D' },
+    job: { label: '알바', backgroundColor: '#EEF4FF', textColor: '#4F78D3' },
+    tutoring: { label: '과외/레슨', backgroundColor: '#F3EEFF', textColor: '#6F58C9' },
+    meetup: { label: '모임', backgroundColor: '#EAF8F2', textColor: '#2F9D6A' },
+};
+
+const getCategoryMeta = (category) => CATEGORY_META[category] || {
+    label: '기타',
+    backgroundColor: '#F4F4F4',
+    textColor: '#808080',
+};
+
 const ChatRoomScreen = ({ navigation, route }) => {
     const { postId, sellerId, conversationId: existingConvId } = route.params || {};
     const { user } = useAuth();
@@ -322,6 +335,9 @@ const ChatRoomScreen = ({ navigation, route }) => {
         );
     };
 
+    const categoryMeta = getCategoryMeta(post?.category || transaction?.category);
+    const showCategory = Boolean(post?.category || transaction?.category);
+
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
@@ -332,11 +348,20 @@ const ChatRoomScreen = ({ navigation, route }) => {
                     <Text style={styles.headerName} numberOfLines={1}>
                         {otherUser?.username || '채팅'}
                     </Text>
-                    {post && (
-                        <Text style={styles.headerPost} numberOfLines={1}>
-                            {post.title}{post.price ? ` · ${post.price}` : ''}
-                        </Text>
-                    )}
+                    <View style={styles.headerSubRow}>
+                        {post && (
+                            <Text style={styles.headerPost} numberOfLines={1}>
+                                {post.title}{post.price ? ` · ${post.price}` : ''}
+                            </Text>
+                        )}
+                        {showCategory && (
+                            <View style={[styles.categoryBadge, { backgroundColor: categoryMeta.backgroundColor }]}>
+                                <Text style={[styles.categoryBadgeText, { color: categoryMeta.textColor }]}>
+                                    {categoryMeta.label}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
                 </View>
             </View>
 
@@ -435,6 +460,15 @@ const ChatRoomScreen = ({ navigation, route }) => {
                         renderItem={renderMessage}
                         contentContainerStyle={styles.messagesList}
                         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                        ListHeaderComponent={
+                            showCategory ? (
+                                <View style={styles.contextNotice}>
+                                    <Text style={styles.contextNoticeText}>
+                                        이 채팅은 [{categoryMeta.label}] 게시글에서 시작됐어요.
+                                    </Text>
+                                </View>
+                            ) : null
+                        }
                         ListEmptyComponent={
                             <View style={styles.emptyState}>
                                 <Text style={styles.emptyTitle}>아직 대화가 없어요</Text>
@@ -475,7 +509,27 @@ const styles = StyleSheet.create({
     headerBtn: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
     headerInfo: { flex: 1, marginLeft: 4 },
     headerName: { fontSize: 16, fontWeight: '700', color: '#4A4A4A' },
-    headerPost: { fontSize: 13, color: '#FFB7B2', fontWeight: '600', marginTop: 2 },
+    headerSubRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 3,
+        gap: 8,
+    },
+    headerPost: {
+        fontSize: 13,
+        color: '#FFB7B2',
+        fontWeight: '600',
+        maxWidth: '72%',
+    },
+    categoryBadge: {
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+    },
+    categoryBadgeText: {
+        fontSize: 11,
+        fontWeight: '700',
+    },
     txBanner: {
         backgroundColor: '#FDFDFD',
         paddingHorizontal: 16,
@@ -525,6 +579,19 @@ const styles = StyleSheet.create({
     txRatedText: {
         fontSize: 11,
         color: '#999',
+        fontWeight: '600',
+    },
+    contextNotice: {
+        alignSelf: 'center',
+        marginBottom: 12,
+        backgroundColor: '#F7F7F7',
+        borderRadius: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+    },
+    contextNoticeText: {
+        fontSize: 12,
+        color: '#777',
         fontWeight: '600',
     },
     messagesList: { padding: 16, paddingBottom: 8 },

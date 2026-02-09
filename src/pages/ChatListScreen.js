@@ -15,6 +15,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { User, MessageCircle } from 'lucide-react-native';
 import { useChatUnread } from '../contexts/ChatUnreadContext';
 
+const CATEGORY_META = {
+    used: { label: '중고거래', backgroundColor: '#FFF1EF', textColor: '#E8756D' },
+    job: { label: '알바', backgroundColor: '#EEF4FF', textColor: '#4F78D3' },
+    tutoring: { label: '과외/레슨', backgroundColor: '#F3EEFF', textColor: '#6F58C9' },
+    meetup: { label: '모임', backgroundColor: '#EAF8F2', textColor: '#2F9D6A' },
+};
+
+const getCategoryMeta = (category) => CATEGORY_META[category] || {
+    label: '기타',
+    backgroundColor: '#F4F4F4',
+    textColor: '#808080',
+};
+
 const ChatListScreen = ({ navigation }) => {
     const { user } = useAuth();
     const { unreadByConversation } = useChatUnread();
@@ -170,39 +183,51 @@ const ChatListScreen = ({ navigation }) => {
         };
     }, [fetchConversations, user]);
 
-    const renderChatItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.chatItem}
-            onPress={() => navigation.navigate('ChatRoom', { conversationId: item.id })}
-            onLongPress={() => {
-                Alert.alert('채팅방 삭제', '이 대화방을 삭제하시겠습니까?', [
-                    { text: '취소', style: 'cancel' },
-                    {
-                        text: '삭제',
-                        style: 'destructive',
-                        onPress: () => handleDeleteConversation(item.id)
-                    }
-                ]);
-            }}
-        >
-            <View style={styles.avatarContainer}>
-                {item.post && item.post.image_urls && item.post.image_urls.length > 0 ? (
-                    <Image source={{ uri: item.post.image_urls[0] }} style={styles.avatar} />
-                ) : item.otherUser?.avatar_url ? (
-                    <Image source={{ uri: item.otherUser.avatar_url }} style={styles.avatar} />
-                ) : (
-                    <View style={styles.defaultAvatar}>
-                        <User size={24} color="#ccc" />
-                    </View>
-                )}
-            </View>
+    const renderChatItem = ({ item }) => {
+        const categoryMeta = getCategoryMeta(item.post?.category);
+
+        return (
+            <TouchableOpacity
+                style={styles.chatItem}
+                onPress={() => navigation.navigate('ChatRoom', { conversationId: item.id })}
+                onLongPress={() => {
+                    Alert.alert('채팅방 삭제', '이 대화방을 삭제하시겠습니까?', [
+                        { text: '취소', style: 'cancel' },
+                        {
+                            text: '삭제',
+                            style: 'destructive',
+                            onPress: () => handleDeleteConversation(item.id)
+                        }
+                    ]);
+                }}
+            >
+                <View style={styles.avatarContainer}>
+                    {item.post && item.post.image_urls && item.post.image_urls.length > 0 ? (
+                        <Image source={{ uri: item.post.image_urls[0] }} style={styles.avatar} />
+                    ) : item.otherUser?.avatar_url ? (
+                        <Image source={{ uri: item.otherUser.avatar_url }} style={styles.avatar} />
+                    ) : (
+                        <View style={styles.defaultAvatar}>
+                            <User size={24} color="#ccc" />
+                        </View>
+                    )}
+                </View>
 
                 <View style={styles.chatInfo}>
                     <View style={styles.chatHeader}>
                         <View style={styles.chatUserGroup}>
-                            <Text style={styles.username} numberOfLines={1}>
-                                {item.otherUser?.username || '알 수 없음'}
-                            </Text>
+                            <View style={styles.userRow}>
+                                <Text style={styles.username} numberOfLines={1}>
+                                    {item.otherUser?.username || '알 수 없음'}
+                                </Text>
+                                {item.post?.category ? (
+                                    <View style={[styles.categoryBadge, { backgroundColor: categoryMeta.backgroundColor }]}>
+                                        <Text style={[styles.categoryBadgeText, { color: categoryMeta.textColor }]}>
+                                            {categoryMeta.label}
+                                        </Text>
+                                    </View>
+                                ) : null}
+                            </View>
                             {item.post?.title ? (
                                 <Text style={styles.postTitleInline} numberOfLines={1}>
                                     {item.post.title}
@@ -221,12 +246,13 @@ const ChatListScreen = ({ navigation }) => {
                         </View>
                     </View>
 
-                <Text style={styles.lastMessage} numberOfLines={1}>
-                    {item.lastMessage || '새로운 대화가 시작되었습니다.'}
-                </Text>
-            </View>
-        </TouchableOpacity>
-    );
+                    <Text style={styles.lastMessage} numberOfLines={1}>
+                        {item.lastMessage || '새로운 대화가 시작되었습니다.'}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
 
     if (loading) {
         return (
@@ -324,10 +350,24 @@ const styles = StyleSheet.create({
     chatUserGroup: {
         flex: 1,
     },
+    userRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
     username: {
         fontSize: 16,
         fontWeight: '700',
         color: '#333',
+    },
+    categoryBadge: {
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+    },
+    categoryBadgeText: {
+        fontSize: 11,
+        fontWeight: '700',
     },
     postTitleInline: {
         marginTop: 2,
