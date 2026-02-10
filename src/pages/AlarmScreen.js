@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
@@ -11,11 +11,37 @@ const AlarmScreen = ({ navigation }) => {
     const { refreshNotifications } = useNotification();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         if (!user) return;
+
         fetchNotifications();
+
+        // 실시간 알림 목록 구독 복구
+        const channel = supabase
+            .channel(`alarm_screen_list_${user.id}`)
+            .on('postgres_changes', {
+                event: '*', // INSERT, UPDATE, DELETE 모두 감지
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${user.id}`
+            }, () => {
+                // 데이터 변경 시 목록 다시 가져오기 (가장 정확한 방법)
+                fetchNotifications();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user]);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchNotifications();
+        setRefreshing(false);
+    };
 
     const fetchNotifications = async () => {
         try {
@@ -178,6 +204,9 @@ const AlarmScreen = ({ navigation }) => {
                     renderItem={renderItem}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} color="#FF6347" />
+                    }
                 />
             )}
         </SafeAreaView>

@@ -30,7 +30,7 @@ const getCategoryMeta = (category) => CATEGORY_META[category] || {
 
 const ChatListScreen = ({ navigation }) => {
     const { user } = useAuth();
-    const { unreadByConversation, latestMessageEvent, latestMessageByConversation } = useChatUnread();
+    const { unreadByConversation, latestMessageEvent, latestMessageByConversation, refreshUnreadCounts } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const conversationsRef = useRef([]);
@@ -159,13 +159,14 @@ const ChatListScreen = ({ navigation }) => {
                 table: 'conversations'
             }, () => {
                 fetchConversations();
+                refreshUnreadCounts();
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(conversationSubscription);
         };
-    }, [fetchConversations, user]);
+    }, [fetchConversations, refreshUnreadCounts, user]);
 
     useEffect(() => {
         if (!latestMessageEvent) return;
@@ -262,6 +263,7 @@ const ChatListScreen = ({ navigation }) => {
 
             <FlatList
                 data={mergedConversations}
+                extraData={unreadByConversation}
                 renderItem={renderChatItem}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}
