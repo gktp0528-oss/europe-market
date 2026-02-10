@@ -76,11 +76,11 @@ const AlarmScreen = ({ navigation }) => {
             <View style={styles.iconContainer}>
                 <Text style={styles.iconText}>{item.type === 'message' ? '💬' : item.type === 'transaction' ? '🤝' : '🔔'}</Text>
             </View>
-            <div style={styles.contentContainer}>
+            <View style={styles.contentContainer}>
                 <Text style={styles.notificationTitle}>{item.title}</Text>
                 <Text style={styles.notificationContent} numberOfLines={2}>{item.content}</Text>
                 <Text style={styles.timeText}>{new Date(item.created_at).toLocaleString()}</Text>
-            </div>
+            </View>
             {!item.is_read && <View style={styles.unreadDot} />}
         </TouchableOpacity>
     );

@@ -29,6 +29,11 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
     const [unreadCount, setUnreadCount] = useState(0);
     const [showCountryModal, setShowCountryModal] = useState(false);
 
+    const { selectedCountry } = useCountry();
+    const fallbackCountry = SUPPORTED_COUNTRIES.find((item) => item.code === selectedCountry?.code);
+    const countryName = (selectedCountry?.name || fallbackCountry?.name || '전체').trim() || '전체';
+    const countryCode = selectedCountry?.code || fallbackCountry?.code || 'ALL';
+
     useEffect(() => {
         if (!user) return;
 
