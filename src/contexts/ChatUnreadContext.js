@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { AppState } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
@@ -13,7 +13,6 @@ export const ChatUnreadProvider = ({ children }) => {
         latestMessageByConversation: {},
     });
     const [activeConversationId, setActiveConversationId] = useState(null);
-    const refreshTimerRef = useRef(null);
 
     const refreshUnreadCounts = useCallback(async () => {
         if (!user) return;
@@ -69,16 +68,6 @@ export const ChatUnreadProvider = ({ children }) => {
         }
     }, [refreshUnreadCounts, user]);
 
-    const scheduleRefresh = useCallback((delayMs = 80) => {
-        if (refreshTimerRef.current) {
-            clearTimeout(refreshTimerRef.current);
-        }
-        refreshTimerRef.current = setTimeout(() => {
-            refreshUnreadCounts();
-            refreshTimerRef.current = null;
-        }, delayMs);
-    }, [refreshUnreadCounts]);
-
     useEffect(() => {
         if (!user) return;
 
@@ -131,8 +120,6 @@ export const ChatUnreadProvider = ({ children }) => {
                     markAsRead(newMsg.conversation_id);
                     return;
                 }
-
-                scheduleRefresh(80);
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -164,8 +151,6 @@ export const ChatUnreadProvider = ({ children }) => {
                             },
                         };
                     });
-
-                    scheduleRefresh(80);
                 }
             })
             .on('postgres_changes', {
@@ -183,7 +168,7 @@ export const ChatUnreadProvider = ({ children }) => {
 
         const intervalId = setInterval(() => {
             refresh();
-        }, 8000);
+        }, 15000);
 
         const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
             if (nextAppState === 'active') {
@@ -193,14 +178,10 @@ export const ChatUnreadProvider = ({ children }) => {
 
         return () => {
             clearInterval(intervalId);
-            if (refreshTimerRef.current) {
-                clearTimeout(refreshTimerRef.current);
-                refreshTimerRef.current = null;
-            }
             appStateSubscription.remove();
             supabase.removeChannel(channel);
         };
-    }, [user, activeConversationId, refreshUnreadCounts, markAsRead, scheduleRefresh]);
+    }, [user, activeConversationId, refreshUnreadCounts, markAsRead]);
 
     const visibleUnreadByConversation = useMemo(() => {
         return user ? realtimeState.unreadByConversation : {};

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCountry, SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
+import { useNotification } from '../contexts/NotificationContext';
 import CountryModal from './CountryModal';
 
 const CATEGORY_TABS = [
@@ -34,49 +35,13 @@ const Header = ({
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { user } = useAuth();
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [showCountryModal, setShowCountryModal] = useState(false);
-
     const { selectedCountry } = useCountry();
+    const { unreadCount } = useNotification();
+    const [showCountryModal, setShowCountryModal] = useState(false);
     const fallbackCountry = SUPPORTED_COUNTRIES.find((item) => item.code === selectedCountry?.code);
     const countryName = (selectedCountry?.name || fallbackCountry?.name || '전체').trim() || '전체';
     const countryCode = selectedCountry?.code || fallbackCountry?.code || 'ALL';
 
-    useEffect(() => {
-        if (!user) return;
-
-        fetchUnreadCount();
-
-        const channel = supabase
-            .channel('header_notifications')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${user.id}`
-            }, () => {
-                fetchUnreadCount();
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [user]);
-
-    const fetchUnreadCount = async () => {
-        try {
-            const { count, error } = await supabase
-                .from('notifications')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id)
-                .eq('is_read', false);
-
-            if (!error) setUnreadCount(count || 0);
-        } catch (err) {
-            console.error('Error fetching unread count:', err);
-        }
-    };
     const tabLayoutsRef = useRef({});
     const indicatorX = useRef(new Animated.Value(0)).current;
     const indicatorW = useRef(new Animated.Value(0)).current;

@@ -4,33 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../contexts/NotificationContext';
 
 const AlarmScreen = ({ navigation }) => {
     const { user } = useAuth();
+    const { refreshNotifications } = useNotification();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!user) return;
-
         fetchNotifications();
-
-        // 실시간 알림 구독
-        const subscription = supabase
-            .channel('public:notifications')
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${user.id}`
-            }, (payload) => {
-                setNotifications(prev => [payload.new, ...prev]);
-            })
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(subscription);
-        };
     }, [user]);
 
     const fetchNotifications = async () => {
@@ -59,6 +43,7 @@ const AlarmScreen = ({ navigation }) => {
                 .eq('id', item.id);
 
             setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+            refreshNotifications();
         }
 
         // 페이지 이동
@@ -103,6 +88,7 @@ const AlarmScreen = ({ navigation }) => {
 
             if (error) throw error;
             setNotifications(prev => prev.filter(n => n.id !== id));
+            refreshNotifications();
         } catch (error) {
             console.error('Error deleting notification:', error);
             Alert.alert('오류', '알림을 삭제하는 중 문제가 발생했어요.');

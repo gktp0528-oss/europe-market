@@ -9,6 +9,7 @@ import { Home, MessageCircle, Bell, User, Pencil } from 'lucide-react-native';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { CountryProvider } from './src/contexts/CountryContext';
 import { ChatUnreadProvider, useChatUnread } from './src/contexts/ChatUnreadContext';
+import { NotificationProvider, useNotification } from './src/contexts/NotificationContext';
 
 // Pages
 import HomeScreen from './src/pages/HomeScreen';
@@ -114,6 +115,7 @@ const WRITE_OPTIONS = [
 // 하단 탭 내비게이션
 function MainTabs({ navigation: rootNavigation }) {
     const { totalUnread } = useChatUnread();
+    const { unreadCount } = useNotification();
     const [menuOpen, setMenuOpen] = useState(false);
     const anim = useRef(new Animated.Value(0)).current;
 
@@ -185,7 +187,15 @@ function MainTabs({ navigation: rootNavigation }) {
                         },
                     })}
                 />
-                <Tab.Screen name="Alarm" component={AlarmScreen} options={{ tabBarLabel: '알림' }} />
+                <Tab.Screen
+                    name="Alarm"
+                    component={AlarmScreen}
+                    options={{
+                        tabBarLabel: '알림',
+                        tabBarBadge: unreadCount > 0 ? unreadCount : undefined,
+                        tabBarBadgeStyle: { backgroundColor: '#FFB7B2', fontSize: 10 },
+                    }}
+                />
                 <Tab.Screen name="Profile" component={ProfileStack} options={{ tabBarLabel: '마이' }} />
             </Tab.Navigator>
 
@@ -284,10 +294,12 @@ export default function App() {
         <AuthProvider>
             <CountryProvider>
                 <ChatUnreadProvider>
-                    <NavigationContainer>
-                        <StatusBar style="dark" hidden={false} />
-                        <AppNavigator />
-                    </NavigationContainer>
+                    <NotificationProvider>
+                        <NavigationContainer>
+                            <StatusBar style="dark" hidden={false} />
+                            <AppNavigator />
+                        </NavigationContainer>
+                    </NotificationProvider>
                 </ChatUnreadProvider>
             </CountryProvider>
         </AuthProvider>
