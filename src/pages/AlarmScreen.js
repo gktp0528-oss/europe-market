@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { X } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -93,23 +94,46 @@ const AlarmScreen = ({ navigation }) => {
         }
     };
 
+    const deleteNotification = async (id) => {
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+            Alert.alert('오류', '알림을 삭제하는 중 문제가 발생했어요.');
+        }
+    };
+
     const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={[styles.notificationCard, !item.is_read && styles.unreadCard]}
-            onPress={() => handleNotificationClick(item)}
-        >
-            <View style={styles.iconContainer}>
-                <Text style={styles.iconText}>
-                    {item.type === 'like' ? '❤️' : (item.type === 'message' ? '💬' : '🔔')}
-                </Text>
-            </View>
-            <View style={styles.contentContainer}>
-                <Text style={styles.notificationTitle}>{item.title}</Text>
-                <Text style={styles.notificationContent} numberOfLines={2}>{item.content}</Text>
-                <Text style={styles.timeText}>{new Date(item.created_at).toLocaleString()}</Text>
-            </View>
-            {!item.is_read && <View style={styles.unreadDot} />}
-        </TouchableOpacity>
+        <View style={[styles.notificationWrapper, !item.is_read && styles.unreadWrapper]}>
+            <TouchableOpacity
+                style={styles.notificationCardContent}
+                onPress={() => handleNotificationClick(item)}
+            >
+                <View style={styles.iconContainer}>
+                    <Text style={styles.iconText}>
+                        {item.type === 'like' ? '❤️' : (item.type === 'message' ? '💬' : '🔔')}
+                    </Text>
+                </View>
+                <View style={styles.contentContainer}>
+                    <Text style={styles.notificationTitle}>{item.title}</Text>
+                    <Text style={styles.notificationContent} numberOfLines={2}>{item.content}</Text>
+                    <Text style={styles.timeText}>{new Date(item.created_at).toLocaleString()}</Text>
+                </View>
+                {!item.is_read && <View style={styles.unreadDot} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => deleteNotification(item.id)}
+            >
+                <X size={16} color="#B2BEC3" />
+            </TouchableOpacity>
+        </View>
     );
 
     return (
@@ -156,10 +180,9 @@ const styles = StyleSheet.create({
     listContent: {
         padding: 16,
     },
-    notificationCard: {
+    notificationWrapper: {
         backgroundColor: '#FFFFFF',
         borderRadius: 20,
-        padding: 16,
         marginBottom: 12,
         flexDirection: 'row',
         alignItems: 'center',
@@ -168,11 +191,24 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.05,
         shadowRadius: 10,
         elevation: 2,
+        paddingRight: 8,
     },
-    unreadCard: {
+    unreadWrapper: {
         backgroundColor: '#FFF9F8',
         borderWidth: 1,
         borderColor: '#FFEBEA',
+    },
+    notificationCardContent: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        paddingRight: 0,
+    },
+    deleteBtn: {
+        padding: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     iconContainer: {
         width: 48,

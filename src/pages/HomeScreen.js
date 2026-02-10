@@ -100,7 +100,7 @@ const HomeScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Header />
+            <Header showAlarm={false} />
 
             <ScrollView
                 style={styles.scroll}

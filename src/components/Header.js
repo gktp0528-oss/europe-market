@@ -22,7 +22,15 @@ const SEARCH_CATEGORY_MAP = {
     CategoryMeetups: 'meetup',
 };
 
-const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs = false, activeCategory, onCategoryTabPress }) => {
+const Header = ({
+    title,
+    showBack = false,
+    showSearch = true,
+    showAlarm = true,
+    showCategoryTabs = false,
+    activeCategory,
+    onCategoryTabPress
+}) => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     const { user } = useAuth();
@@ -109,7 +117,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
     if (showCategoryTabs) {
         return (
             <View style={styles.categoryContainer}>
-                <View style={styles.categoryTopRow}>
+                <View style={[styles.categoryTopRow, { paddingTop: insets.top, height: 56 + insets.top }]}>
                     <TouchableOpacity
                         style={styles.backBtn}
                         onPress={() => navigation.goBack()}
@@ -125,8 +133,8 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                         <ChevronDown size={12} color="#2D3436" />
                     </TouchableOpacity>
 
-                    {showSearch && (
-                        <View style={styles.headerRightGroup}>
+                    <View style={styles.headerRightGroup}>
+                        {showSearch && (
                             <TouchableOpacity
                                 style={styles.iconBtn}
                                 onPress={() => navigation.navigate('Search', {
@@ -136,15 +144,21 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                             >
                                 <Search size={22} color="#2D3436" />
                             </TouchableOpacity>
+                        )}
+                        {showAlarm && (
                             <TouchableOpacity
                                 style={styles.iconBtn}
                                 onPress={() => navigation.navigate('Alarm')}
                             >
                                 <Bell size={22} color="#2D3436" />
-                                {unreadCount > 0 && <View style={styles.badge} />}
+                                {unreadCount > 0 && (
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+                                    </View>
+                                )}
                             </TouchableOpacity>
-                        </View>
-                    )}
+                        )}
+                    </View>
                 </View>
 
                 <ScrollView
@@ -200,7 +214,7 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                 </ScrollView>
 
                 <CountryModal visible={showCountryModal} onClose={() => setShowCountryModal(false)} />
-            </View>
+            </View >
         );
     }
 
@@ -237,13 +251,19 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                         >
                             <Search size={22} color="#2D3436" />
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.iconBtn}
-                            onPress={() => navigation.navigate('Alarm')}
-                        >
-                            <Bell size={22} color="#2D3436" />
-                            {unreadCount > 0 && <View style={styles.badge} />}
-                        </TouchableOpacity>
+                        {showAlarm && (
+                            <TouchableOpacity
+                                style={styles.iconBtn}
+                                onPress={() => navigation.navigate('Alarm')}
+                            >
+                                <Bell size={22} color="#2D3436" />
+                                {unreadCount > 0 && (
+                                    <View style={styles.badge}>
+                                        <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        )}
                     </View>
                 )}
             </View>
@@ -313,14 +333,22 @@ const styles = StyleSheet.create({
     },
     badge: {
         position: 'absolute',
-        top: 6,
-        right: 6,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+        top: 2,
+        right: 2,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
         backgroundColor: '#FF6347',
-        borderWidth: 1.5,
+        borderWidth: 1.2,
         borderColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 2,
+    },
+    badgeText: {
+        color: '#FFFFFF',
+        fontSize: 10,
+        fontWeight: '800',
     },
 
     // Category Header

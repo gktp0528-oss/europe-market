@@ -7,10 +7,12 @@ const ChatUnreadContext = createContext();
 
 export const ChatUnreadProvider = ({ children }) => {
     const { user } = useAuth();
-    const [unreadByConversation, setUnreadByConversation] = useState({});
+    const [realtimeState, setRealtimeState] = useState({
+        unreadByConversation: {},
+        latestMessageEvent: null,
+        latestMessageByConversation: {},
+    });
     const [activeConversationId, setActiveConversationId] = useState(null);
-    const [latestMessageEvent, setLatestMessageEvent] = useState(null);
-    const [latestMessageByConversation, setLatestMessageByConversation] = useState({});
     const refreshTimerRef = useRef(null);
 
     const refreshUnreadCounts = useCallback(async () => {
@@ -27,12 +29,15 @@ export const ChatUnreadProvider = ({ children }) => {
             return;
         }
 
-        const counts = data.reduce((acc, msg) => {
+        const counts = (data || []).reduce((acc, msg) => {
             acc[msg.conversation_id] = (acc[msg.conversation_id] || 0) + 1;
             return acc;
         }, {});
 
-        setUnreadByConversation(counts);
+        setRealtimeState((prev) => ({
+            ...prev,
+            unreadByConversation: counts,
+        }));
     }, [user]);
 
     const markAsRead = useCallback(async (conversationId) => {
@@ -40,7 +45,7 @@ export const ChatUnreadProvider = ({ children }) => {
 
         try {
             const { error } = await supabase.rpc('mark_conversation_read', {
-                p_conversation_id: conversationId
+                p_conversation_id: conversationId,
             });
 
             if (error) {
@@ -64,7 +69,7 @@ export const ChatUnreadProvider = ({ children }) => {
         }
     }, [refreshUnreadCounts, user]);
 
-    const scheduleRefresh = useCallback((delayMs = 120) => {
+    const scheduleRefresh = useCallback((delayMs = 80) => {
         if (refreshTimerRef.current) {
             clearTimeout(refreshTimerRef.current);
         }
@@ -86,25 +91,39 @@ export const ChatUnreadProvider = ({ children }) => {
             .on('postgres_changes', {
                 event: 'INSERT',
                 schema: 'public',
-                table: 'messages'
+                table: 'messages',
             }, (payload) => {
                 const newMsg = payload.new;
-                setLatestMessageEvent({
+                const liveMessage = {
                     id: newMsg.id,
                     conversation_id: newMsg.conversation_id,
                     content: newMsg.content,
                     created_at: newMsg.created_at,
                     sender_id: newMsg.sender_id,
+                };
+
+                setRealtimeState((prev) => {
+                    const next = {
+                        ...prev,
+                        latestMessageEvent: liveMessage,
+                        latestMessageByConversation: {
+                            ...prev.latestMessageByConversation,
+                            [newMsg.conversation_id]: liveMessage,
+                        },
+                    };
+
+                    if (newMsg.sender_id === user.id || newMsg.conversation_id === activeConversationId) {
+                        return next;
+                    }
+
+                    return {
+                        ...next,
+                        unreadByConversation: {
+                            ...prev.unreadByConversation,
+                            [newMsg.conversation_id]: (prev.unreadByConversation[newMsg.conversation_id] || 0) + 1,
+                        },
+                    };
                 });
-                setLatestMessageByConversation((prev) => ({
-                    ...prev,
-                    [newMsg.conversation_id]: {
-                        id: newMsg.id,
-                        content: newMsg.content,
-                        created_at: newMsg.created_at,
-                        sender_id: newMsg.sender_id,
-                    },
-                }));
 
                 if (newMsg.sender_id === user.id) return;
 
@@ -113,40 +132,46 @@ export const ChatUnreadProvider = ({ children }) => {
                     return;
                 }
 
-                setUnreadByConversation(prev => ({
-                    ...prev,
-                    [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
-                }));
-                // 즉시 UI 반영 후 짧은 지연 동기화로 정확도 보정
-                scheduleRefresh(120);
+                scheduleRefresh(80);
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
                 schema: 'public',
-                table: 'messages'
+                table: 'messages',
             }, (payload) => {
                 const updatedMsg = payload.new;
                 const oldMsg = payload.old;
+
                 if (updatedMsg.is_read && oldMsg?.is_read === false && updatedMsg.sender_id !== user.id) {
-                    setUnreadByConversation(prev => {
-                        const current = prev[updatedMsg.conversation_id] || 0;
+                    setRealtimeState((prev) => {
+                        const current = prev.unreadByConversation[updatedMsg.conversation_id] || 0;
+                        if (current <= 0) return prev;
+
                         if (current <= 1) {
-                            const next = { ...prev };
-                            delete next[updatedMsg.conversation_id];
-                            return next;
+                            const nextUnread = { ...prev.unreadByConversation };
+                            delete nextUnread[updatedMsg.conversation_id];
+                            return {
+                                ...prev,
+                                unreadByConversation: nextUnread,
+                            };
                         }
+
                         return {
                             ...prev,
-                            [updatedMsg.conversation_id]: current - 1,
+                            unreadByConversation: {
+                                ...prev.unreadByConversation,
+                                [updatedMsg.conversation_id]: current - 1,
+                            },
                         };
                     });
-                    scheduleRefresh(120);
+
+                    scheduleRefresh(80);
                 }
             })
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
-                table: 'conversations'
+                table: 'conversations',
             }, () => {
                 refresh();
             })
@@ -160,7 +185,6 @@ export const ChatUnreadProvider = ({ children }) => {
             refresh();
         }, 8000);
 
-        // AppState로 앱이 foreground로 돌아올 때 새로고침
         const appStateSubscription = AppState.addEventListener('change', (nextAppState) => {
             if (nextAppState === 'active') {
                 refresh();
@@ -179,8 +203,8 @@ export const ChatUnreadProvider = ({ children }) => {
     }, [user, activeConversationId, refreshUnreadCounts, markAsRead, scheduleRefresh]);
 
     const visibleUnreadByConversation = useMemo(() => {
-        return user ? unreadByConversation : {};
-    }, [user, unreadByConversation]);
+        return user ? realtimeState.unreadByConversation : {};
+    }, [user, realtimeState.unreadByConversation]);
 
     const totalUnread = useMemo(() => {
         return Object.values(visibleUnreadByConversation).reduce((sum, count) => sum + count, 0);
@@ -189,12 +213,12 @@ export const ChatUnreadProvider = ({ children }) => {
     const value = {
         unreadByConversation: visibleUnreadByConversation,
         totalUnread,
-        latestMessageEvent,
-        latestMessageByConversation,
+        latestMessageEvent: realtimeState.latestMessageEvent,
+        latestMessageByConversation: realtimeState.latestMessageByConversation,
         activeConversationId,
         setActiveConversationId,
         markAsRead,
-        refreshUnreadCounts
+        refreshUnreadCounts,
     };
 
     return (
