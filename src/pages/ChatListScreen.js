@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
     StyleSheet,
     Text,
@@ -30,7 +30,7 @@ const getCategoryMeta = (category) => CATEGORY_META[category] || {
 
 const ChatListScreen = ({ navigation }) => {
     const { user } = useAuth();
-    const { unreadByConversation } = useChatUnread();
+    const { unreadByConversation, latestMessageEvent, latestMessageByConversation } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const conversationsRef = useRef([]);
@@ -70,6 +70,21 @@ const ChatListScreen = ({ navigation }) => {
     useEffect(() => {
         conversationsRef.current = conversations;
     }, [conversations]);
+
+    const mergedConversations = useMemo(() => {
+        const merged = conversations.map((chat) => {
+            const live = latestMessageByConversation[chat.id];
+            if (!live) return chat;
+            return {
+                ...chat,
+                lastMessage: live.content ?? chat.lastMessage,
+                updated_at: live.created_at ?? chat.updated_at,
+            };
+        });
+
+        merged.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+        return merged;
+    }, [conversations, latestMessageByConversation]);
 
     const handleDeleteConversation = useCallback(async (conversationId) => {
         const snapshot = conversationsRef.current;
@@ -147,41 +162,18 @@ const ChatListScreen = ({ navigation }) => {
             })
             .subscribe();
 
-        const messageSubscription = supabase
-            .channel('public:chat_list_messages')
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'messages'
-            }, (payload) => {
-                const msg = payload.new;
-                const existsInList = conversationsRef.current.some(chat => chat.id === msg.conversation_id);
-
-                if (!existsInList) {
-                    fetchConversations();
-                    return;
-                }
-
-                setConversations(prev => {
-                    const updated = prev.map(chat => {
-                        if (chat.id !== msg.conversation_id) return chat;
-                        return {
-                            ...chat,
-                            lastMessage: msg.content,
-                            updated_at: msg.created_at
-                        };
-                    });
-                    const changed = updated.find(chat => chat.id === msg.conversation_id);
-                    return [changed, ...updated.filter(chat => chat.id !== msg.conversation_id)];
-                });
-            })
-            .subscribe();
-
         return () => {
             supabase.removeChannel(conversationSubscription);
-            supabase.removeChannel(messageSubscription);
         };
     }, [fetchConversations, user]);
+
+    useEffect(() => {
+        if (!latestMessageEvent) return;
+        const existsInList = conversationsRef.current.some(chat => chat.id === latestMessageEvent.conversation_id);
+        if (!existsInList) {
+            fetchConversations();
+        }
+    }, [latestMessageEvent, fetchConversations]);
 
     const renderChatItem = ({ item }) => {
         const categoryMeta = getCategoryMeta(item.post?.category);
@@ -269,7 +261,7 @@ const ChatListScreen = ({ navigation }) => {
             </View>
 
             <FlatList
-                data={conversations}
+                data={mergedConversations}
                 renderItem={renderChatItem}
                 keyExtractor={item => item.id.toString()}
                 contentContainerStyle={styles.listContent}

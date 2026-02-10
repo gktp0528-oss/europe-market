@@ -9,6 +9,8 @@ export const ChatUnreadProvider = ({ children }) => {
     const { user } = useAuth();
     const [unreadByConversation, setUnreadByConversation] = useState({});
     const [activeConversationId, setActiveConversationId] = useState(null);
+    const [latestMessageEvent, setLatestMessageEvent] = useState(null);
+    const [latestMessageByConversation, setLatestMessageByConversation] = useState({});
     const refreshTimerRef = useRef(null);
 
     const refreshUnreadCounts = useCallback(async () => {
@@ -62,7 +64,7 @@ export const ChatUnreadProvider = ({ children }) => {
         }
     }, [refreshUnreadCounts, user]);
 
-    const scheduleRefresh = useCallback((delayMs = 250) => {
+    const scheduleRefresh = useCallback((delayMs = 120) => {
         if (refreshTimerRef.current) {
             clearTimeout(refreshTimerRef.current);
         }
@@ -87,6 +89,22 @@ export const ChatUnreadProvider = ({ children }) => {
                 table: 'messages'
             }, (payload) => {
                 const newMsg = payload.new;
+                setLatestMessageEvent({
+                    id: newMsg.id,
+                    conversation_id: newMsg.conversation_id,
+                    content: newMsg.content,
+                    created_at: newMsg.created_at,
+                    sender_id: newMsg.sender_id,
+                });
+                setLatestMessageByConversation((prev) => ({
+                    ...prev,
+                    [newMsg.conversation_id]: {
+                        id: newMsg.id,
+                        content: newMsg.content,
+                        created_at: newMsg.created_at,
+                        sender_id: newMsg.sender_id,
+                    },
+                }));
 
                 if (newMsg.sender_id === user.id) return;
 
@@ -100,7 +118,7 @@ export const ChatUnreadProvider = ({ children }) => {
                     [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
                 }));
                 // 즉시 UI 반영 후 짧은 지연 동기화로 정확도 보정
-                scheduleRefresh(300);
+                scheduleRefresh(120);
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -122,7 +140,7 @@ export const ChatUnreadProvider = ({ children }) => {
                             [updatedMsg.conversation_id]: current - 1,
                         };
                     });
-                    scheduleRefresh(300);
+                    scheduleRefresh(120);
                 }
             })
             .on('postgres_changes', {
@@ -171,6 +189,8 @@ export const ChatUnreadProvider = ({ children }) => {
     const value = {
         unreadByConversation: visibleUnreadByConversation,
         totalUnread,
+        latestMessageEvent,
+        latestMessageByConversation,
         activeConversationId,
         setActiveConversationId,
         markAsRead,

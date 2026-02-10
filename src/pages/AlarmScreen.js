@@ -61,10 +61,35 @@ const AlarmScreen = ({ navigation }) => {
         }
 
         // 페이지 이동
-        if (item.type === 'message' || (item.type === 'transaction' && item.title === '이용 완료 요청')) {
-            navigation.navigate('ChatRoom', { conversationId: item.link_id });
-        } else if (item.type === 'transaction' && item.title === '이용 완료 확정') {
-            navigation.navigate('Rating', { transactionId: item.link_id });
+        if (item.type === 'transaction' && (item.title === '이용 완료 요청' || item.title === '이용 완료 확정' || item.type === 'message')) {
+            // 메시지 알림은 이제 생성되지 않지만, 기존 데이터 호환을 위해 일단 유지하거나 수정 가능
+            if (item.title === '이용 완료 확정') {
+                navigation.navigate('Rating', { transactionId: item.link_id });
+            } else {
+                navigation.navigate('ChatRoom', { conversationId: item.link_id });
+            }
+        } else if (item.type === 'like') {
+            try {
+                const { data: post } = await supabase
+                    .from('posts')
+                    .select('category')
+                    .eq('id', item.link_id)
+                    .single();
+
+                if (post) {
+                    const screenMap = {
+                        'used': 'ProductDetail',
+                        'job': 'JobDetail',
+                        'tutoring': 'TutoringDetail',
+                        'meetup': 'MeetupDetail'
+                    };
+                    navigation.navigate(screenMap[post.category] || 'ProductDetail', { id: item.link_id });
+                } else {
+                    navigation.navigate('ProductDetail', { id: item.link_id });
+                }
+            } catch (err) {
+                navigation.navigate('ProductDetail', { id: item.link_id });
+            }
         }
     };
 
@@ -74,7 +99,9 @@ const AlarmScreen = ({ navigation }) => {
             onPress={() => handleNotificationClick(item)}
         >
             <View style={styles.iconContainer}>
-                <Text style={styles.iconText}>{item.type === 'message' ? '💬' : item.type === 'transaction' ? '🤝' : '🔔'}</Text>
+                <Text style={styles.iconText}>
+                    {item.type === 'like' ? '❤️' : (item.type === 'message' ? '💬' : '🔔')}
+                </Text>
             </View>
             <View style={styles.contentContainer}>
                 <Text style={styles.notificationTitle}>{item.title}</Text>
