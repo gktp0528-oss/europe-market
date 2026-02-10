@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { AppState } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
@@ -9,6 +9,7 @@ export const ChatUnreadProvider = ({ children }) => {
     const { user } = useAuth();
     const [unreadByConversation, setUnreadByConversation] = useState({});
     const [activeConversationId, setActiveConversationId] = useState(null);
+    const refreshTimerRef = useRef(null);
 
     const refreshUnreadCounts = useCallback(async () => {
         if (!user) return;
@@ -61,6 +62,16 @@ export const ChatUnreadProvider = ({ children }) => {
         }
     }, [refreshUnreadCounts, user]);
 
+    const scheduleRefresh = useCallback((delayMs = 250) => {
+        if (refreshTimerRef.current) {
+            clearTimeout(refreshTimerRef.current);
+        }
+        refreshTimerRef.current = setTimeout(() => {
+            refreshUnreadCounts();
+            refreshTimerRef.current = null;
+        }, delayMs);
+    }, [refreshUnreadCounts]);
+
     useEffect(() => {
         if (!user) return;
 
@@ -88,7 +99,8 @@ export const ChatUnreadProvider = ({ children }) => {
                     ...prev,
                     [newMsg.conversation_id]: (prev[newMsg.conversation_id] || 0) + 1
                 }));
-                refresh();
+                // 즉시 UI 반영 후 짧은 지연 동기화로 정확도 보정
+                scheduleRefresh(300);
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -96,8 +108,21 @@ export const ChatUnreadProvider = ({ children }) => {
                 table: 'messages'
             }, (payload) => {
                 const updatedMsg = payload.new;
-                if (updatedMsg.is_read) {
-                    refresh();
+                const oldMsg = payload.old;
+                if (updatedMsg.is_read && oldMsg?.is_read === false && updatedMsg.sender_id !== user.id) {
+                    setUnreadByConversation(prev => {
+                        const current = prev[updatedMsg.conversation_id] || 0;
+                        if (current <= 1) {
+                            const next = { ...prev };
+                            delete next[updatedMsg.conversation_id];
+                            return next;
+                        }
+                        return {
+                            ...prev,
+                            [updatedMsg.conversation_id]: current - 1,
+                        };
+                    });
+                    scheduleRefresh(300);
                 }
             })
             .on('postgres_changes', {
@@ -126,10 +151,14 @@ export const ChatUnreadProvider = ({ children }) => {
 
         return () => {
             clearInterval(intervalId);
+            if (refreshTimerRef.current) {
+                clearTimeout(refreshTimerRef.current);
+                refreshTimerRef.current = null;
+            }
             appStateSubscription.remove();
             supabase.removeChannel(channel);
         };
-    }, [user, activeConversationId, refreshUnreadCounts, markAsRead]);
+    }, [user, activeConversationId, refreshUnreadCounts, markAsRead, scheduleRefresh]);
 
     const visibleUnreadByConversation = useMemo(() => {
         return user ? unreadByConversation : {};

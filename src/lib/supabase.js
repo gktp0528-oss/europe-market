@@ -7,9 +7,20 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
+const getStorageKey = (url) => {
+    try {
+        const host = new URL(url).host || '';
+        const projectRef = host.split('.')[0] || 'default';
+        return `sb-${projectRef}-auth-token`;
+    } catch {
+        return 'sb-europe-market-auth-token';
+    }
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
         storage: AsyncStorage,
+        storageKey: getStorageKey(supabaseUrl),
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: false,

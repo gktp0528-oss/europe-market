@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft, Search, ChevronDown } from 'lucide-react-native';
+import { ArrowLeft, Search, ChevronDown, Bell } from 'lucide-react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useCountry, SUPPORTED_COUNTRIES } from '../contexts/CountryContext';
 import CountryModal from './CountryModal';
@@ -23,11 +25,45 @@ const SEARCH_CATEGORY_MAP = {
 const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs = false, activeCategory, onCategoryTabPress }) => {
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
-    const { selectedCountry } = useCountry();
-    const fallbackCountry = SUPPORTED_COUNTRIES.find((item) => item.code === selectedCountry?.code);
-    const countryName = (selectedCountry?.name || fallbackCountry?.name || '전체').trim() || '전체';
-    const countryCode = selectedCountry?.code || fallbackCountry?.code || 'ALL';
+    const { user } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
     const [showCountryModal, setShowCountryModal] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+
+        fetchUnreadCount();
+
+        const channel = supabase
+            .channel('header_notifications')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${user.id}`
+            }, () => {
+                fetchUnreadCount();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [user]);
+
+    const fetchUnreadCount = async () => {
+        try {
+            const { count, error } = await supabase
+                .from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .eq('is_read', false);
+
+            if (!error) setUnreadCount(count || 0);
+        } catch (err) {
+            console.error('Error fetching unread count:', err);
+        }
+    };
     const tabLayoutsRef = useRef({});
     const indicatorX = useRef(new Animated.Value(0)).current;
     const indicatorW = useRef(new Animated.Value(0)).current;
@@ -85,15 +121,24 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
                     </TouchableOpacity>
 
                     {showSearch && (
-                        <TouchableOpacity
-                            style={styles.searchBtn}
-                            onPress={() => navigation.navigate('Search', {
-                                category: SEARCH_CATEGORY_MAP[activeCategory] || 'all',
-                                country: countryCode,
-                            })}
-                        >
-                            <Search size={22} color="#2D3436" />
-                        </TouchableOpacity>
+                        <View style={styles.headerRightGroup}>
+                            <TouchableOpacity
+                                style={styles.iconBtn}
+                                onPress={() => navigation.navigate('Search', {
+                                    category: SEARCH_CATEGORY_MAP[activeCategory] || 'all',
+                                    country: countryCode,
+                                })}
+                            >
+                                <Search size={22} color="#2D3436" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.iconBtn}
+                                onPress={() => navigation.navigate('Alarm')}
+                            >
+                                <Bell size={22} color="#2D3436" />
+                                {unreadCount > 0 && <View style={styles.badge} />}
+                            </TouchableOpacity>
+                        </View>
                     )}
                 </View>
 
@@ -180,12 +225,21 @@ const Header = ({ title, showBack = false, showSearch = true, showCategoryTabs =
 
             <View style={styles.headerRight}>
                 {showSearch && (
-                    <TouchableOpacity
-                        style={styles.iconBtn}
-                        onPress={() => navigation.navigate('Search')}
-                    >
-                        <Search size={22} color="#2D3436" />
-                    </TouchableOpacity>
+                    <View style={styles.headerRightGroup}>
+                        <TouchableOpacity
+                            style={styles.iconBtn}
+                            onPress={() => navigation.navigate('Search')}
+                        >
+                            <Search size={22} color="#2D3436" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.iconBtn}
+                            onPress={() => navigation.navigate('Alarm')}
+                        >
+                            <Bell size={22} color="#2D3436" />
+                            {unreadCount > 0 && <View style={styles.badge} />}
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
 
@@ -245,6 +299,23 @@ const styles = StyleSheet.create({
     iconBtn: {
         padding: 8,
         borderRadius: 20,
+        position: 'relative',
+    },
+    headerRightGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    badge: {
+        position: 'absolute',
+        top: 6,
+        right: 6,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#FF6347',
+        borderWidth: 1.5,
+        borderColor: '#FFFFFF',
     },
 
     // Category Header
