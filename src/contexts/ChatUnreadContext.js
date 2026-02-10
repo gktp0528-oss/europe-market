@@ -14,6 +14,18 @@ export const ChatUnreadProvider = ({ children }) => {
     });
     const [activeConversationId, setActiveConversationId] = useState(null);
 
+    const shouldApplyAsLatest = useCallback((prev, incomingMsg) => {
+        const current = prev.latestMessageByConversation[incomingMsg.conversation_id];
+        if (!current) return true;
+
+        const nextAt = new Date(incomingMsg.created_at).getTime();
+        const currentAt = new Date(current.created_at).getTime();
+
+        if (nextAt > currentAt) return true;
+        if (nextAt < currentAt) return false;
+        return String(incomingMsg.id) > String(current.id);
+    }, []);
+
     const refreshUnreadCounts = useCallback(async () => {
         if (!user) return;
 
@@ -92,12 +104,15 @@ export const ChatUnreadProvider = ({ children }) => {
                 };
 
                 setRealtimeState((prev) => {
+                    const isLatest = shouldApplyAsLatest(prev, liveMessage);
                     const next = {
                         ...prev,
-                        latestMessageEvent: liveMessage,
+                        latestMessageEvent: isLatest ? liveMessage : prev.latestMessageEvent,
                         latestMessageByConversation: {
                             ...prev.latestMessageByConversation,
-                            [newMsg.conversation_id]: liveMessage,
+                            [newMsg.conversation_id]: isLatest
+                                ? liveMessage
+                                : prev.latestMessageByConversation[newMsg.conversation_id],
                         },
                     };
 
@@ -181,7 +196,7 @@ export const ChatUnreadProvider = ({ children }) => {
             appStateSubscription.remove();
             supabase.removeChannel(channel);
         };
-    }, [user, activeConversationId, refreshUnreadCounts, markAsRead]);
+    }, [user, activeConversationId, refreshUnreadCounts, markAsRead, shouldApplyAsLatest]);
 
     const visibleUnreadByConversation = useMemo(() => {
         return user ? realtimeState.unreadByConversation : {};

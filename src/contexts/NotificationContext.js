@@ -50,6 +50,17 @@ export const NotificationProvider = ({ children }) => {
         };
     }, [user, fetchUnreadCount]);
 
+    useEffect(() => {
+        if (!user) return;
+
+        // 10초마다 강제 동기화 (구독 누락 대비)
+        const interval = setInterval(() => {
+            fetchUnreadCount();
+        }, 10000);
+
+        return () => clearInterval(interval);
+    }, [user, fetchUnreadCount]);
+
     return (
         <NotificationContext.Provider value={{ unreadCount, refreshNotifications: fetchUnreadCount }}>
             {children}

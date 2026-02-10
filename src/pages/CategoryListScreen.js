@@ -163,7 +163,7 @@ const CategoryListScreen = ({ navigation, route }) => {
 
     if (loading && items.length === 0) {
         return (
-            <SafeAreaView style={styles.container} edges={['top']}>
+            <SafeAreaView style={styles.container} edges={['left', 'right']}>
                 <Header
                     showCategoryTabs
                     activeCategory={activeTab}
@@ -178,7 +178,7 @@ const CategoryListScreen = ({ navigation, route }) => {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
             <Header
                 showCategoryTabs
                 activeCategory={activeTab}

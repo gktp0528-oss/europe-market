@@ -37,13 +37,20 @@ const AlarmScreen = ({ navigation }) => {
     const handleNotificationClick = async (item) => {
         // 읽음 처리
         if (!item.is_read) {
-            await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('id', item.id);
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('id', item.id);
 
-            setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
-            refreshNotifications();
+                if (!error) {
+                    setNotifications(prev => prev.map(n => n.id === item.id ? { ...n, is_read: true } : n));
+                    // 뱃지 숫자 즉시 동기화
+                    await refreshNotifications();
+                }
+            } catch (err) {
+                console.error('Error marking as read:', err);
+            }
         }
 
         // 페이지 이동
@@ -76,6 +83,30 @@ const AlarmScreen = ({ navigation }) => {
             } catch (err) {
                 navigation.navigate('ProductDetail', { id: item.link_id });
             }
+        }
+    };
+
+    const markAllAsRead = async () => {
+        if (notifications.length === 0) return;
+
+        try {
+            const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
+            if (unreadIds.length === 0) return;
+
+            const { error } = await supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', user.id)
+                .eq('is_read', false);
+
+            if (error) throw error;
+
+            setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+            await refreshNotifications();
+            Alert.alert('알림', '모든 알림을 읽음 처리했어요! ✨');
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+            Alert.alert('오류', '전체 읽음 처리 중 문제가 발생했어요.');
         }
     };
 
@@ -126,6 +157,11 @@ const AlarmScreen = ({ navigation }) => {
         <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
                 <Text style={styles.title}>알림 🔔</Text>
+                {notifications.some(n => !n.is_read) && (
+                    <TouchableOpacity onPress={markAllAsRead} style={styles.readAllBtn}>
+                        <Text style={styles.readAllText}>전체 읽음</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             {loading ? (
@@ -157,11 +193,25 @@ const styles = StyleSheet.create({
         padding: 24,
         paddingBottom: 10,
         backgroundColor: '#FFFFFF',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     title: {
         fontSize: 24,
         fontWeight: '800',
         color: '#2D3436',
+    },
+    readAllBtn: {
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 12,
+        backgroundColor: '#F1F2F6',
+    },
+    readAllText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#636E72',
     },
     listContent: {
         padding: 16,
