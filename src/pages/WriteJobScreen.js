@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, View, Text, TextInput, TouchableOpacity,
     ScrollView, Alert, KeyboardAvoidingView, Platform, ActivityIndicator
@@ -16,7 +16,9 @@ import { uploadImages } from '../utils/imageUpload';
 const PAY_TYPES = ['시급', '일급', '월급', '협의'];
 const WORK_DAYS = ['월', '화', '수', '목', '금', '토', '일', '무관'];
 
-const WriteJobScreen = ({ navigation }) => {
+const WriteJobScreen = ({ navigation, route }) => {
+    const editPost = route.params?.editPost;
+    const isEditMode = !!editPost;
     const { user } = useAuth();
     const { selectedCountry } = useCountry();
     const countryCode = selectedCountry?.code || 'FR';
@@ -27,17 +29,23 @@ const WriteJobScreen = ({ navigation }) => {
     const [showSuccess, setShowSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
-        title: '',
-        payType: '시급',
-        payAmount: '',
-        workDays: [],
-        workTimeStart: '',
-        workTimeEnd: '',
-        location: '',
-        locationData: null,
-        description: '',
-        requirements: '',
+        title: editPost?.title || '',
+        payType: editPost?.metadata?.pay_type || '시급',
+        payAmount: editPost?.price ? editPost.price.replace(/[^0-9]/g, '') : '',
+        workDays: editPost?.trade_time ? (editPost.trade_time.includes('요일/시간 협의') ? ['무관'] : editPost.trade_time.split(' ')[0].split(',')) : [],
+        workTimeStart: (editPost?.trade_time && !editPost.trade_time.includes('요일/시간 협의')) ? editPost.trade_time.split(' ')[1].split('~')[0] : '',
+        workTimeEnd: (editPost?.trade_time && !editPost.trade_time.includes('요일/시간 협의')) ? editPost.trade_time.split(' ')[1].split('~')[1] : '',
+        location: editPost?.location || '',
+        locationData: editPost?.latitude ? { address: editPost.location, lat: editPost.latitude, lng: editPost.longitude } : null,
+        description: editPost?.description?.includes('[상세내용]') ? editPost.description.split('[상세내용]\n')[1] : (editPost?.description || ''),
+        requirements: editPost?.description?.includes('[자격요건]') ? editPost.description.split('[자격요건]\n')[1].split('\n\n[상세내용]')[0] : '',
     });
+
+    useEffect(() => {
+        if (isEditMode && editPost.image_urls) {
+            setImages(editPost.image_urls);
+        }
+    }, [isEditMode, editPost]);
 
     const updateField = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -69,7 +77,15 @@ const WriteJobScreen = ({ navigation }) => {
 
         setIsSubmitting(true);
         try {
-            const uploadedUrls = images.length > 0 ? await uploadImages(images, 'jobs') : [];
+            const newImages = images.filter(img => !img.startsWith('http'));
+            const existingImages = images.filter(img => img.startsWith('http'));
+
+            let uploadedUrls = [];
+            if (newImages.length > 0) {
+                uploadedUrls = await uploadImages(newImages, 'jobs');
+            }
+
+            const finalImageUrls = [...existingImages, ...uploadedUrls];
 
             const formattedPay = formData.payAmount
                 ? `${formData.payType} ${formData.payAmount}€`
@@ -83,7 +99,7 @@ const WriteJobScreen = ({ navigation }) => {
                 ? `[자격요건]\n${formData.requirements}\n\n[상세내용]\n${formData.description}`
                 : formData.description;
 
-            const { error } = await supabase.from('posts').insert({
+            const postData = {
                 category: 'job',
                 title: formData.title,
                 price: formattedPay,
@@ -93,21 +109,31 @@ const WriteJobScreen = ({ navigation }) => {
                 description: fullDescription,
                 trade_time: formattedTime,
                 country_code: countryCode,
-                image_urls: uploadedUrls,
-                views: 0, likes: 0,
-                color: '#FFF9C4',
+                image_urls: finalImageUrls,
                 user_id: user.id,
                 metadata: {
                     pay_type: formData.payType,
                     work_time: formattedTime,
                 },
-            });
+            };
 
-            if (error) throw error;
+            if (isEditMode) {
+                const { error } = await supabase.from('posts').update(postData).eq('id', editPost.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('posts').insert({
+                    ...postData,
+                    views: 0,
+                    likes: 0,
+                    color: '#FFF9C4',
+                });
+                if (error) throw error;
+            }
+
             setShowSuccess(true);
         } catch (error) {
             console.error('Submit error:', error);
-            Alert.alert('오류', '등록 중 오류가 발생했습니다.');
+            Alert.alert('오류', '처리 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
@@ -119,7 +145,7 @@ const WriteJobScreen = ({ navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
                     <ArrowLeft size={24} color="#4A4A4A" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>알바/구인 글쓰기</Text>
+                <Text style={styles.headerTitle}>{isEditMode ? '알바 공고 수정하기' : '알바/구인 글쓰기'}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -253,7 +279,7 @@ const WriteJobScreen = ({ navigation }) => {
                     {isSubmitting ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.submitBtnText}>구인 공고 올리기</Text>
+                        <Text style={styles.submitBtnText}>{isEditMode ? '수정 완료' : '구인 공고 올리기'}</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -268,8 +294,8 @@ const WriteJobScreen = ({ navigation }) => {
             <SuccessModal
                 visible={showSuccess}
                 onClose={() => { setShowSuccess(false); navigation.goBack(); }}
-                title="등록 완료!"
-                message={`구인 공고가\n성공적으로 등록되었습니다!`}
+                title={isEditMode ? "수정 완료!" : "등록 완료!"}
+                message={isEditMode ? `구인 공고가\n성공적으로 수정되었습니다!` : `구인 공고가\n성공적으로 등록되었습니다!`}
                 Icon={Briefcase}
                 buttonText="목록으로 이동"
             />
@@ -316,7 +342,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8F8F8', borderWidth: 1, borderColor: '#E0E0E0',
     },
     dayChipActive: { backgroundColor: '#FFB7B2', borderColor: '#FFB7B2' },
-    dayChipText: { fontSize: 13, color: '#9B9B9B', fontWeight: '600' },
     dayChipTextActive: { color: '#fff' },
     timeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     timeBox: {
@@ -335,6 +360,7 @@ const styles = StyleSheet.create({
     },
     submitBtnDisabled: { opacity: 0.5 },
     submitBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+    headerActions: { flexDirection: 'row', gap: 10 },
 });
 
 export default WriteJobScreen;

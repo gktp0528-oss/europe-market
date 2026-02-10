@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, View, Text, TextInput, TouchableOpacity,
     ScrollView, Alert, KeyboardAvoidingView, Platform, ActivityIndicator
@@ -15,7 +15,9 @@ import { uploadImages } from '../utils/imageUpload';
 
 const TRADE_TIMES = ['오전', '오후', '저녁', '주말', '무관'];
 
-const WriteUsedScreen = ({ navigation }) => {
+const WriteUsedScreen = ({ navigation, route }) => {
+    const editPost = route.params?.editPost;
+    const isEditMode = !!editPost;
     const { user } = useAuth();
     const { selectedCountry } = useCountry();
     const countryCode = selectedCountry?.code || 'FR';
@@ -28,13 +30,19 @@ const WriteUsedScreen = ({ navigation }) => {
     const [showSuccess, setShowSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
-        title: '',
-        price: '',
-        location: '',
-        locationData: null,
-        tradeTime: '',
-        description: '',
+        title: editPost?.title || '',
+        price: editPost?.price ? editPost.price.replace(/[^0-9]/g, '') : '',
+        location: editPost?.location || '',
+        locationData: editPost?.latitude ? { address: editPost.location, lat: editPost.latitude, lng: editPost.longitude } : null,
+        tradeTime: editPost?.trade_time || '',
+        description: editPost?.description || '',
     });
+
+    useEffect(() => {
+        if (isEditMode && editPost.image_urls) {
+            setImages(editPost.image_urls);
+        }
+    }, [isEditMode, editPost]);
 
     const updateField = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -56,10 +64,19 @@ const WriteUsedScreen = ({ navigation }) => {
 
         setIsSubmitting(true);
         try {
-            const uploadedUrls = images.length > 0 ? await uploadImages(images, 'used') : [];
+            // 새로 추가된 사진만 업로드 (기존 http URL이 아닌 파일 경로만)
+            const newImages = images.filter(img => !img.startsWith('http'));
+            const existingImages = images.filter(img => img.startsWith('http'));
 
+            let uploadedUrls = [];
+            if (newImages.length > 0) {
+                uploadedUrls = await uploadImages(newImages, 'used');
+            }
+
+            const finalImageUrls = [...existingImages, ...uploadedUrls];
             const displayPrice = Number(formData.price).toLocaleString();
-            const { error } = await supabase.from('posts').insert({
+
+            const postData = {
                 category: 'used',
                 title: formData.title,
                 price: `${displayPrice}${currency}`,
@@ -69,17 +86,30 @@ const WriteUsedScreen = ({ navigation }) => {
                 description: formData.description,
                 trade_time: formData.tradeTime,
                 country_code: countryCode,
-                image_urls: uploadedUrls,
-                views: 0, likes: 0,
-                color: '#F5F5F5',
+                image_urls: finalImageUrls,
                 user_id: user.id,
-            });
+            };
 
-            if (error) throw error;
+            if (isEditMode) {
+                const { error } = await supabase
+                    .from('posts')
+                    .update(postData)
+                    .eq('id', editPost.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('posts').insert({
+                    ...postData,
+                    views: 0,
+                    likes: 0,
+                    color: '#F5F5F5',
+                });
+                if (error) throw error;
+            }
+
             setShowSuccess(true);
         } catch (error) {
             console.error('Submit error:', error);
-            Alert.alert('오류', '등록 중 오류가 발생했습니다. 다시 시도해 주세요.');
+            Alert.alert('오류', '처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
         } finally {
             setIsSubmitting(false);
         }
@@ -91,7 +121,7 @@ const WriteUsedScreen = ({ navigation }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
                     <ArrowLeft size={24} color="#4A4A4A" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>중고거래 글쓰기</Text>
+                <Text style={styles.headerTitle}>{isEditMode ? '중고거래 수정하기' : '중고거래 글쓰기'}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -185,7 +215,7 @@ const WriteUsedScreen = ({ navigation }) => {
                     {isSubmitting ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.submitBtnText}>작성 완료</Text>
+                        <Text style={styles.submitBtnText}>{isEditMode ? '수정 완료' : '작성 완료'}</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -200,8 +230,8 @@ const WriteUsedScreen = ({ navigation }) => {
             <SuccessModal
                 visible={showSuccess}
                 onClose={() => { setShowSuccess(false); navigation.goBack(); }}
-                title="등록 완료!"
-                message={`소중한 물건이\n성공적으로 등록되었습니다!`}
+                title={isEditMode ? "수정 완료!" : "등록 완료!"}
+                message={isEditMode ? `게시글 내용이\n성공적으로 수정되었습니다!` : `소중한 물건이\n성공적으로 등록되었습니다!`}
                 Icon={ShoppingBag}
                 buttonText="목록으로 이동"
             />

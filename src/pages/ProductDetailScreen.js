@@ -11,7 +11,7 @@ import {
     Linking,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Heart, Share2, MessageCircle, MapPin, Clock, Eye, User, Star } from 'lucide-react-native';
+import { ArrowLeft, Heart, Share2, MessageCircle, MapPin, Clock, Eye, User, Star, MoreVertical } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { getPostTimeLabel } from '../utils/dateUtils';
@@ -141,6 +141,52 @@ const ProductDetailScreen = ({ navigation, route }) => {
         }
     };
 
+    const handleDelete = async () => {
+        Alert.alert(
+            '게시물 삭제',
+            '정말 이 게시물을 삭제하시겠어요? 삭제하면 되돌릴 수 없어요! 🗑️',
+            [
+                { text: '취소', style: 'cancel' },
+                {
+                    text: '삭제',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const { error } = await supabase
+                                .from('posts')
+                                .delete()
+                                .eq('id', normalizedPostId);
+
+                            if (error) throw error;
+
+                            Alert.alert('성공', '게시물이 삭제되었습니다! ✨');
+                            navigation.goBack();
+                        } catch (err) {
+                            console.error('Delete error:', err);
+                            Alert.alert('오류', '삭제 중 문제가 발생했습니다.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleEdit = () => {
+        navigation.navigate('WriteUsed', { editPost: post });
+    };
+
+    const showMenu = () => {
+        Alert.alert(
+            '게시물 관리',
+            '실행할 작업을 선택해주세요! ✨',
+            [
+                { text: '게시물 수정', onPress: handleEdit },
+                { text: '게시물 삭제', onPress: handleDelete, style: 'destructive' },
+                { text: '취소', style: 'cancel' }
+            ]
+        );
+    };
+
     const openUserProfile = () => {
         if (!post?.user_id) {
             Alert.alert('알림', '작성자 정보를 찾을 수 없습니다.');
@@ -206,9 +252,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
                             <ArrowLeft size={24} color="#333" />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={styles.headerBtn}>
-                            <Share2 size={20} color="#333" />
-                        </TouchableOpacity>
+                        <View style={styles.headerActions}>
+                            <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={styles.headerBtn}>
+                                <Share2 size={20} color="#333" />
+                            </TouchableOpacity>
+
+                            {user?.id === post?.user_id && (
+                                <TouchableOpacity onPress={showMenu} style={styles.headerBtn}>
+                                    <MoreVertical size={20} color="#333" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
 
                     <ImageCarousel images={post.image_urls} height={380} />

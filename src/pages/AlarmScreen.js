@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { X } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,10 +9,33 @@ import { useNotification } from '../contexts/NotificationContext';
 
 const AlarmScreen = ({ navigation }) => {
     const { user } = useAuth();
-    const { refreshNotifications } = useNotification();
+    const { refreshNotifications, setIsAlarmActive, markAllAsRead } = useNotification();
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [approvingRequestId, setApprovingRequestId] = useState(null);
+
+    const fetchNotifications = useCallback(async () => {
+        if (!user) {
+            setNotifications([]);
+            setLoading(false);
+            return;
+        }
+        try {
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setNotifications(data || []);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [user]);
 
     useEffect(() => {
         if (!user) return;
@@ -35,29 +59,31 @@ const AlarmScreen = ({ navigation }) => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [user]);
+    }, [user, fetchNotifications]);
+
+    useFocusEffect(
+        useCallback(() => {
+            if (!user) return undefined;
+
+            setIsAlarmActive(true);
+
+            const syncOnFocus = async () => {
+                await markAllAsRead();
+                await fetchNotifications();
+                await refreshNotifications();
+            };
+            syncOnFocus();
+
+            return () => {
+                setIsAlarmActive(false);
+            };
+        }, [user, setIsAlarmActive, markAllAsRead, fetchNotifications, refreshNotifications])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
         await fetchNotifications();
         setRefreshing(false);
-    };
-
-    const fetchNotifications = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setNotifications(data || []);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-        } finally {
-            setLoading(false);
-        }
     };
 
     const handleNotificationClick = async (item) => {
@@ -80,53 +106,112 @@ const AlarmScreen = ({ navigation }) => {
         }
 
         // 페이지 이동
-        if (item.type === 'transaction' && (item.title === '이용 완료 요청' || item.title === '이용 완료 확정' || item.type === 'message')) {
-            // 메시지 알림은 이제 생성되지 않지만, 기존 데이터 호환을 위해 일단 유지하거나 수정 가능
+        if (item.type === 'transaction') {
             if (item.title === '이용 완료 확정') {
                 navigation.navigate('Rating', { transactionId: item.link_id });
-            } else {
-                navigation.navigate('ChatRoom', { conversationId: item.link_id });
+                return;
             }
-        } else if (item.type === 'like') {
+            if (item.title === '이용 완료 요청') {
+                navigation.navigate('ChatRoom', { conversationId: item.link_id });
+                return;
+            }
+            if (item.title === '모임 승인 완료') {
+                navigation.navigate('Home', {
+                    screen: 'MeetupDetail',
+                    params: { postId: Number(item.link_id) },
+                });
+                return;
+            }
+            if (item.title === '모임 승인 요청') {
+                try {
+                    const { data } = await supabase
+                        .from('meetup_join_requests')
+                        .select('post_id')
+                        .eq('id', item.link_id)
+                        .single();
+                    if (data?.post_id) {
+                        navigation.navigate('Home', {
+                            screen: 'MeetupDetail',
+                            params: { postId: Number(data.post_id) },
+                        });
+                    }
+                } catch (err) {
+                    console.error('Fetch meetup request detail error:', err);
+                }
+                return;
+            }
+        }
+
+        if (item.type === 'message') {
+            navigation.navigate('ChatRoom', { conversationId: item.link_id });
+            return;
+        }
+
+        if (item.type === 'like') {
             try {
+                const postId = Number(item.link_id);
                 const { data: post } = await supabase
                     .from('posts')
                     .select('category')
-                    .eq('id', item.link_id)
+                    .eq('id', postId)
                     .single();
 
-                if (post) {
-                    const screenMap = {
-                        'used': 'ProductDetail',
-                        'job': 'JobDetail',
-                        'tutoring': 'TutoringDetail',
-                        'meetup': 'MeetupDetail'
-                    };
-                    navigation.navigate(screenMap[post.category] || 'ProductDetail', { id: item.link_id });
-                } else {
-                    navigation.navigate('ProductDetail', { id: item.link_id });
-                }
+                const screenMap = {
+                    'used': 'ProductDetail',
+                    'job': 'JobDetail',
+                    'tutoring': 'TutoringDetail',
+                    'meetup': 'MeetupDetail'
+                };
+
+                // [희은] Home 탭 스택 안의 화면으로 안전하게 navigate! 🏠✨
+                navigation.navigate('Home', {
+                    screen: screenMap[post?.category] || 'ProductDetail',
+                    params: { postId }
+                });
             } catch (err) {
-                navigation.navigate('ProductDetail', { id: item.link_id });
+                console.error('Navigation error:', err);
+                navigation.navigate('Home', { screen: 'ProductDetail', params: { postId: Number(item.link_id) } });
             }
         }
     };
 
-    const markAllAsRead = async () => {
+    const handleApproveMeetupRequest = async (item) => {
+        if (!item?.link_id) return;
+        setApprovingRequestId(item.id);
+        try {
+            const { error } = await supabase.rpc('approve_meetup_approval', {
+                p_request_id: item.link_id,
+            });
+            if (error) throw error;
+
+            await supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('id', item.id);
+
+            setNotifications((prev) => prev.map((n) => (
+                n.id === item.id
+                    ? { ...n, is_read: true, title: '모임 승인 처리 완료' }
+                    : n
+            )));
+            await refreshNotifications();
+            Alert.alert('완료', '모임 참가 요청을 승인했습니다.');
+        } catch (error) {
+            console.error('Approve meetup request error:', error);
+            Alert.alert('오류', error?.message || '승인 처리 중 문제가 발생했습니다.');
+        } finally {
+            setApprovingRequestId(null);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
         if (notifications.length === 0) return;
 
         try {
             const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
             if (unreadIds.length === 0) return;
 
-            const { error } = await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('user_id', user.id)
-                .eq('is_read', false);
-
-            if (error) throw error;
-
+            await markAllAsRead();
             setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
             await refreshNotifications();
             Alert.alert('알림', '모든 알림을 읽음 처리했어요! ✨');
@@ -167,6 +252,19 @@ const AlarmScreen = ({ navigation }) => {
                     <Text style={styles.notificationTitle}>{item.title}</Text>
                     <Text style={styles.notificationContent} numberOfLines={2}>{item.content}</Text>
                     <Text style={styles.timeText}>{new Date(item.created_at).toLocaleString()}</Text>
+                    {item.type === 'transaction' && item.title === '모임 승인 요청' && !item.is_read ? (
+                        <View style={styles.actionRow}>
+                            <TouchableOpacity
+                                style={styles.approveBtn}
+                                onPress={() => handleApproveMeetupRequest(item)}
+                                disabled={approvingRequestId === item.id}
+                            >
+                                <Text style={styles.approveBtnText}>
+                                    {approvingRequestId === item.id ? '처리 중...' : '승인'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
                 </View>
                 {!item.is_read && <View style={styles.unreadDot} />}
             </TouchableOpacity>
@@ -184,7 +282,7 @@ const AlarmScreen = ({ navigation }) => {
             <View style={styles.header}>
                 <Text style={styles.title}>알림 🔔</Text>
                 {notifications.some(n => !n.is_read) && (
-                    <TouchableOpacity onPress={markAllAsRead} style={styles.readAllBtn}>
+                    <TouchableOpacity onPress={handleMarkAllAsRead} style={styles.readAllBtn}>
                         <Text style={styles.readAllText}>전체 읽음</Text>
                     </TouchableOpacity>
                 )}
@@ -304,6 +402,21 @@ const styles = StyleSheet.create({
     timeText: {
         fontSize: 11,
         color: '#B2BEC3',
+    },
+    actionRow: {
+        marginTop: 8,
+    },
+    approveBtn: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#EAF8F2',
+        borderRadius: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    approveBtnText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#2F9D6A',
     },
     unreadDot: {
         width: 8,

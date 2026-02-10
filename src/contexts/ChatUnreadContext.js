@@ -13,6 +13,7 @@ export const ChatUnreadProvider = ({ children }) => {
         latestMessageByConversation: {},
     });
     const [activeConversationId, setActiveConversationId] = useState(null);
+    const [isChatListActive, setIsChatListActive] = useState(false);
 
     const shouldApplyAsLatest = useCallback((prev, incomingMsg) => {
         const current = prev.latestMessageByConversation[incomingMsg.conversation_id];
@@ -203,8 +204,9 @@ export const ChatUnreadProvider = ({ children }) => {
     }, [user, realtimeState.unreadByConversation]);
 
     const totalUnread = useMemo(() => {
+        if (isChatListActive) return 0;
         return Object.values(visibleUnreadByConversation).reduce((sum, count) => sum + count, 0);
-    }, [visibleUnreadByConversation]);
+    }, [isChatListActive, visibleUnreadByConversation]);
 
     const value = {
         unreadByConversation: visibleUnreadByConversation,
@@ -213,6 +215,8 @@ export const ChatUnreadProvider = ({ children }) => {
         latestMessageByConversation: realtimeState.latestMessageByConversation,
         activeConversationId,
         setActiveConversationId,
+        isChatListActive,
+        setIsChatListActive,
         markAsRead,
         refreshUnreadCounts,
     };

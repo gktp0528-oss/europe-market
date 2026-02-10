@@ -1,146 +1,22 @@
-# 프로필 별점 기능 구현 계획 (중고/알바/과외·레슨/모임 공통)
+## 수동 작업 체크리스트
 
-## 1. 목표
-- 프로필 별점을 하드코딩(`5.0`)이 아닌 실데이터로 운영한다.
-- 중고뿐 아니라 알바/과외·레슨/모임에도 동일한 평가 체계를 적용한다.
-- 별점은 `완료된 이용 건`에 대해서만 작성 가능하게 만든다.
-- 리뷰 코멘트는 최대 `100자`로 제한한다.
+### 1) Supabase DB 반영
+- `migrations/006_notifications_workflow.sql` 적용
+- `migrations/007_meetup_join_requests.sql` 적용
+- SQL 적용 후 RPC 생성 여부 확인
+  - `toggle_like`
+  - `request_meetup_approval`
+  - `approve_meetup_approval`
 
-## 2. 핵심 정책
-- 용어: `거래 완료` -> `이용 완료`(카테고리 공통)
-- 작성 조건: 완료 확정된 건에서만 상대에게 1회 평가 가능
-- 자기평가 금지
-- 점수 범위: 1~5
-- 코멘트: 선택 입력, 최대 100자
-- 완료 상태가 분쟁(`disputed`)이면 별점 잠금
+### 2) 실기기 E2E 검증 (A/B 계정)
+- 채팅 수신 시 하단 채팅 배지 숫자와 채팅 목록 unread/프리뷰가 동시에 갱신되는지 확인
+- 채팅 목록 화면에 들어가 있는 동안 하단 채팅 배지가 0으로 유지되는지 확인
+- 좋아요 발생 시 상대방 하단 알림 배지와 알림 리스트가 동시에 갱신되는지 확인
+- 알림 탭 진입 시 하단 알림 배지 숫자가 즉시 사라지는지 확인
 
-## 3. 완료 처리 방식 (카테고리별 공통)
-- 상태 머신:
-  - `open` -> `completion_requested` -> `completed`
-  - `completion_requested` -> `disputed`
-- 동작:
-  - A가 완료 요청
-  - B가 확정하면 `completed`
-  - B가 거절하면 `disputed`
-- 카테고리 해석:
-  - 중고: 인도/수령 완료
-  - 알바: 근무 종료
-  - 과외·레슨: 수업 종료
-  - 모임: 모임 종료
-
-## 4. DB 설계
-### 4.1 신규 테이블: `transactions`
-- 목적: 별점 기준이 되는 `완료된 1:1 이용 건` 저장
-- 주요 컬럼:
-  - `id` (pk)
-  - `post_id` (fk posts.id)
-  - `category` (used/job/tutoring/meetup)
-  - `owner_id` (게시글 작성자)
-  - `participant_id` (상대 사용자)
-  - `conversation_id` (fk conversations.id, nullable)
-  - `status` (open/completion_requested/completed/disputed/canceled)
-  - `completion_requested_by`
-  - `completed_at`
-  - `created_at`, `updated_at`
-
-### 4.2 신규 테이블: `profile_ratings`
-- 목적: 완료건별 평가 저장
-- 주요 컬럼:
-  - `id` (pk)
-  - `transaction_id` (fk transactions.id)
-  - `rater_id`
-  - `ratee_id`
-  - `score` (1~5 check)
-  - `comment` (varchar(100))
-  - `created_at`, `updated_at`
-- 제약:
-  - `unique(transaction_id, rater_id)`
-  - `rater_id <> ratee_id`
-
-### 4.3 profiles 집계 컬럼
-- `rating_avg numeric(3,2) default 0`
-- `rating_count integer default 0`
-- `rating_sum integer default 0`
-- 트리거로 `profile_ratings` insert/update/delete 시 자동 갱신
-
-## 5. RLS / 보안 규칙
-- `transactions`:
-  - select: owner/participant만
-  - update: 참여자만 가능, 상태 전이 규칙 함수로 검증
-- `profile_ratings`:
-  - insert: 완료된 transaction 참여자만
-  - update: 작성자 본인만 (정책상 허용 여부 결정, MVP는 비허용 권장)
-  - select: 공개
-
-## 6. RPC/함수 설계
-- `request_transaction_completion(p_transaction_id)`
-- `confirm_transaction_completion(p_transaction_id)`
-- `reject_transaction_completion(p_transaction_id, p_reason)`
-- `submit_profile_rating(p_transaction_id, p_ratee_id, p_score, p_comment)`
-- `get_profile_rating_summary(p_user_id)`
-- `get_profile_reviews(p_user_id, p_limit, p_offset)`
-
-## 7. 프론트엔드 구현 계획
-### 7.1 채팅방 (`src/pages/ChatRoomScreen.js`)
-- 완료 요청/확정/거절 UI 추가
-- 완료 확정 후 `평가하기` 진입 버튼 표시
-
-### 7.2 별점 작성 모달/화면
-- 별점(1~5) + 코멘트 입력
-- 코멘트 글자수 카운터(0/100)
-- 100자 초과 입력 차단
-
-### 7.3 프로필 화면 (`src/pages/UserProfileScreen.js`, `src/pages/ProfileScreen.js`)
-- 평균 평점/평가 수 실데이터 바인딩
-- 최근 후기 목록 표시
-
-### 7.4 상세 화면들
-- 파일:
-  - `src/pages/ProductDetailScreen.js`
-  - `src/pages/JobDetailScreen.js`
-  - `src/pages/TutoringDetailScreen.js`
-  - `src/pages/MeetupDetailScreen.js`
-- 현재 하드코딩 `5.0` 제거 후 프로필 집계 값 연결
-
-## 8. 구현 순서 (실행 단계)
-1. 마이그레이션 작성: `transactions`, `profile_ratings`, profiles 집계 컬럼, 인덱스, RLS
-2. RPC/트리거 작성 및 테스트 SQL 준비
-3. 채팅방 완료 플로우 UI + 상태 연결
-4. 별점 작성 UI + 100자 제한 적용
-5. 프로필/상세 화면 실데이터 반영
-6. QA: 상태 전이, 중복 평가 차단, 권한 우회 차단, 집계 정확도 검증
-
-## 9. QA 체크리스트
-- 완료 전에는 평가 버튼이 노출되지 않는가
-- 완료 후 상대에게만 평가 가능한가
-- 동일 transaction에서 중복 평가가 차단되는가
-- 코멘트 100자 제한이 DB/클라이언트 모두에서 동작하는가
-- 프로필 평균/개수가 실시간 또는 재조회 시 정확한가
-
-## 10. 보완 필요 사항 (현 구현 점검 결과)
-### 10.1 보안/권한 (최우선)
-- `submit_profile_rating`에서 `completed` 여부만 보지 말고, `auth.uid()`가 해당 transaction의 `owner_id` 또는 `participant_id`인지 검증 필요
-- `p_ratee_id`가 상대 참여자인지 검증 필요 (임의 사용자 평가 방지)
-- `transactions` RLS에 `insert/update` 정책 또는 전용 RPC 추가 필요 (클라이언트 직접 insert 시 RLS 충돌 방지)
-
-### 10.2 상태 전이 완성도
-- 계획서에 정의한 `reject_transaction_completion` RPC 구현 필요
-- `completion_requested -> disputed` 전이를 실제로 처리하고, disputed 상태에서는 평가 불가를 DB/클라이언트 모두에서 보장 필요
-- 완료 요청자 본인은 확정할 수 없다는 규칙 유지 + 거절 권한도 반대 참여자에게만 부여 필요
-
-### 10.3 데이터 무결성
-- transaction 중복 생성 방지 제약 필요
-  - 예: `conversation_id` unique (nullable 처리 전략 포함) 또는 `(post_id, owner_id, participant_id)` 조합 유니크 정책
-- `submit_profile_rating`에서 transaction-category/post-owner-participant 관계 일관성 체크 필요
-- 트리거/정책/인덱스 생성 시 `if not exists` 또는 `drop ... if exists` 패턴으로 재실행 안정성 확보 필요
-
-### 10.4 UI/UX 보완
-- 이미 평가한 transaction에서는 `별점 남기기` 버튼 숨김 또는 `평가 완료` 상태로 전환
-- 완료 요청 수신자에게 `확정` + `거절` 버튼 동시 제공
-- 상태별 문구를 `거래` 대신 `이용`으로 통일 (중고/알바/과외·레슨/모임 공통)
-
-### 10.5 테스트 보완
-- 권한 우회 테스트: 비참여자가 RPC 호출 시 실패하는지 확인
-- 상태 전이 테스트: `open -> completion_requested -> completed/disputed`만 허용되는지 확인
-- 중복 평가 테스트: 동일 `(transaction_id, rater_id)` 재평가 차단 확인
-- 집계 정확도 테스트: insert/update/delete 시 `rating_sum/count/avg` 정합성 검증
+### 3) 모임 승인 플로우 검증
+- 신청자 계정: 모임 채팅방 상단 `승인 요청하기` 버튼 노출/동작 확인
+- 호스트 계정: 알림 페이지에 `모임 승인 요청` 항목 생성 확인
+- 호스트 계정: 알림의 `승인` 버튼 클릭 시 처리 완료되는지 확인
+- 신청자 계정: `모임 승인 완료` 알림 수신 확인
+- 모임 상세 페이지: 신청 인원 카드/인원수/진행바가 승인 결과로 즉시 반영되는지 확인

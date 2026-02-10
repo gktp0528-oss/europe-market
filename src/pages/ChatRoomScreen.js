@@ -36,6 +36,9 @@ const ChatRoomScreen = ({ navigation, route }) => {
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [hasRated, setHasRated] = useState(false);
+    const [meetupRequestId, setMeetupRequestId] = useState(null);
+    const [meetupRequestStatus, setMeetupRequestStatus] = useState(null);
+    const [meetupRequestLoading, setMeetupRequestLoading] = useState(false);
     const flatListRef = useRef(null);
 
     const reconcileMessages = useCallback((prev, fetched) => {
@@ -208,6 +211,87 @@ const ChatRoomScreen = ({ navigation, route }) => {
         };
         checkRated();
     }, [transaction?.id, transaction?.status, user]);
+
+    const isMeetupChat = post?.category === 'meetup';
+    const isHost = Boolean(post?.user_id && user?.id && post.user_id === user.id);
+    const isRequester = Boolean(isMeetupChat && !isHost);
+
+    useEffect(() => {
+        if (isMeetupChat) return;
+        setMeetupRequestId(null);
+        setMeetupRequestStatus(null);
+    }, [isMeetupChat]);
+
+    useEffect(() => {
+        if (!isMeetupChat || !user || !post?.id) return;
+
+        const targetRequesterId = isHost ? otherUser?.id : user.id;
+        if (!targetRequesterId) return;
+
+        const fetchMeetupRequest = async () => {
+            const { data, error } = await supabase
+                .from('meetup_join_requests')
+                .select('id, status')
+                .eq('post_id', post.id)
+                .eq('requester_id', targetRequesterId)
+                .maybeSingle();
+
+            if (error) {
+                console.error('Fetch meetup request error:', error);
+                return;
+            }
+
+            setMeetupRequestId(data?.id || null);
+            setMeetupRequestStatus(data?.status || null);
+        };
+
+        fetchMeetupRequest();
+        const channel = supabase
+            .channel(`meetup-req:${post.id}:${targetRequesterId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'meetup_join_requests',
+                filter: `post_id=eq.${post.id}`,
+            }, (payload) => {
+                const row = payload.new || payload.old;
+                if (!row || row.requester_id !== targetRequesterId) return;
+
+                setMeetupRequestId(row.id || null);
+                setMeetupRequestStatus(row.status || null);
+            })
+            .subscribe();
+
+        return () => supabase.removeChannel(channel);
+    }, [isMeetupChat, isHost, otherUser?.id, post?.id, user]);
+
+    const handleRequestMeetupApproval = async () => {
+        if (!post?.id || !isRequester) return;
+        setMeetupRequestLoading(true);
+        try {
+            const { data, error } = await supabase.rpc('request_meetup_approval', {
+                p_post_id: Number(post.id),
+                p_conversation_id: conversationId || null,
+            });
+            if (error) throw error;
+
+            setMeetupRequestId(data || meetupRequestId);
+            setMeetupRequestStatus('pending');
+        } catch (err) {
+            console.error('Request meetup approval error:', err);
+        } finally {
+            setMeetupRequestLoading(false);
+        }
+    };
+
+    const moveToAlarmTab = () => {
+        const parent = navigation.getParent?.();
+        if (parent?.navigate) {
+            parent.navigate('Alarm');
+            return;
+        }
+        navigation.navigate('Alarm');
+    };
 
     const handleRequestCompletion = async () => {
         if (!transaction) return;
@@ -443,6 +527,40 @@ const ChatRoomScreen = ({ navigation, route }) => {
                 </View>
             )}
 
+            {isMeetupChat && (
+                <View style={styles.meetupApprovalBanner}>
+                    {isRequester && meetupRequestStatus !== 'approved' && meetupRequestStatus !== 'pending' ? (
+                        <>
+                            <Text style={styles.meetupApprovalText}>이 모임은 승인제입니다. 참여 승인을 요청하세요.</Text>
+                            <TouchableOpacity
+                                style={styles.meetupApprovalBtn}
+                                onPress={handleRequestMeetupApproval}
+                                disabled={meetupRequestLoading}
+                            >
+                                <Text style={styles.meetupApprovalBtnText}>승인 요청하기</Text>
+                            </TouchableOpacity>
+                        </>
+                    ) : null}
+
+                    {isRequester && meetupRequestStatus === 'pending' ? (
+                        <Text style={styles.meetupApprovalPending}>호스트 승인 대기 중입니다.</Text>
+                    ) : null}
+
+                    {isRequester && meetupRequestStatus === 'approved' ? (
+                        <Text style={styles.meetupApprovalApproved}>승인 완료: 모임 신청 인원에 반영되었습니다.</Text>
+                    ) : null}
+
+                    {isHost && meetupRequestStatus === 'pending' ? (
+                        <View style={styles.meetupHostRow}>
+                            <Text style={styles.meetupApprovalText}>참가 승인 요청이 도착했습니다.</Text>
+                            <TouchableOpacity style={styles.meetupApprovalBtn} onPress={moveToAlarmTab}>
+                                <Text style={styles.meetupApprovalBtnText}>알림에서 승인</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : null}
+                </View>
+            )}
+
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -580,6 +698,46 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: '#999',
         fontWeight: '600',
+    },
+    meetupApprovalBanner: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+        backgroundColor: '#FCFCFC',
+    },
+    meetupApprovalText: {
+        fontSize: 13,
+        color: '#4A4A4A',
+        marginBottom: 8,
+    },
+    meetupHostRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 10,
+    },
+    meetupApprovalBtn: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#EAF8F2',
+        borderRadius: 14,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    meetupApprovalBtnText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#2F9D6A',
+    },
+    meetupApprovalPending: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#2F9D6A',
+    },
+    meetupApprovalApproved: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#4F78D3',
     },
     contextNotice: {
         alignSelf: 'center',

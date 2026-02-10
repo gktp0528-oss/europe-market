@@ -16,16 +16,12 @@ import {
     Heart,
     Share2,
     MessageCircle,
-    MapPin,
     Clock,
     Eye,
-    User,
     Star,
     DollarSign,
     BookOpen,
-    Award,
-    ChevronLeft,
-    ChevronRight,
+    MoreVertical,
 } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -155,6 +151,47 @@ const TutoringDetailScreen = ({ navigation, route }) => {
         }
     };
 
+    const handleDelete = async () => {
+        Alert.alert(
+            '게시물 삭제',
+            '정말 이 게시물을 삭제하시겠어요? 삭제하면 되돌릴 수 없어요! 🗑️',
+            [
+                { text: '취소', style: 'cancel' },
+                {
+                    text: '삭제',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const { error } = await supabase.from('posts').delete().eq('id', normalizedPostId);
+                            if (error) throw error;
+                            Alert.alert('성공', '게시물이 삭제되었습니다! ✨');
+                            navigation.goBack();
+                        } catch (err) {
+                            console.error('Delete error:', err);
+                            Alert.alert('오류', '삭제 중 문제가 발생했습니다.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleEdit = () => {
+        navigation.navigate('WriteTutoring', { editPost: post });
+    };
+
+    const showMenu = () => {
+        Alert.alert(
+            '게시물 관리',
+            '실행할 작업을 선택해주세요! ✨',
+            [
+                { text: '게시물 수정', onPress: handleEdit },
+                { text: '게시물 삭제', onPress: handleDelete, style: 'destructive' },
+                { text: '취소', style: 'cancel' }
+            ]
+        );
+    };
+
     const openUserProfile = () => {
         if (!post?.user_id) {
             Alert.alert('알림', '작성자 정보를 찾을 수 없습니다.');
@@ -244,9 +281,17 @@ const TutoringDetailScreen = ({ navigation, route }) => {
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBtn}>
                         <ArrowLeft size={24} color="#000" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={styles.headerBtn}>
-                        <Share2 size={20} color="#000" />
-                    </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={styles.headerBtn}>
+                            <Share2 size={20} color="#000" />
+                        </TouchableOpacity>
+
+                        {user?.id === post?.user_id && (
+                            <TouchableOpacity onPress={showMenu} style={styles.headerBtn}>
+                                <MoreVertical size={20} color="#000" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 <ScrollView
@@ -382,14 +427,9 @@ const TutoringDetailScreen = ({ navigation, route }) => {
                         <Heart size={24} color={liked ? '#ff4d4f' : '#666'} fill={liked ? '#ff4d4f' : 'none'} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.chatBtn} onPress={handleChat}>
-                        <MessageCircle size={20} color="#3F51B5" />
-                        <Text style={styles.chatBtnText}>문의하기</Text>
-                    </TouchableOpacity>
-
                     <TouchableOpacity style={styles.inquiryBtn} onPress={handleChat}>
-                        <BookOpen size={20} color="#fff" />
-                        <Text style={styles.inquiryBtnText}>수업 신청</Text>
+                        <MessageCircle size={20} color="#fff" />
+                        <Text style={styles.inquiryBtnText}>연락하기</Text>
                     </TouchableOpacity>
                 </View>
             </View>

@@ -10,6 +10,7 @@ import {
     Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { User, MessageCircle } from 'lucide-react-native';
@@ -30,7 +31,12 @@ const getCategoryMeta = (category) => CATEGORY_META[category] || {
 
 const ChatListScreen = ({ navigation }) => {
     const { user } = useAuth();
-    const { unreadByConversation, latestMessageEvent, latestMessageByConversation, refreshUnreadCounts } = useChatUnread();
+    const {
+        unreadByConversation,
+        latestMessageEvent,
+        latestMessageByConversation,
+        setIsChatListActive,
+    } = useChatUnread();
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
     const conversationsRef = useRef([]);
@@ -70,6 +76,15 @@ const ChatListScreen = ({ navigation }) => {
     useEffect(() => {
         conversationsRef.current = conversations;
     }, [conversations]);
+
+    useFocusEffect(
+        useCallback(() => {
+            setIsChatListActive(true);
+            return () => {
+                setIsChatListActive(false);
+            };
+        }, [setIsChatListActive])
+    );
 
     const mergedConversations = useMemo(() => {
         const merged = conversations.map((chat) => {
@@ -159,14 +174,13 @@ const ChatListScreen = ({ navigation }) => {
                 table: 'conversations'
             }, () => {
                 fetchConversations();
-                refreshUnreadCounts();
             })
             .subscribe();
 
         return () => {
             supabase.removeChannel(conversationSubscription);
         };
-    }, [fetchConversations, refreshUnreadCounts, user]);
+    }, [fetchConversations, user]);
 
     useEffect(() => {
         if (!latestMessageEvent) return;

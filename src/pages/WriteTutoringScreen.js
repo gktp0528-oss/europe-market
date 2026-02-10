@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, View, Text, TextInput, TouchableOpacity,
     ScrollView, Alert, KeyboardAvoidingView, Platform, ActivityIndicator
@@ -11,7 +11,9 @@ import { useCountry } from '../contexts/CountryContext';
 import LocationPicker from '../components/LocationPicker';
 import SuccessModal from '../components/SuccessModal';
 
-const WriteTutoringScreen = ({ navigation }) => {
+const WriteTutoringScreen = ({ navigation, route }) => {
+    const editPost = route.params?.editPost;
+    const isEditMode = !!editPost;
     const { user } = useAuth();
     const { selectedCountry } = useCountry();
     const countryCode = selectedCountry?.code || 'FR';
@@ -23,12 +25,19 @@ const WriteTutoringScreen = ({ navigation }) => {
     const [gender, setGender] = useState('male');
 
     const [formData, setFormData] = useState({
-        title: '',
-        subject: '',
-        location: '',
-        locationData: null,
-        description: '',
+        title: editPost?.title || '',
+        subject: editPost?.metadata?.subject || '',
+        location: editPost?.location || '',
+        locationData: editPost?.latitude ? { address: editPost.location, lat: editPost.latitude, lng: editPost.longitude } : null,
+        description: editPost?.description ? (editPost.description.split('\n\n').slice(1).join('\n\n') || editPost.description) : '',
     });
+
+    useEffect(() => {
+        if (isEditMode) {
+            setTutoringType(editPost.metadata?.tutoringType || 'tutoring');
+            setGender(editPost.metadata?.gender || 'male');
+        }
+    }, [isEditMode, editPost]);
 
     const updateField = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -64,31 +73,41 @@ const WriteTutoringScreen = ({ navigation }) => {
 
         setIsSubmitting(true);
         try {
-            const { error } = await supabase.from('posts').insert({
+            const postData = {
                 category: 'tutoring',
                 title: formData.title,
-                price: '수업료 협의',
+                price: editPost?.price || '수업료 협의',
                 location: formData.location,
                 latitude: formData.locationData?.lat,
                 longitude: formData.locationData?.lng,
                 description: `[${tutoringType === 'tutoring' ? '과외' : '레슨'}] ${tutoringType === 'tutoring' ? '과목' : '분야'}: ${formData.subject}\n\n${formData.description}`,
                 country_code: countryCode,
-                views: 0, likes: 0,
-                image_urls: [],
-                color: '#F5F5F5',
+                image_urls: editPost?.image_urls || [],
                 user_id: user.id,
                 metadata: {
                     subject: formData.subject,
                     tutoringType,
                     gender,
                 },
-            });
+            };
 
-            if (error) throw error;
+            if (isEditMode) {
+                const { error } = await supabase.from('posts').update(postData).eq('id', editPost.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('posts').insert({
+                    ...postData,
+                    views: 0,
+                    likes: 0,
+                    color: '#F5F5F5',
+                });
+                if (error) throw error;
+            }
+
             setShowSuccess(true);
         } catch (error) {
             console.error('Submit error:', error);
-            Alert.alert('오류', '등록 중 오류가 발생했습니다.');
+            Alert.alert('오류', '처리 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
@@ -201,7 +220,7 @@ const WriteTutoringScreen = ({ navigation }) => {
                     {isSubmitting ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.submitBtnText}>작성 완료</Text>
+                        <Text style={styles.submitBtnText}>{isEditMode ? '수정 완료' : '작성 완료'}</Text>
                     )}
                 </TouchableOpacity>
             </View>
@@ -216,8 +235,8 @@ const WriteTutoringScreen = ({ navigation }) => {
             <SuccessModal
                 visible={showSuccess}
                 onClose={() => { setShowSuccess(false); navigation.goBack(); }}
-                title={`${tutoringType === 'tutoring' ? '과외' : '레슨'} 등록 완료!`}
-                message={`${tutoringType === 'tutoring' ? '과외' : '레슨'} 공고가\n성공적으로 등록되었습니다!`}
+                title={isEditMode ? "수정 완료!" : `${tutoringType === 'tutoring' ? '과외' : '레슨'} 등록 완료!`}
+                message={isEditMode ? `공고 내용이\n성공적으로 수정되었습니다!` : `${tutoringType === 'tutoring' ? '과외' : '레슨'} 공고가\n성공적으로 등록되었습니다!`}
                 Icon={BookOpen}
                 iconColor="#B5EAD7"
                 buttonText="목록으로 이동"
@@ -264,6 +283,7 @@ const styles = StyleSheet.create({
     },
     submitBtnDisabled: { opacity: 0.5 },
     submitBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+    headerActions: { flexDirection: 'row', gap: 10 },
 });
 
 export default WriteTutoringScreen;

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
@@ -7,6 +7,7 @@ const NotificationContext = createContext();
 export const NotificationProvider = ({ children }) => {
     const { user } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isAlarmActive, setIsAlarmActive] = useState(false);
 
     const fetchUnreadCount = useCallback(async () => {
         if (!user) return;
@@ -25,9 +26,27 @@ export const NotificationProvider = ({ children }) => {
         }
     }, [user]);
 
+    const markAllAsRead = useCallback(async () => {
+        if (!user) return;
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('user_id', user.id)
+                .eq('is_read', false);
+
+            if (error) throw error;
+
+            setUnreadCount(0);
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
+        }
+    }, [user]);
+
     useEffect(() => {
         if (!user) {
             setUnreadCount(0);
+            setIsAlarmActive(false);
             return;
         }
 
@@ -61,8 +80,21 @@ export const NotificationProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [user, fetchUnreadCount]);
 
+    const visibleUnreadCount = useMemo(() => {
+        return isAlarmActive ? 0 : unreadCount;
+    }, [isAlarmActive, unreadCount]);
+
     return (
-        <NotificationContext.Provider value={{ unreadCount, refreshNotifications: fetchUnreadCount }}>
+        <NotificationContext.Provider
+            value={{
+                unreadCount: visibleUnreadCount,
+                rawUnreadCount: unreadCount,
+                isAlarmActive,
+                setIsAlarmActive,
+                markAllAsRead,
+                refreshNotifications: fetchUnreadCount,
+            }}
+        >
             {children}
         </NotificationContext.Provider>
     );

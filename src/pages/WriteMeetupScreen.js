@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, View, Text, TextInput, TouchableOpacity,
     ScrollView, Alert, KeyboardAvoidingView, Platform, ActivityIndicator
@@ -21,7 +21,9 @@ const REPEAT_CYCLES = ['매주', '격주', '매월'];
 const TOTAL_STEPS = 3;
 const STEP_LABELS = ['기본 정보', '일정 및 장소', '참여 조건'];
 
-const WriteMeetupScreen = ({ navigation }) => {
+const WriteMeetupScreen = ({ navigation, route }) => {
+    const editPost = route.params?.editPost;
+    const isEditMode = !!editPost;
     const { user } = useAuth();
     const { selectedCountry } = useCountry();
     const countryCode = selectedCountry?.code || 'FR';
@@ -35,23 +37,29 @@ const WriteMeetupScreen = ({ navigation }) => {
     const [showSuccess, setShowSuccess] = useState(false);
 
     const [formData, setFormData] = useState({
-        title: '',
-        meetupType: 'one-time',
-        date: '',
-        startTime: '',
-        endTime: '',
-        repeatDays: [],
-        repeatCycle: '매주',
-        isFree: true,
-        fee: '',
-        members: '',
-        location: '',
-        locationData: null,
-        onOffline: 'offline',
-        description: '',
-        tags: [],
-        approvalType: 'first-come',
+        title: editPost?.title || '',
+        meetupType: editPost?.metadata?.meetupType || 'one-time',
+        date: editPost?.metadata?.date || '',
+        startTime: editPost?.metadata?.startTime || '',
+        endTime: editPost?.metadata?.endTime || '',
+        repeatDays: editPost?.metadata?.repeatDays || [],
+        repeatCycle: editPost?.metadata?.repeatCycle || '매주',
+        isFree: editPost?.metadata?.isFree !== undefined ? editPost.metadata.isFree : true,
+        fee: editPost?.metadata?.fee || '',
+        members: editPost?.metadata?.members || '',
+        location: editPost?.location || '',
+        locationData: editPost?.latitude ? { address: editPost.location, lat: editPost.latitude, lng: editPost.longitude } : null,
+        onOffline: editPost?.metadata?.onOffline || 'offline',
+        description: editPost?.description || '',
+        tags: editPost?.metadata?.tags || [],
+        approvalType: editPost?.metadata?.approvalType || 'first-come',
     });
+
+    useEffect(() => {
+        if (isEditMode && editPost.image_urls) {
+            setImages(editPost.image_urls);
+        }
+    }, [isEditMode, editPost]);
 
     const updateField = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -98,14 +106,22 @@ const WriteMeetupScreen = ({ navigation }) => {
 
         setIsSubmitting(true);
         try {
-            const uploadedUrls = images.length > 0 ? await uploadImages(images, 'meetups') : [];
+            const newImages = images.filter(img => !img.startsWith('http'));
+            const existingImages = images.filter(img => img.startsWith('http'));
+
+            let uploadedUrls = [];
+            if (newImages.length > 0) {
+                uploadedUrls = await uploadImages(newImages, 'meetups');
+            }
+
+            const finalImageUrls = [...existingImages, ...uploadedUrls];
 
             const formattedFee = formData.isFree ? '무료' : `${formData.fee}${currency}`;
             const formattedDate = formData.meetupType === 'one-time'
                 ? `${formData.date} ${formData.startTime}`
                 : `${formData.repeatDays.join(', ')} ${formData.startTime}`;
 
-            const { error } = await supabase.from('posts').insert({
+            const postData = {
                 category: 'meetup',
                 title: formData.title,
                 price: formattedFee,
@@ -115,9 +131,7 @@ const WriteMeetupScreen = ({ navigation }) => {
                 longitude: formData.locationData?.lng,
                 description: formData.description,
                 country_code: countryCode,
-                image_urls: uploadedUrls,
-                views: 0, likes: 0,
-                color: '#E0F7FA',
+                image_urls: finalImageUrls,
                 user_id: user.id,
                 metadata: {
                     tags: formData.tags,
@@ -126,19 +140,32 @@ const WriteMeetupScreen = ({ navigation }) => {
                     startTime: formData.startTime,
                     endTime: formData.endTime,
                     isFree: formData.isFree,
+                    fee: formData.fee, // 원본 금액 저장
                     members: formData.members,
                     meetupType: formData.meetupType,
                     date: formData.date,
                     repeatDays: formData.repeatDays,
                     repeatCycle: formData.repeatCycle,
                 },
-            });
+            };
 
-            if (error) throw error;
+            if (isEditMode) {
+                const { error } = await supabase.from('posts').update(postData).eq('id', editPost.id);
+                if (error) throw error;
+            } else {
+                const { error } = await supabase.from('posts').insert({
+                    ...postData,
+                    views: 0,
+                    likes: 0,
+                    color: '#E0F7FA',
+                });
+                if (error) throw error;
+            }
+
             setShowSuccess(true);
         } catch (error) {
             console.error('Submit error:', error);
-            Alert.alert('오류', '등록 중 오류가 발생했습니다.');
+            Alert.alert('오류', '처리 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
@@ -412,7 +439,7 @@ const WriteMeetupScreen = ({ navigation }) => {
                 <TouchableOpacity onPress={prevStep} style={styles.headerBtn}>
                     <ArrowLeft size={24} color="#4A4A4A" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>모임 글쓰기</Text>
+                <Text style={styles.headerTitle}>{isEditMode ? '모임 정보 수정하기' : '모임 글쓰기'}</Text>
                 <View style={{ width: 40 }} />
             </View>
 
@@ -454,7 +481,7 @@ const WriteMeetupScreen = ({ navigation }) => {
                         {isSubmitting ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.submitBtnText}>모임 만들기</Text>
+                            <Text style={styles.submitBtnText}>{isEditMode ? '수정 완료' : '모임 만들기'}</Text>
                         )}
                     </TouchableOpacity>
                 )}
@@ -470,8 +497,8 @@ const WriteMeetupScreen = ({ navigation }) => {
             <SuccessModal
                 visible={showSuccess}
                 onClose={() => { setShowSuccess(false); navigation.goBack(); }}
-                title="모임 생성 완료!"
-                message={`새로운 모임이\n성공적으로 만들어졌습니다!`}
+                title={isEditMode ? "수정 완료!" : "모임 생성 완료!"}
+                message={isEditMode ? `모임 정보가\n성공적으로 수정되었습니다!` : `새로운 모임이\n성공적으로 만들어졌습니다!`}
                 Icon={Users}
                 iconColor="#C3B1E1"
                 buttonText="목록으로 이동"
@@ -567,6 +594,7 @@ const styles = StyleSheet.create({
     meetupBtn: { backgroundColor: '#C3B1E1' },
     submitBtnDisabled: { opacity: 0.5 },
     submitBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+    headerActions: { flexDirection: 'row', gap: 10 },
 });
 
 export default WriteMeetupScreen;

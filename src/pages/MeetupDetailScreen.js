@@ -15,19 +15,20 @@ import {
     ArrowLeft,
     Heart,
     Share2,
+    MoreVertical,
     MessageCircle,
     MapPin,
     Clock,
     Eye,
     User,
+    UserPlus,
     Star,
     Users,
     Calendar,
+    Monitor,
+    CheckCircle,
     ChevronLeft,
     ChevronRight,
-    Monitor,
-    UserPlus,
-    CheckCircle,
 } from 'lucide-react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,8 +44,51 @@ const MeetupDetailScreen = ({ navigation, route }) => {
     const [liked, setLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [approvedMembers, setApprovedMembers] = useState([]);
 
     const normalizedPostId = Number(postId);
+
+    const fetchApprovedMembers = useCallback(async () => {
+        if (!Number.isFinite(normalizedPostId)) return;
+
+        try {
+            const { data: requestRows, error } = await supabase
+                .from('meetup_join_requests')
+                .select('id, approved_at, requester_id')
+                .eq('post_id', normalizedPostId)
+                .eq('status', 'approved')
+                .order('approved_at', { ascending: true });
+
+            if (error) throw error;
+
+            const requesterIds = [...new Set((requestRows || []).map((row) => row.requester_id).filter(Boolean))];
+            let profileById = {};
+
+            if (requesterIds.length > 0) {
+                const { data: profiles, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id, username, full_name, avatar_url')
+                    .in('id', requesterIds);
+
+                if (profileError) throw profileError;
+
+                profileById = (profiles || []).reduce((acc, profile) => {
+                    acc[profile.id] = profile;
+                    return acc;
+                }, {});
+            }
+
+            const mergedMembers = (requestRows || []).map((row) => ({
+                id: row.id,
+                approved_at: row.approved_at,
+                requester: profileById[row.requester_id] || null,
+            }));
+
+            setApprovedMembers(mergedMembers);
+        } catch (error) {
+            console.error('Error fetching approved meetup members:', error);
+        }
+    }, [normalizedPostId]);
 
     const fetchDetail = useCallback(async () => {
         if (!Number.isFinite(normalizedPostId)) {
@@ -88,16 +132,38 @@ const MeetupDetailScreen = ({ navigation, route }) => {
                 }
                 setLiked(!!likeData);
             }
+
+            await fetchApprovedMembers();
         } catch (error) {
             console.error('Error fetching meetup detail:', error);
         } finally {
             setLoading(false);
         }
-    }, [normalizedPostId, user]);
+    }, [fetchApprovedMembers, normalizedPostId, user]);
 
     useEffect(() => {
         fetchDetail();
     }, [fetchDetail]);
+
+    useEffect(() => {
+        if (!Number.isFinite(normalizedPostId)) return undefined;
+
+        const channel = supabase
+            .channel(`meetup-members:${normalizedPostId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'meetup_join_requests',
+                filter: `post_id=eq.${normalizedPostId}`,
+            }, () => {
+                fetchApprovedMembers();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [fetchApprovedMembers, normalizedPostId]);
 
     const handleLike = async () => {
         if (!user) {
@@ -240,6 +306,47 @@ const MeetupDetailScreen = ({ navigation, route }) => {
         }
     };
 
+    const handleDelete = async () => {
+        Alert.alert(
+            '게시물 삭제',
+            '정말 이 게시물을 삭제하시겠어요? 삭제하면 되돌릴 수 없어요! 🗑️',
+            [
+                { text: '취소', style: 'cancel' },
+                {
+                    text: '삭제',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            const { error } = await supabase.from('posts').delete().eq('id', normalizedPostId);
+                            if (error) throw error;
+                            Alert.alert('성공', '게시물이 삭제되었습니다! ✨');
+                            navigation.goBack();
+                        } catch (err) {
+                            console.error('Delete error:', err);
+                            Alert.alert('오류', '삭제 중 문제가 발생했습니다.');
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleEdit = () => {
+        navigation.navigate('WriteMeetup', { editPost: post });
+    };
+
+    const showMenu = () => {
+        Alert.alert(
+            '게시물 관리',
+            '실행할 작업을 선택해주세요! ✨',
+            [
+                { text: '게시물 수정', onPress: handleEdit },
+                { text: '게시물 삭제', onPress: handleDelete, style: 'destructive' },
+                { text: '취소', style: 'cancel' }
+            ]
+        );
+    };
+
     const openUserProfile = () => {
         if (!post?.user_id) {
             Alert.alert('알림', '작성자 정보를 찾을 수 없습니다.');
@@ -272,6 +379,9 @@ const MeetupDetailScreen = ({ navigation, route }) => {
     };
 
     const sellerName = post?.profiles?.username || post?.profiles?.full_name || '호스트';
+    const maxMembersNumber = Math.max(1, parseInt(String(maxMembers || '0'), 10) || 1);
+    const approvedCount = approvedMembers.length;
+    const participantPercent = Math.max(0, Math.min(100, (approvedCount / maxMembersNumber) * 100));
 
     if (loading) {
         return (
@@ -298,9 +408,17 @@ const MeetupDetailScreen = ({ navigation, route }) => {
                     <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.headerBtn, !hasImages && styles.headerBtnLight]}>
                         <ArrowLeft size={24} color={headerIconColor} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={[styles.headerBtn, !hasImages && styles.headerBtnLight]}>
-                        <Share2 size={20} color={headerIconColor} />
-                    </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity onPress={() => sharePost(post.title, post.description)} style={[styles.headerBtn, !hasImages && styles.headerBtnLight]}>
+                            <Share2 size={20} color={headerIconColor} />
+                        </TouchableOpacity>
+
+                        {user?.id === post?.user_id && (
+                            <TouchableOpacity onPress={showMenu} style={[styles.headerBtn, !hasImages && styles.headerBtnLight]}>
+                                <MoreVertical size={20} color={headerIconColor} />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 <ScrollView
@@ -414,12 +532,38 @@ const MeetupDetailScreen = ({ navigation, route }) => {
 
                         <View style={styles.participationStatus}>
                             <View style={styles.participationHeader}>
-                                <Text style={styles.participationLabel}>신청 인원 1명</Text>
+                                <Text style={styles.participationLabel}>신청 인원 {approvedCount}명</Text>
                                 <Text style={styles.participationMax}>최대 {maxMembers}명</Text>
                             </View>
                             <View style={styles.participantBar}>
-                                <View style={styles.participantFill} />
+                                <View style={[styles.participantFill, { width: `${participantPercent}%` }]} />
                             </View>
+                            {approvedMembers.length > 0 ? (
+                                <View style={styles.memberCardList}>
+                                    {approvedMembers.map((member) => {
+                                        const name = member.requester?.username || member.requester?.full_name || '참가자';
+                                        const approvedAt = member.approved_at ? new Date(member.approved_at).toLocaleString() : '';
+                                        return (
+                                            <View key={member.id} style={styles.memberCard}>
+                                                <View style={styles.memberAvatarWrap}>
+                                                    {member.requester?.avatar_url ? (
+                                                        <Image source={{ uri: member.requester.avatar_url }} style={styles.memberAvatar} />
+                                                    ) : (
+                                                        <UserPlus size={18} color="#8A8A8A" />
+                                                    )}
+                                                </View>
+                                                <View style={styles.memberTextWrap}>
+                                                    <Text style={styles.memberName}>{name}</Text>
+                                                    <Text style={styles.memberMeta}>승인됨 {approvedAt}</Text>
+                                                </View>
+                                                <CheckCircle size={18} color="#2F9D6A" />
+                                            </View>
+                                        );
+                                    })}
+                                </View>
+                            ) : (
+                                <Text style={styles.memberEmpty}>아직 승인된 신청자가 없어요.</Text>
+                            )}
                         </View>
 
                         <View style={styles.sellerCard}>
@@ -462,13 +606,9 @@ const MeetupDetailScreen = ({ navigation, route }) => {
                         <Heart size={24} color={liked ? '#ff4d4f' : '#666'} fill={liked ? '#ff4d4f' : 'none'} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.chatIconBtn} onPress={handleChat}>
-                        <MessageCircle size={24} color="#00BCD4" />
-                    </TouchableOpacity>
-
                     <TouchableOpacity style={styles.joinBtn} onPress={handleChat}>
-                        {approvalType === 'first-come' ? <UserPlus size={20} color="#fff" /> : <CheckCircle size={20} color="#fff" />}
-                        <Text style={styles.joinBtnText}>{approvalType === 'first-come' ? '참가 신청' : '승인 요청하기'}</Text>
+                        <MessageCircle size={20} color="#fff" />
+                        <Text style={styles.joinBtnText}>연락하기</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -603,7 +743,54 @@ const styles = StyleSheet.create({
     participationLabel: { fontSize: 13, color: '#666' },
     participationMax: { fontSize: 13, fontWeight: '700', color: '#00BCD4' },
     participantBar: { height: 8, backgroundColor: '#e2e8f0', borderRadius: 4, overflow: 'hidden' },
-    participantFill: { width: '10%', height: '100%', backgroundColor: '#00BCD4' },
+    participantFill: { height: '100%', backgroundColor: '#00BCD4' },
+    memberCardList: {
+        marginTop: 12,
+        gap: 8,
+    },
+    memberCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#E7ECEF',
+        paddingHorizontal: 10,
+        paddingVertical: 9,
+        gap: 10,
+    },
+    memberAvatarWrap: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: '#EEF2F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    memberAvatar: {
+        width: '100%',
+        height: '100%',
+    },
+    memberTextWrap: {
+        flex: 1,
+        minWidth: 0,
+    },
+    memberName: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#333',
+    },
+    memberMeta: {
+        marginTop: 1,
+        fontSize: 11,
+        color: '#8A8A8A',
+    },
+    memberEmpty: {
+        marginTop: 10,
+        fontSize: 12,
+        color: '#9B9B9B',
+    },
     sellerCard: {
         flexDirection: 'row',
         justifyContent: 'space-between',
